@@ -1,0 +1,38 @@
+--- share/provers-detection-data.conf.in.orig	2011-10-13 08:10:39.000000000 -0600
++++ share/provers-detection-data.conf.in	2012-04-16 21:20:39.459160751 -0600
+@@ -3,6 +3,7 @@
+ exec = "alt-ergo"
+ version_switch = "-version"
+ version_regexp = "\\([0-9.]+\\)"
++version_ok = "0.94"
+ version_ok = "0.93.1"
+ version_ok = "0.93"
+ version_bad = "0.92.3"
+@@ -36,6 +37,7 @@
+ exec = "cvc3"
+ version_switch = "-version"
+ version_regexp = "This is CVC3 version \\([^ \n]+\\)"
++version_ok = "2.4.1"
+ version_ok = "2.2"
+ version_old = "2.1"
+ command = "@LOCALBIN@why3-cpulimit 0 %m -s %e -timeout %t %f"
+@@ -46,6 +48,11 @@
+ exec = "yices"
+ version_switch = "--version"
+ version_regexp = "[Yices ]*\\([^ \n]+\\)"
++version_ok = "1.0.34"
++version_ok = "1.0.33"
++version_ok = "1.0.32"
++version_ok = "1.0.31"
++version_ok = "1.0.30"
+ version_ok = "1.0.29"
+ version_ok = "1.0.28"
+ version_ok = "1.0.27"
+@@ -174,6 +181,7 @@
+ exec = "coqc"
+ version_switch = "-v"
+ version_regexp = "The Coq Proof Assistant, version \\([^ \n]+\\)"
++version_ok = "8.3pl3"
+ version_ok = "8.3pl2"
+ version_ok = "8.3pl1"
+ version_ok = "8.3"
