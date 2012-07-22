@@ -5,7 +5,7 @@
 
 Name:           why3
 Version:        0.71
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 License:        LGPLv2 with exceptions
@@ -173,6 +173,9 @@ popd
 %files all
 
 %changelog
+* Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.71-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Thu Apr 19 2012 Jerry James <loganjerry@gmail.com> - 0.71-2
 - Add missing sqlite-devel BR
 - Do not move the coq plugin
