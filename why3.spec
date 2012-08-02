@@ -4,31 +4,29 @@
 %global opt %(test -x %{_bindir}/ocamlopt && echo 1 || echo 0)
 
 Name:           why3
-Version:        0.71
-Release:        3%{?dist}
+Version:        0.73
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/29252/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/31257/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
-# This patch will not be upstream.  It updates the expected version numbers of
-# some components to match the currently available Fedora versions.
-Patch0:         %{name}-versions.patch
 
 BuildRequires:  coq
 BuildRequires:  evince
+BuildRequires:  flocq
 BuildRequires:  gtksourceview2-devel
 BuildRequires:  ocaml
 BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib-devel
 BuildRequires:  ocaml-lablgtk-devel
-BuildRequires:  ocaml-menhir-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-sqlite-devel
+BuildRequires:  pvs-sbcl
 BuildRequires:  rubber
 BuildRequires:  sqlite-devel
 BuildRequires:  emacs xemacs xemacs-packages-extra
@@ -101,20 +99,27 @@ based on Why3, including various automated and interactive provers.
 %prep
 %setup -q
 %setup -q -T -D -a 1
-%patch0
 
-# Use the correct compiler flags and fix linking the TPTP plugin
+# Use the correct compiler flags, fix PVS realizations, and keep timestamps
 sed -e "s|-Wall|$RPM_OPT_FLAGS|" \
-    -e "s|-shared -o \$@|& \$(MENHIRLIB).cmx|" \
+    -e '\|mkdir.*pvs/number|d' \
+    -e '/cp .*PVSLIBS_NUMBER/d' \
+    -e 's/cp \(\$(PVSLIBS_[[:alpha:]]*)\)/cp \$(addsuffix .pvs, \1)/' \
+    -e '/^update-pvs/,/^else/s/--realize/& -L theories/' \
+    -e 's/cp /cp -p /' \
     -i Makefile.in
 
 %build
-%configure --enable-menhirlib --enable-doc
-
+export PVS=%{_bindir}/pvs-sbcl
+%configure --enable-doc
 make %{?_smp_mflags}
 
-# The makefile doesn't strip the Coq plugin
-strip plugins/whytptp.cmxs
+# Make the PVS realizations
+mkdir -p lib/pvs/int lib/pvs/real
+make update-pvs
+
+# The Makefile does not strip the tactics and plugins
+find . -name \*.cmxs | xargs strip
 
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
@@ -129,10 +134,9 @@ done
 cd ..
 
 # Move the gtksourceview language file to the right place
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/gtksourceview-2.0/language-specs
-mv $RPM_BUILD_ROOT%{_datadir}/%{name}/lang/why.lang \
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/gtksourceview-2.0
+mv $RPM_BUILD_ROOT%{_datadir}/%{name}/lang \
    $RPM_BUILD_ROOT%{_datadir}/gtksourceview-2.0/language-specs
-rmdir $RPM_BUILD_ROOT%{_datadir}/%{name}/lang
 
 # Move the (X)Emacs support file to the right place and byte compile.
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitelispdir}
@@ -173,6 +177,9 @@ popd
 %files all
 
 %changelog
+* Thu Aug  2 2012 Jerry James <loganjerry@gmail.com> - 0.73-1
+- New upstream release
+
 * Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.71-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
