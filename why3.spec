@@ -14,6 +14,8 @@ Source0:        https://gforge.inria.fr/frs/download.php/31257/%{name}-%{version
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
+# Adapt to coq 8.4.
+Patch0:         %{name}-coq84.patch
 
 BuildRequires:  coq
 BuildRequires:  evince
@@ -99,6 +101,7 @@ based on Why3, including various automated and interactive provers.
 %prep
 %setup -q
 %setup -q -T -D -a 1
+%patch0
 
 # Use the correct compiler flags, fix PVS realizations, and keep timestamps
 sed -e "s|-Wall|$RPM_OPT_FLAGS|" \
