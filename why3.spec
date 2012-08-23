@@ -5,7 +5,7 @@
 
 Name:           why3
 Version:        0.73
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 License:        LGPLv2 with exceptions
@@ -177,6 +177,9 @@ popd
 %files all
 
 %changelog
+* Thu Aug 23 2012 Jerry James <loganjerry@gmail.com> - 0.73-2
+- Rebuild for coq 8.4
+
 * Thu Aug  2 2012 Jerry James <loganjerry@gmail.com> - 0.73-1
 - New upstream release
 
