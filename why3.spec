@@ -5,7 +5,7 @@
 
 Name:           why3
 Version:        0.73
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 License:        LGPLv2 with exceptions
@@ -180,6 +180,9 @@ popd
 %files all
 
 %changelog
+* Fri Dec 14 2012 Richard W.M. Jones <rjones@redhat.com> - 0.73-3
+- Rebuild for OCaml 4.00.1.
+
 * Thu Aug 23 2012 Jerry James <loganjerry@gmail.com> - 0.73-2
 - Rebuild for coq 8.4
 
