@@ -5,7 +5,7 @@
 
 Name:           why3
 Version:        0.73
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Software verification platform
 
 License:        LGPLv2 with exceptions
@@ -180,6 +180,9 @@ popd
 %files all
 
 %changelog
+* Fri Feb 15 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.73-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
 * Mon Jan  7 2013 Jerry James <loganjerry@gmail.com> - 0.73-4
 - Rebuild for coq 8.4pl1
 
