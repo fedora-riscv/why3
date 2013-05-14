@@ -1,0 +1,616 @@
+--- ./CHANGES.orig	2013-03-27 00:08:28.000000000 -0600
++++ ./CHANGES	2013-05-09 10:11:15.478721606 -0600
+@@ -1,5 +1,7 @@
+ * marks an incompatible change
+ 
++  * [emacs] why.el renamed to why3.el
++  * [GTK sourceview] why.lang renamed to why3.lang
+ 
+ version 0.81, March 25, 2013
+ ==========================
+--- ./Makefile.in.orig	2013-03-27 00:08:28.000000000 -0600
++++ ./Makefile.in	2013-05-09 16:44:28.346547015 -0600
+@@ -96,9 +96,9 @@ endif
+ .PHONY: byte opt clean depend all install install_local install_no_local
+ .PHONY: plugins plugins.byte plugins.opt
+ 
+-#############
+-# Why library
+-#############
++##############
++# Why3 library
++##############
+ 
+ LIBGENERATED = src/util/config.ml src/util/rc.ml src/parser/lexer.ml \
+ 	       src/parser/parser.mli src/parser/parser.ml \
+@@ -215,6 +215,7 @@ install_no_local::
+ 	mkdir -p $(DATADIR)/why3/images/boomy
+ 	mkdir -p $(DATADIR)/why3/images/fatcow
+ 	mkdir -p $(DATADIR)/why3/emacs
++	mkdir -p $(DATADIR)/why3/vim
+ 	mkdir -p $(DATADIR)/why3/lang
+ 	mkdir -p $(DATADIR)/why3/theories
+ 	mkdir -p $(DATADIR)/why3/modules
+@@ -229,20 +230,21 @@ install_no_local::
+ 	cp -f share/images/fatcow/*.png $(DATADIR)/why3/images/fatcow
+ 	cp -f share/why3session.dtd $(DATADIR)/why3
+ 	cp -rf share/javascript $(DATADIR)/why3/javascript
+-	cp -f share/emacs/why.el $(DATADIR)/why3/emacs/why.el
+-	cp -f share/lang/why.lang $(DATADIR)/why3/lang/why.lang
++	cp -f share/emacs/why.el $(DATADIR)/why3/emacs/why3.el
++	cp -f share/vim/why3.vim $(DATADIR)/why3/vim/why3.vim
++	cp -f share/lang/why.lang $(DATADIR)/why3/lang/why3.lang
+ #	if test -d /etc/bash_completion.d; then cp -f share/bash/why3 /etc/bash_completion.d; fi
+ 
+ install_no_local_lib::
+-	rm -rf $(OCAMLLIB)/why3
+-	mkdir -p $(OCAMLLIB)/why3
++	rm -rf $(DESTDIR)$(OCAMLLIB)/why3
++	mkdir -p $(DESTDIR)$(OCAMLLIB)/why3
+ 	cp -f lib/why3/why3.cm* lib/why3/why3.[ao] \
+-		lib/why3/META $(OCAMLLIB)/why3
++		lib/why3/META $(DESTDIR)$(OCAMLLIB)/why3
+ 
+ ifeq (@enable_local@,yes)
+ install install-lib:
+-	@echo "Why is configured in local installation mode."
+-	@echo "To install Why, run ./configure --disable-local ; make ; make install"
++	@echo "Why3 is configured in local installation mode."
++	@echo "To install Why3, run ./configure --disable-local ; make ; make install"
+ else
+ install: clean_old_install install_no_local
+ install-lib: install_no_local_lib
+@@ -251,7 +253,7 @@ endif
+ install-all: install install-lib
+ 
+ ##################
+-# Why plugins
++# Why3 plugins
+ ##################
+ 
+ PLUGGENERATED = plugins/tptp/tptp_lexer.ml \
+@@ -499,7 +501,7 @@ clean::
+ 
+ local_config: bin/why3config.@OCAMLBEST@
+ 	WHY3LIB=$(PWD) WHY3DATA=$(PWD)/share bin/why3config.@OCAMLBEST@ \
+-		--detect --conf_file why.conf
++		--detect --conf_file why3.conf
+ 
+ install_no_local::
+ 	cp -f bin/why3config.@OCAMLBEST@ $(BINDIR)/why3config$(EXE)
+@@ -1036,8 +1038,8 @@ jessie.opt: src/jessie/Makefile lib/why3
+ 	@$(MAKE) -C src/jessie Jessie3.cmxs
+ 
+ install_no_local::
+-	mkdir -p $(FRAMAC_LIBDIR)/plugins/
+-	cp -f src/jessie/Jessie3.cm* $(FRAMAC_LIBDIR)/plugins/
++	mkdir -p $(DESTDIR)$(FRAMAC_LIBDIR)/plugins/
++	cp -f src/jessie/Jessie3.cm* $(DESTDIR)$(FRAMAC_LIBDIR)/plugins/
+ 
+ clean::
+ 	$(MAKE) -C src/jessie clean
+@@ -1174,14 +1176,14 @@ testl-type: bin/why3.byte
+ test-api.byte: examples/use_api/use_api.ml lib/why3/why3.cma
+ 	$(if $(QUIET),@echo 'Ocaml    $<' &&) \
+ 	ocaml -I lib/why3 $(INCLUDES) $(EXTCMA) lib/why3/why3.cma $< \
+-	|| (rm -f test-api.byte; printf "Test of Why API calls failed. Please fix it"; exit 2)
++	|| (rm -f test-api.byte; printf "Test of Why3 API calls failed. Please fix it"; exit 2)
+ 	@rm -f test-api.byte;
+ 
+ test-api.opt: examples/use_api/use_api.ml lib/why3/why3.cmxa
+ 	$(if $(QUIET),@echo 'Ocamlopt $<' &&) \
+ 	($(OCAMLOPT) -o $@ -I lib/why3 $(INCLUDES) $(EXTCMXA) lib/why3/why3.cmxa $< \
+ 	&& ./test-api.opt) \
+-	|| (rm -f test-api.opt; printf "Test of Why API calls failed. Please fix it"; exit 2)
++	|| (rm -f test-api.opt; printf "Test of Why3 API calls failed. Please fix it"; exit 2)
+ 	@rm -f test-api.opt
+ 
+ #test-shape: lib/why3/why3.cma
+@@ -1191,7 +1193,7 @@ test-session.byte: examples/use_api/crea
+ 	$(if $(QUIET),@echo 'Ocaml    $<' &&) \
+ 	ocaml -I lib/why3 $(INCLUDES) $(EXTCMA) lib/why3/why3.cma $< \
+ 	|| (rm -f why3session.xml;  \
+-	printf "Test of Why API calls for Session module failed. Please fix it"; exit 2)
++	printf "Test of Why3 API calls for Session module failed. Please fix it"; exit 2)
+ 	@rm -f why3session.xml
+ 
+ test-session.opt: examples/use_api/create_session.ml lib/why3/why3.cmxa
+@@ -1199,7 +1201,7 @@ test-session.opt: examples/use_api/creat
+ 	($(OCAMLOPT) -o $@ -I lib/why3 $(INCLUDES) $(EXTCMXA) lib/why3/why3.cmxa $< \
+ 	&& ./test-session.opt) \
+ 	|| (rm -f test-session.opt why3session.xml; \
+-	printf "Test of Why API calls for Session module failed. Please fix it"; exit 2)
++	printf "Test of Why3 API calls for Session module failed. Please fix it"; exit 2)
+ 	@rm -f test-session.opt why3session.xml
+ 
+ 
+@@ -1463,7 +1465,7 @@ DISTRIB_FILES = Version Makefile.in conf
+       share/javascript/themes/default/*.gif \
+       share/javascript/themes/default/*.png \
+       share/javascript/themes/default/*.css \
+-      share/emacs/why.el share/lang/*.lang \
++      share/emacs/*.el share/lang/*.lang \
+       share/images/icons.rc share/images/*.png share/images/*/*.png \
+       share/bash/why3 share/zsh/_why3 share/vim/why3.vim
+ 
+@@ -1615,9 +1617,9 @@ depend:
+ 	rm -f $^
+ 	$(MAKE) $^
+ 
+-#################################################################
+-# Building the Why platform with ocamlbuild (OCaml 3.10 needed) #
+-#################################################################
++##################################################################
++# Building the Why3 platform with ocamlbuild (OCaml 3.10 needed) #
++##################################################################
+ 
+ # There used to be targets here but they are no longer useful.
+ 
+--- ./src/ide/gmain.ml.orig	2013-03-27 00:08:29.000000000 -0600
++++ ./src/ide/gmain.ml	2013-05-09 10:25:12.613259624 -0600
+@@ -121,9 +121,9 @@ let (why_lang, any_lang) =
+   languages_manager#set_search_path
+     (load_path :: languages_manager#search_path);
+   let why_lang =
+-    match languages_manager#language "why" with
++    match languages_manager#language "why3" with
+     | None ->
+-        eprintf "language file for 'why' not found in directory %s@."
++        eprintf "language file for 'why3' not found in directory %s@."
+           load_path;
+         exit 1
+     | Some _ as l -> l in
+--- ./src/transform/eliminate_inductive.ml.orig	2013-03-27 00:08:29.000000000 -0600
++++ ./src/transform/eliminate_inductive.ml	2013-05-09 10:29:47.020804488 -0600
+@@ -27,7 +27,11 @@ let exi vl (_,f) =
+     | Tapp (_,tl) ->
+         let marry acc v t = t_and_simp acc (t_equ v t) in
+         List.fold_left2 marry t_true vl tl
+-    | _ -> assert false
++    | Tlet (t, tb) ->
++        let v, f = t_open_bound tb in
++        t_let_close v t (descend f)
++    | _ ->
++        assert false (* ensured by Decl.create_ind_decl *)
+   in
+   descend f
+ 
+--- ./src/jessie/ACSLtoWhy3.ml.orig	2013-03-27 00:08:29.000000000 -0600
++++ ./src/jessie/ACSLtoWhy3.ml	2013-05-09 10:34:53.556234646 -0600
+@@ -222,7 +222,7 @@ let logic_constant c =
+       let c = Literals.integer s in Number.ConstInt c
+     | Integer(_value,None) ->
+       Self.not_yet_implemented "logic_constant Integer None"
+-    | LReal(_value,s) ->
++    | LReal { r_literal = s } ->
+       let c = Literals.floating_point s in Number.ConstReal c
+     | (LStr _|LWStr _|LChr _|LEnum _) ->
+       Self.not_yet_implemented "logic_constant"
+@@ -247,7 +247,7 @@ let bin (ty1,t1) op (ty2,t2) =
+     | Mult,Lreal,Lreal -> t_app mul_real [t1;t2]
+ 
+     | PlusA,ty1,ty2 -> Self.not_yet_implemented "bin PlusA(%a,%a)"
+-      Cil.d_logic_type ty1 Cil.d_logic_type ty2
++      Cil_printer.pp_logic_type ty1 Cil_printer.pp_logic_type ty2
+     | MinusA,_,_ -> Self.not_yet_implemented "bin MinusA"
+     | Mult,_,_ -> Self.not_yet_implemented "bin Mult"
+     | (PlusPI|IndexPI|MinusPI|MinusPP),_,_
+@@ -406,6 +406,7 @@ let rec term_node ~label t =
+     | Tnull
+     | TCoerce (_, _)
+     | TCoerceE (_, _)
++    | TLogic_coerce (_, _)
+     | TUpdate (_, _, _)
+     | Ttypeof _
+     | Ttype _
+@@ -626,7 +627,7 @@ let seq e1 e2 =
+   Mlw_expr.e_let l e2
+ 
+ let annot a e =
+-  match (Annotations.code_annotation_of_rooted a).annot_content with
++  match a.annot_content with
+   | AAssert ([],pred) ->
+     let p = predicate_named ~label:Here pred in
+     let a = Mlw_expr.e_assert Mlw_expr.Aassert p in
+@@ -648,7 +649,7 @@ let annot a e =
+ 
+ let loop_annot a =
+   List.fold_left (fun (inv,var) a ->
+-    match (Annotations.code_annotation_of_rooted a).annot_content with
++    match a.annot_content with
+       | AAssert ([],_pred) ->
+         Self.not_yet_implemented "loop_annot AAssert"
+       | AAssert(_labels,_pred) ->
+@@ -697,7 +698,7 @@ let constant c =
+   | CInt64(_t,_ikind, Some s) ->
+       Number.ConstInt (Literals.integer s)
+   | CInt64(t,_ikind, None) ->
+-      Number.ConstInt (Literals.integer (My_bigint.to_string t))
++      Number.ConstInt (Literals.integer (Integer.to_string t))
+   | CStr _
+   | CWStr _
+   | CChr _
+--- ./share/emacs/why.el.orig	2013-03-27 00:08:32.000000000 -0600
++++ ./share/emacs/why.el	2013-04-08 09:44:16.248708515 -0600
+@@ -1,167 +1,68 @@
+ 
+-;; why.el - GNU Emacs mode for Why
+-;; Copyright (C) 2002 Jean-Christophe FILLIATRE
++;; why3.el - GNU Emacs mode for Why3
+ 
+-(defvar why-mode-hook nil)
++(defvar why3-mode-hook nil)
+ 
+-(defvar why-mode-map nil
+-  "Keymap for Why major mode")
++(defvar why3-mode-map nil
++  "Keymap for Why3 major mode")
+ 
+-(if why-mode-map nil
+-  (setq why-mode-map (make-keymap))
+-  ;; (define-key why-mode-map "\C-c\C-c" 'why-generate-obligations) **)
+-  ;; (define-key why-mode-map "\C-c\C-a" 'why-find-alternate-file) **)
+-  ;; (define-key why-mode-map "\C-c\C-v" 'why-viewer) **)
+-  (define-key why-mode-map [(control return)] 'font-lock-fontify-buffer))
++(if why3-mode-map nil
++  (setq why3-mode-map (make-keymap))
++  ;; (define-key why3-mode-map "\C-c\C-c" 'why3-generate-obligations) **)
++  ;; (define-key why3-mode-map "\C-c\C-a" 'why3-find-alternate-file) **)
++  ;; (define-key why3-mode-map "\C-c\C-v" 'why3-viewer) **)
++  (define-key why3-mode-map [(control return)] 'font-lock-fontify-buffer))
+ 
+ (setq auto-mode-alist
+       (append
+-       '(("\\.\\(why\\|mlw\\)" . why-mode))
++       '(("\\.\\(why\\|mlw\\)" . why3-mode))
+        auto-mode-alist))
+ 
+ ;; font-lock
+ 
+-(defun why-regexp-opt (l)
++(defun why3-regexp-opt (l)
+   (concat "\\<" (concat (regexp-opt l t) "\\>")))
+ 
+-(defconst why-font-lock-keywords-1
++(defconst why3-font-lock-keywords-1
+   (list
+    ;; Note: comment font-lock is guaranteed by suitable syntax entries
+    '("(\\*\\([^*)]\\([^*]\\|\\*[^)]\\)*\\)?\\*)" . font-lock-comment-face)
+-   '("{}\\|{[^|]\\([^}]*\\)}" . font-lock-type-face)
+-   `(,(why-regexp-opt '("use" "clone" "namespace" "import" "export" "coinductive" "inductive" "external" "constant" "function" "predicate" "val" "exception" "axiom" "lemma" "goal" "type" "mutable" "model" "abstract" "private")) . font-lock-builtin-face)
+-   `(,(why-regexp-opt '("any" "match" "let" "rec" "in" "if" "then" "else" "begin" "end" "while" "invariant" "variant" "for" "to" "downto" "do" "done" "label" "loop" "assert" "absurd" "assume" "check" "ghost" "try" "with" "theory" "uses" "module" "requires" "ensures" "returns" "raises" "reads" "writes")) . font-lock-keyword-face)
+-   ; `(,(why-regexp-opt '("unit" "bool" "int" "float" "prop" "array")) . font-lock-type-face)
++;   '("{}\\|{[^|]\\([^}]*\\)}" . font-lock-type-face)
++   `(,(why3-regexp-opt '("invariant" "variant" "requires" "ensures" "returns" "raises" "reads" "writes" "assert" "assume" "check")) . font-lock-type-face)
++   `(,(why3-regexp-opt '("use" "clone" "namespace" "import" "export" "coinductive" "inductive" "external" "constant" "function" "predicate" "val" "exception" "axiom" "lemma" "goal" "type" "mutable" "model" "abstract" "private" "any" "match" "let" "rec" "in" "if" "then" "else" "begin" "end" "while" "for" "to" "downto" "do" "done" "loop" "absurd" "ghost" "try" "with" "theory" "uses" "module")) . font-lock-keyword-face)
+    )
+-  "Minimal highlighting for Why mode")
++  "Minimal highlighting for Why3 mode")
+ 
+-(defvar why-font-lock-keywords why-font-lock-keywords-1
+-  "Default highlighting for Why mode")
++(defvar why3-font-lock-keywords why3-font-lock-keywords-1
++  "Default highlighting for Why3 mode")
+ 
+-(defvar why-indent 2
+-  "How many spaces to indent in why mode.")
+-(make-variable-buffer-local 'why-indent)
++(defvar why3-indent 2
++  "How many spaces to indent in why3 mode.")
++(make-variable-buffer-local 'why3-indent)
+ 
+ ;; syntax
+ 
+-(defvar why-mode-syntax-table nil
+-  "Syntax table for why-mode")
++(defvar why3-mode-syntax-table nil
++  "Syntax table for why3-mode")
+ 
+-(defun why-create-syntax-table ()
+-  (if why-mode-syntax-table
++(defun why3-create-syntax-table ()
++  (if why3-mode-syntax-table
+       ()
+-    (setq why-mode-syntax-table (make-syntax-table))
+-    (set-syntax-table why-mode-syntax-table)
+-    (modify-syntax-entry ?' "w" why-mode-syntax-table)
+-    (modify-syntax-entry ?_ "w" why-mode-syntax-table)
++    (setq why3-mode-syntax-table (make-syntax-table))
++    (set-syntax-table why3-mode-syntax-table)
++    (modify-syntax-entry ?' "w" why3-mode-syntax-table)
++    (modify-syntax-entry ?_ "w" why3-mode-syntax-table)
+     ; comments
+-    (modify-syntax-entry ?\( ". 1" why-mode-syntax-table)
+-    (modify-syntax-entry ?\) ". 4" why-mode-syntax-table)
+-    (modify-syntax-entry ?* ". 23" why-mode-syntax-table)
++    (modify-syntax-entry ?\( ". 1" why3-mode-syntax-table)
++    (modify-syntax-entry ?\) ". 4" why3-mode-syntax-table)
++    (modify-syntax-entry ?* ". 23" why3-mode-syntax-table)
+     ))
+ 
+-;; utility functions
+-
+-(defun why-go-and-get-next-proof ()
+-  (let ((bp (search-forward "Proof." nil t)))
+-    (if (null bp) (progn (message "Cannot find a proof below") nil)
+-      (let ((bs (re-search-forward "Save\\|Qed\\." nil t)))
+-	(if (null bs) (progn (message "Cannot find a proof below") nil)
+-	  (if (> bs (+ bp 6))
+-	      (let ((br (+ bp 1))
+-		    (er (progn (goto-char bs) (beginning-of-line) (point))))
+-		(progn (kill-region br er) t))
+-	    (why-go-and-get-next-proof)))))))
+-
+-(defun why-grab-next-proof ()
+-  "grab the next non-empty proof below and insert it at current point"
+-  (interactive)
+-  (if (save-excursion (why-go-and-get-next-proof)) (yank)))
+-
+-;; custom variables
+-
+-(require 'custom)
+-
+-(defcustom why-prover "coq"
+-  "Why prover"
+-  :group 'why :type '(choice (const :tag "Coq" "coq")
+-			     (const :tag "PVS" "pvs")))
+-
+-(defcustom why-prog-name "why"
+-  "Why executable name"
+-  :group 'why :type 'string)
+-
+-(defcustom why-options "--valid"
+-  "Why options"
+-  :group 'why :type 'string)
+-
+-(defcustom why-viewer-prog-name "why_viewer"
+-  "Why viewer executable name"
+-  :group 'why :type 'string)
+-
+-(defun why-command-line (file)
+-  (concat why-prog-name " -P " why-prover " " why-options " " file))
+-
+-(defun why-find-alternate-file ()
+-  "switch to the proof obligations buffer"
+-  (interactive)
+-  (let* ((f (buffer-file-name))
+-	 (fcoq (concat (file-name-sans-extension f) "_why.v")))
+-    (find-file fcoq)))
+-
+-(defun why-generate-obligations ()
+-  "generate the proof obligations"
+-  (interactive)
+-  (let ((f (buffer-name)))
+-    (compile (why-command-line f))))
+-
+-(defun why-viewer-command-line (file)
+-  (concat why-viewer-prog-name " " file))
+-
+-(defun why-viewer ()
+-  "launch the why viewer"
+-  (interactive)
+-  (let ((f (buffer-name)))
+-    (compile (why-viewer-command-line f))))
+-
+-(defun why-generate-ocaml ()
+-  "generate the ocaml code"
+-  (interactive)
+-  (let ((f (buffer-name)))
+-    (compile (concat why-prog-name " --ocaml " f))))
+-
+-;; menu
+-
+-(require 'easymenu)
+-
+-(defun why-menu ()
+-  (easy-menu-define
+-   why-mode-menu (list why-mode-map)
+-   "Why Mode Menu."
+-   '("Why"
+-     ["Customize Why mode" (customize-group 'why) t]
+-     "---"
+-     ["Type-check buffer" why-type-check t]
+-     ; ["Show WP" why-show-wp t]
+-     ["Why viewer" why-viewer t]
+-     ["Generate obligations" why-generate-obligations t]
+-     ["Switch to obligations buffer" why-find-alternate-file t]
+-     ["Generate Ocaml code" why-generate-ocaml t]
+-     ["Recolor buffer" font-lock-fontify-buffer t]
+-     "---"
+-     "Coq"
+-     ["Grab next proof" why-grab-next-proof t]
+-     "---"
+-     "PVS"
+-     "---"
+-     ))
+-  (easy-menu-add why-mode-menu))
+-
+ ;indentation
+ 
+ ;http://www.emacswiki.org/emacs/ModeTutorial
+-(defun why-indent-line ()
+-  "Indent current line as why logic"
++(defun why3-indent-line ()
++  "Indent current line as why3 logic"
+   (interactive)
+   (save-excursion
+     (beginning-of-line)
+@@ -173,7 +74,7 @@
+             (progn
+               (save-excursion
+                 (forward-line -1)
+-                (setq cur-indent (- (current-indentation) why-indent)))
++                (setq cur-indent (- (current-indentation) why3-indent)))
+               (if (< cur-indent 0)
+                   (setq cur-indent 0)))
+           (progn
+@@ -187,7 +88,7 @@
+                           (setq not-indented nil))
+                       (if (looking-at "^[ \t]*clone.*with ")
+                           (progn
+-                            (setq cur-indent (+ (current-indentation) why-indent))
++                            (setq cur-indent (+ (current-indentation) why3-indent))
+                             (setq not-indented nil)
+                             ))))))
+         ;For the definition its very badly done...
+@@ -213,7 +114,7 @@
+                      (forward-line -1)
+                      (if (looking-at
+                           "^[ \t]*\\(logic\\|type\\|axiom\\|goal\\|lemma\\|inductive\\)")
+-                         (setq cur-indent (+ (current-indentation) why-indent))
++                         (setq cur-indent (+ (current-indentation) why3-indent))
+                        (setq cur-indent (current-indentation)))
+                      (setq not-indented nil)))))))
+           ;For inside theory or namespace
+@@ -227,7 +128,7 @@
+                                         ; Check for rule 4
+                 (if (looking-at "^[ \t]*\\(theory\\|namespace\\)")
+                     (progn
+-                      (setq cur-indent (+ (current-indentation) why-indent))
++                      (setq cur-indent (+ (current-indentation) why3-indent))
+                       (setq not-indented nil))
+                   (if (bobp) ; Check for rule 5
+                       (setq not-indented nil)))))))
+@@ -237,7 +138,7 @@
+ 
+ ; compile will propose "why3ide file" is no Makefile is present
+ 
+-(add-hook 'why-mode-hook
++(add-hook 'why3-mode-hook
+           (lambda ()
+             (unless (file-exists-p "Makefile")
+               (set (make-local-variable 'compile-command)
+@@ -247,29 +148,29 @@
+ 
+ 
+ ;; setting the mode
+-(defun why-mode ()
+-  "Major mode for editing Why programs.
++(defun why3-mode ()
++  "Major mode for editing Why3 programs.
+ 
+-\\{why-mode-map}"
++\\{why3-mode-map}"
+   (interactive)
+   (kill-all-local-variables)
+-  (why-create-syntax-table)
++  (why3-create-syntax-table)
+   ; hilight
+   (make-local-variable 'font-lock-defaults)
+-  (setq font-lock-defaults '(why-font-lock-keywords))
++  (setq font-lock-defaults '(why3-font-lock-keywords))
+   ; indentation
+   ;(make-local-variable 'indent-line-function)
+-  ;(setq indent-line-function 'why-indent-line)
++  ;(setq indent-line-function 'why3-indent-line)
+   ; OCaml style comments for comment-region, comment-dwim, etc.
+   (setq comment-start "(*" comment-end "*)")
+   ; menu
+   ; providing the mode
+-  (setq major-mode 'why-mode)
+-  (setq mode-name "WHY")
+-  (use-local-map why-mode-map)
++  (setq major-mode 'why3-mode)
++  (setq mode-name "Why3")
++  (use-local-map why3-mode-map)
+   (font-lock-mode 1)
+-  ; (why-menu)
+-  (run-hooks 'why-mode-hook))
++  ; (why3-menu)
++  (run-hooks 'why3-mode-hook))
+ 
+-(provide 'why-mode)
++(provide 'why3-mode)
+ 
+--- ./share/lang/why.lang.orig	2013-03-27 00:08:32.000000000 -0600
++++ ./share/lang/why.lang	2013-04-08 09:44:16.248708515 -0600
+@@ -1,29 +1,22 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <!--
+ 
+-Copyright (C) 2010-
+-  Francois Bobot
+-  Jean-Christophe Filliatre
+-  Johannes Kanig
+-  Andrei Paskevich
++The Why3 Verification Platform   /   The Why3 Development Team
++Copyright 2010-2013   -    INRIA - CNRS - Paris-Sud University
+ 
+-This software is free software; you can redistribute it and/or
+-modify it under the terms of the GNU Library General Public
+-License version 2.1, with the special exception on linking
+-described in file LICENSE.
++This software is distributed under the terms of the GNU Lesser
++General Public License version 2.1, with the special exception
++on linking described in file LICENSE.
+ 
+-This software is distributed in the hope that it will be useful,
+-but WITHOUT ANY WARRANTY; without even the implied warranty of
+-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ -->
+ <!--
+  This file was based on ocaml.lang by
+  Copyright (C) 2007 Eric Cooper <ecc@cmu.edu>
+  Copyright (C) 2007 Eric Norige <thelema314@gmail.com>
+ -->
+-<language id="why" _name="Why3" version="2.0" _section="Sources">
++<language id="why3" _name="Why3" version="2.0" _section="Sources">
+   <metadata>
+-    <property name="mimetypes">text/x-why</property>
++    <property name="mimetypes">text/x-why3</property>
+     <property name="globs">*.mlw;*.why</property>
+     <property name="block-comment-start">(*</property>
+     <property name="block-comment-end">*)</property>
+@@ -61,7 +54,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICU
+       <match>\%{char-esc}</match>
+     </context>
+     <!-- here's the main context -->
+-    <context id="why">
++    <context id="why3">
+       <include>
+ 	<context id="symbol-star">
+ 	  <match>\(\*\)</match>
+@@ -134,7 +127,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICU
+ 	  <start>\{</start>
+ 	  <end>\}</end>
+ 	  <include>
+-	    <context ref="why"/>
++	    <context ref="why3"/>
+ 	  </include>
+ 	</context>
+ 	<context id="badrecord" style-ref="error" extend-parent="false">
+@@ -145,7 +138,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICU
+ 	  <start>\[\|</start>
+ 	  <end>\|\]</end>
+ 	  <include>
+-	    <context ref="why"/>
++	    <context ref="why3"/>
+ 	  </include>
+ 	</context>
+ 	<context id="badarray" style-ref="error" extend-parent="false">
+@@ -155,7 +148,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICU
+ 	  <start>\[</start>
+ 	  <end>(?&lt;!\|)\]</end>
+ 	  <include>
+-	    <context ref="why"/>
++	    <context ref="why3"/>
+ 	  </include>
+ 	</context>
+ 	<context id="badlist" style-ref="error" extend-parent="false">
+--- ./configure.orig	2013-03-27 00:08:28.000000000 -0600
++++ ./configure	2013-05-09 10:32:59.661460424 -0600
+@@ -4040,11 +4040,11 @@ $as_echo_n "checking Frama-C version...
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $FRAMAC_VERSION" >&5
+ $as_echo "$FRAMAC_VERSION" >&6; }
+       case $FRAMAC_VERSION in
+-         Oxygen-20120901) ;;
+-         *) { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Version Oxygen-20120901 required." >&5
++         Fluorine-20130401) ;;
++         *) { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Version Fluorine-20130401 required." >&5
+ $as_echo "$as_me: WARNING: Version Oxygen-20120901 required." >&2;}
+             enable_frama_c=no
+-            reason_frama_c=" (version Oxygen required)"
++            reason_frama_c=" (version Fluorine required)"
+             ;;
+       esac
+       FRAMAC_SHARE=`$FRAMAC -print-path`
