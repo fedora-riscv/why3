@@ -605,8 +605,8 @@
        case $FRAMAC_VERSION in
 -         Oxygen-20120901) ;;
 -         *) { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Version Oxygen-20120901 required." >&5
-+         Fluorine-20130401) ;;
-+         *) { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Version Fluorine-20130401 required." >&5
++         Fluorine-20130501) ;;
++         *) { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Version Fluorine-20130501 required." >&5
  $as_echo "$as_me: WARNING: Version Oxygen-20120901 required." >&2;}
              enable_frama_c=no
 -            reason_frama_c=" (version Oxygen required)"
