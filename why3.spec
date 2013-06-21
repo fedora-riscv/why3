@@ -5,7 +5,7 @@
 
 Name:           why3
 Version:        0.81
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 License:        LGPLv2 with exceptions
@@ -198,6 +198,9 @@ rm -fr %{buildroot}%{_datadir}/doc
 %files all
 
 %changelog
+* Fri Jun 21 2013 Jerry James <loganjerry@gmail.com> - 0.81-3
+- Rebuild for frama-c Fluorine 20130601
+
 * Thu May 23 2013 Jerry James <loganjerry@gmail.com> - 0.81-2
 - Rebuild for frama-c Fluorine 20130501
 
