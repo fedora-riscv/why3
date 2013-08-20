@@ -22,6 +22,10 @@ Source1:        %{name}-man.tar.xz
 #    fixed eliminate_inductive with let-in
 # 2b88812f1ac8413bf4b5988453379e4f2341afaf
 #    Update Jessie3 plugin to Frama-C Fluorine.
+# ea3cc5fbf8ca66e50efec901577c96de68a95def
+#    Update to Flocq 2.1.0 by changing the way NaNs are handled.
+# f9d36d732c4fd69727fd13f4b5491d82a91fd5b4
+#    It should have been Flocq 2.2.
 Patch0:         %{name}-fixes.patch
 
 BuildRequires:  coq

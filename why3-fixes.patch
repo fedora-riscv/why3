@@ -146,6 +146,24 @@
  
  # There used to be targets here but they are no longer useful.
  
+--- ./configure.in.orig	2013-03-27 00:08:28.000000000 -0600
++++ ./configure.in	2013-08-20 08:42:00.917807823 -0600
+@@ -466,13 +466,13 @@ if test "$enable_coq_libs" = yes; then
+    AC_MSG_CHECKING([for Flocq])
+    AS_IF(
+      [ echo "Require Import Flocq_version BinNat." \
+-            "Goal (20000 <= Flocq_version)%N. easy. Qed." > conftest.v
++            "Goal (20200 <= Flocq_version)%N. easy. Qed." > conftest.v
+        "$COQC" conftest.v > conftest.err ],
+      [ AC_MSG_RESULT(yes) ],
+      [ AC_MSG_RESULT(no)
+        enable_coq_fp_libs=no
+        AC_MSG_WARN(Cannot find Flocq.)
+-       reason_coq_fp_libs=" (Flocq >= 2.0 not found)" ])
++       reason_coq_fp_libs=" (Flocq >= 2.2 not found)" ])
+    rm -f conftest.v conftest.vo conftest.err
+ fi
+ 
 --- ./src/ide/gmain.ml.orig	2013-03-27 00:08:29.000000000 -0600
 +++ ./src/ide/gmain.ml	2013-05-09 10:25:12.613259624 -0600
 @@ -121,9 +121,9 @@ let (why_lang, any_lang) =
@@ -230,6 +248,66 @@
    | CStr _
    | CWStr _
    | CChr _
+--- ./lib/coq/floating_point/GenFloat.v.orig	2013-03-27 00:08:32.000000000 -0600
++++ ./lib/coq/floating_point/GenFloat.v	2013-08-20 08:42:00.917807823 -0600
+@@ -63,26 +63,45 @@ destruct x as (x,xv,xe,xm).
+ destruct y as (y,yv,ye,ym).
+ destruct (Req_EM_T xe ye) as [He|He]...
+ destruct (Req_EM_T xm ym) as [Hm|Hm]...
+-destruct x as [xs|xs| |xs xm' xe' xH] ;
+-  destruct y as [ys|ys| |ys ym' ye' yH]...
+-destruct (Bool.bool_dec xs ys) as [Hs|Hs].
+-left.
+-apply f_equal3 ; try easy.
+-now apply f_equal.
++rewrite He, Hm.
++destruct x as [xs|xs|xs xm'|xs xm' xe' xH] ;
++  destruct y as [ys|ys|ys ym'|ys ym' ye' yH]...
++clear.
++destruct (Bool.bool_dec xs ys) as [->|Hs].
++now left.
+ right.
+ apply t_inv.
+-intros H.
++intros H _ _.
+ now injection H.
+-destruct (Bool.bool_dec xs ys) as [Hs|Hs].
++clear.
++destruct (Bool.bool_dec xs ys) as [->|Hs].
++now left.
++right.
++apply t_inv.
++intros H _ _.
++now injection H.
++clear.
++destruct (Bool.bool_dec xs ys) as [->|Hs].
++destruct (Z_eq_dec (Zpos (projT1 xm')) (Zpos (projT1 ym'))) as [Hm'|Hm'].
+ left.
+ apply f_equal3 ; try easy.
+-now apply f_equal.
++apply f_equal2 ; try easy.
++destruct xm' as [xm' pxm'].
++destruct ym' as [ym' pym'].
++simpl in Hm'.
++injection Hm'.
++intros ->.
++now rewrite (eqbool_irrelevance _ pxm' pym').
+ right.
+ apply t_inv.
+-intros H.
++intros H _ _.
++injection H.
++contradict Hm'.
++now rewrite Hm'.
++right.
++apply t_inv.
++intros H _ _.
+ now injection H.
+-left.
+-now apply f_equal3.
+ destruct (Req_EM_T xv yv) as [Hv|Hv].
+ left.
+ apply f_equal3 ; try easy.
 --- ./share/emacs/why.el.orig	2013-03-27 00:08:32.000000000 -0600
 +++ ./share/emacs/why.el	2013-04-08 09:44:16.248708515 -0600
 @@ -1,167 +1,68 @@
