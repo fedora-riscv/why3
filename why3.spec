@@ -1,11 +1,8 @@
-# Debuginfo cannot be generated usefully for OCaml programs, so the only
-# debuginfo for this package is for the sole C program: why3-cpulimit.
-
 %global opt %(test -x %{_bindir}/ocamlopt && echo 1 || echo 0)
 
 Name:           why3
 Version:        0.81
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Software verification platform
 
 License:        LGPLv2 with exceptions
@@ -123,9 +120,6 @@ sed -e "s/-Wall/$RPM_OPT_FLAGS/" \
 %configure --enable-frama-c
 make #%%{?_smp_mflags}
 
-# The Makefile does not strip the tactics and plugins
-find . -name \*.cmxs | xargs strip
-
 %install
 make install DESTDIR=%{buildroot}
 
@@ -202,6 +196,10 @@ rm -fr %{buildroot}%{_datadir}/doc
 %files all
 
 %changelog
+* Tue Sep 17 2013 Jerry James <loganjerry@gmail.com> - 0.81-5
+- Rebuild for OCaml 4.01.0
+- Enable debuginfo for the ocaml sources
+
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.81-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
