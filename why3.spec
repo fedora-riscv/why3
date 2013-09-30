@@ -2,7 +2,7 @@
 
 Name:           why3
 Version:        0.81
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Software verification platform
 
 License:        LGPLv2 with exceptions
@@ -116,6 +116,10 @@ sed -e "s/-Wall/$RPM_OPT_FLAGS/" \
     -e "s/Aer-29/& -ccopt -Wl,-z,relro,-z,now/" \
     -i Makefile.in
 
+# Temporary workaround for breakage in alt-ergo 0.95.2.  Remove this when the
+# next alt-ergo version is released.
+sed -i '/alt-ergo/,/cvc4/s/%%T/%%t/' share/provers-detection-data.conf.in
+
 %build
 %configure --enable-frama-c
 make #%%{?_smp_mflags}
@@ -196,6 +200,9 @@ rm -fr %{buildroot}%{_datadir}/doc
 %files all
 
 %changelog
+* Mon Sep 30 2013 Jerry James <loganjerry@gmail.com> - 0.81-6
+- Apply upstream fix for change in the alt-ergo timelimit option
+
 * Tue Sep 17 2013 Jerry James <loganjerry@gmail.com> - 0.81-5
 - Rebuild for OCaml 4.01.0
 - Enable debuginfo for the ocaml sources
