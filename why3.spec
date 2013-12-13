@@ -1,10 +1,17 @@
+# NOTE: Upstream has said that the Frama-C support is still experimental, and
+# less functional than the corresponding support in why2.  They recommend not
+# enabling it for now.  We abide by their wishes.  Revisit this decision each
+# release.
+
 %global opt %(test -x %{_bindir}/ocamlopt && echo 1 || echo 0)
+%global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.81
-Release:        6%{?dist}
+Version:        0.82
+Release:        1%{?dist}
 Summary:        Software verification platform
 
+# See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
 Source0:        http://why3.lri.fr/download/%{name}-%{version}.tar.gz
@@ -12,23 +19,14 @@ Source0:        http://why3.lri.fr/download/%{name}-%{version}.tar.gz
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
 # Post-release fixes from upstream.  Currently this contains:
-# bbafe47e7569fc6106bc5e5f03ec2eba7ff6534a
-#    [emacs] why.el renamed to why3.el
-#    [GTK sourceview] why.lang renamed to why3.lang
-# 666aeb684a11a017b795469447bdeae13dc009b7
-#    fixed eliminate_inductive with let-in
-# 2b88812f1ac8413bf4b5988453379e4f2341afaf
-#    Update Jessie3 plugin to Frama-C Fluorine.
-# ea3cc5fbf8ca66e50efec901577c96de68a95def
-#    Update to Flocq 2.1.0 by changing the way NaNs are handled.
-# f9d36d732c4fd69727fd13f4b5491d82a91fd5b4
-#    It should have been Flocq 2.2.
+# 14ee7f4912d0e18bd5831d56070376d0a5f2330c
+#   Add an explicit coercion so that it compiles with both lablgtk 2.16 and
+#   2.18.
 Patch0:         %{name}-fixes.patch
 
 BuildRequires:  coq
 BuildRequires:  evince
 BuildRequires:  flocq
-BuildRequires:  frama-c
 BuildRequires:  gtksourceview2-devel
 BuildRequires:  hevea
 BuildRequires:  ocaml
@@ -40,11 +38,14 @@ BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  rubber
 BuildRequires:  sqlite-devel
+BuildRequires:  tex(comment.sty)
 BuildRequires:  emacs xemacs xemacs-packages-extra
 
-Requires:       frama-c
 Requires:       gtksourceview2
+Requires:       texlive-base
 Requires:       vim-filesystem
+Requires(posttrans): tex(tex)
+Requires(postun): tex(tex)
 
 ExclusiveArch:  %{ocaml_arches}
 
@@ -58,6 +59,14 @@ generation of verification conditions for programs.  It features a rich
 library of proof task transformations that can be chained to produce a
 suitable input for a large set of theorem provers, including SMT
 solvers, TPTP provers, as well as interactive proof assistants.
+
+%package examples
+Summary:        Example inputs
+Requires:       %{name} = %{version}-%{release}
+BuildArch:      noarch
+
+%description examples
+Example source code with why3 annotations.
 
 %package emacs
 Summary:        Emacs support file for %{name} files
@@ -116,13 +125,10 @@ sed -e "s/-Wall/$RPM_OPT_FLAGS/" \
     -e "s/Aer-29/& -ccopt -Wl,-z,relro,-z,now/" \
     -i Makefile.in
 
-# Temporary workaround for breakage in alt-ergo 0.95.2.  Remove this when the
-# next alt-ergo version is released.
-sed -i '/alt-ergo/,/cvc4/s/%%T/%%t/' share/provers-detection-data.conf.in
-
 %build
-%configure --enable-frama-c
+%configure
 make #%%{?_smp_mflags}
+make doc/manual.pdf
 
 %install
 make install DESTDIR=%{buildroot}
@@ -143,6 +149,10 @@ cp -p share/bash/%{name} %{buildroot}%{_datadir}/bash-completion/completions
 # Install the zsh completion file
 mkdir -p %{buildroot}%{_datadir}/zsh/site-functions
 cp -p share/zsh/_why3 %{buildroot}%{_datadir}/zsh/site-functions
+
+# Install the LaTeX style
+mkdir -p %{buildroot}%{_datadir}/texmf/tex/latex/why3
+cp -p share/latex/why3lang.sty %{buildroot}%{_datadir}/texmf/tex/latex/why3
 
 # Move the gtksourceview language file to the right place
 mkdir -p %{buildroot}%{_datadir}/gtksourceview-2.0
@@ -171,17 +181,26 @@ popd
 # Remove misplaced documentation
 rm -fr %{buildroot}%{_datadir}/doc
 
+%post
+mktexlsr &> /dev/null || :
+
+%postun
+mktexlsr &> /dev/null || :
+
 %files
 %doc AUTHORS CHANGES LICENSE README doc/manual.pdf
 %{_bindir}/%{name}*
 %{_datadir}/%{name}/
 %{_datadir}/bash-completion/
 %{_datadir}/gtksourceview-2.0/language-specs/%{name}.lang
+%{_datadir}/texmf/tex/latex/why3/
 %{_datadir}/vim/vimfiles/syntax/%{name}.vim
 %{_datadir}/zsh/
-%{_libdir}/frama-c/plugins/Jessie3.*
 %{_libdir}/%{name}/
 %{_mandir}/man1/%{name}*
+
+%files examples
+%doc examples
 
 %files emacs
 %{_emacs_sitelispdir}/%{name}.elc
@@ -200,6 +219,13 @@ rm -fr %{buildroot}%{_datadir}/doc
 %files all
 
 %changelog
+* Fri Dec 13 2013 Jerry James <loganjerry@gmail.com> - 0.82-1
+- New upstream release
+- Drop upstreamed patches
+- Add -examples subpackage
+- Install LaTeX style
+- Turn off frama-c support at upstream's request
+
 * Mon Sep 30 2013 Jerry James <loganjerry@gmail.com> - 0.81-6
 - Apply upstream fix for change in the alt-ergo timelimit option
 
