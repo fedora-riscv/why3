@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.82
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -31,7 +31,7 @@ BuildRequires:  gtksourceview2-devel
 BuildRequires:  hevea
 BuildRequires:  ocaml
 BuildRequires:  ocaml-camlp5-devel
-BuildRequires:  ocaml-findlib-devel
+BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
@@ -219,6 +219,10 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Wed Feb 26 2014 Jerry James <loganjerry@gmail.com> - 0.82-2
+- Rebuild for ocamlgraph 1.8.4
+- BR ocaml-findlib instead of ocaml-findlib-devel
+
 * Fri Dec 13 2013 Jerry James <loganjerry@gmail.com> - 0.82-1
 - New upstream release
 - Drop upstreamed patches
