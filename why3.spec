@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -219,6 +219,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Tue Mar 18 2014 Jerry James <loganjerry@gmail.com> - 0.83-2
+- Back out the post-release fix to the Coq printer, which breaks Frama-C
+
 * Fri Mar 14 2014 Jerry James <loganjerry@gmail.com> - 0.83-1
 - New upstream release
 - Use cvc4 instead of cvc3
