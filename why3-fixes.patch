@@ -1,15 +1,864 @@
-Add an explicit coercion so that it compiles with both lablgtk 2.16 and 2.18.
-
-diff --git a/src/ide/gmain.ml b/src/ide/gmain.ml
-index 46756f4..fb5980f 100644
---- ./src/ide/gmain.ml
-+++ ./src/ide/gmain.ml
-@@ -801,7 +801,7 @@ let info_window ?(callback=(fun () -> ())) mt s =
-   in
-   let d = GWindow.message_dialog
-     ~message:s
--    ~message_type:mt
-+    ~message_type:(mt :> Gtk.Tags.message_type)
-     ~buttons
-     ~title:"Why3IDE"
-     ~icon:(!Gconfig.why_icon)
+diff --git a/CHANGES b/CHANGES
+index 9710f2a..173db08 100644
+--- a/CHANGES
++++ b/CHANGES
+@@ -1,6 +1,10 @@
+ 
+ * marks an incompatible change
+ 
++provers
++  * fixed Coq printer (former Coq proofs may have to be updated, by removing
++    non-emptiness constraints from polymorphic type applications)
++
+ version 0.83, March 14, 2014
+ ============================
+ 
+@@ -15,10 +19,8 @@ syntax
+   o formulas and Boolean terms can be used interchangeably
+ 
+ library
+-  * [fix] removed inconsistency in libraries map.MapPermut and
+-    array.ArrayPermut
+-  * [library] names, definitions, and meaning of symbols "permut..." have
+-    been modified
++  * removed inconsistency in libraries map.MapPermut and array.ArrayPermut
++    (names, definitions, and meaning of symbols "permut..." have been modified)
+ 
+ provers
+   o new version of prover: Coq 8.4pl3
+@@ -26,6 +28,8 @@ provers
+   o new version of prover: E prover 1.8
+   * Coq 8.3 is no longer supported
+   o improved support for Isabelle2013-2
++  * fixed Coq printer (former Coq proofs may have to be updated, with
++    extra qualification of imported symbols)
+ 
+ tools
+   o new option --exec to interpret WhyML programs; see doc chapter 8
+@@ -38,10 +42,8 @@ tools
+ API
+   o new type-inferring API for logical terms and program expressions
+ 
+-bug fixes
++miscellaneous
+   o fixed compilation bug with lablgtk 2.18
+-  * fixed Coq printer (former Coq proofs may have to be updated, with
+-    extra qualification of imported symbols)
+ 
+ version 0.82, December 12, 2013
+ ===============================
+diff --git a/lib/coq/map/Map.v b/lib/coq/map/Map.v
+index 55f08ec..0a786b2 100644
+--- a/lib/coq/map/Map.v
++++ b/lib/coq/map/Map.v
+@@ -9,8 +9,7 @@ Inductive _map (a b:Type) :=
+   | _map_constr : (a -> b) -> _map a b.
+ 
+ (* Why3 goal *)
+-Definition map : forall (a:Type) {a_WT:WhyType a} (b:Type) {b_WT:WhyType b},
+-  Type.
++Definition map : forall (a:Type) (b:Type), Type.
+ intros.
+ exact (_map a b).
+ Defined.
+@@ -26,14 +25,14 @@ Qed.
+ 
+ (* Why3 goal *)
+ Definition get: forall {a:Type} {a_WT:WhyType a} {b:Type} {b_WT:WhyType b},
+-  (@map a a_WT b b_WT) -> a -> b.
++  (map a b) -> a -> b.
+ intros a a_WT b b_WT (m) x.
+ exact (m x).
+ Defined.
+ 
+ (* Why3 goal *)
+ Definition set: forall {a:Type} {a_WT:WhyType a} {b:Type} {b_WT:WhyType b},
+-  (@map a a_WT b b_WT) -> a -> b -> (@map a a_WT b b_WT).
++  (map a b) -> a -> b -> (map a b).
+ intros a a_WT b b_WT (m) x y.
+ split.
+ intros x'.
+@@ -44,8 +43,8 @@ Defined.
+ 
+ (* Why3 goal *)
+ Lemma Select_eq : forall {a:Type} {a_WT:WhyType a} {b:Type} {b_WT:WhyType b},
+-  forall (m:(@map a a_WT b b_WT)), forall (a1:a) (a2:a), forall (b1:b),
+-  (a1 = a2) -> ((get (set m a1 b1) a2) = b1).
++  forall (m:(map a b)), forall (a1:a) (a2:a), forall (b1:b), (a1 = a2) ->
++  ((get (set m a1 b1) a2) = b1).
+ Proof.
+ intros a a_WT b b_WT (m) a1 a2 b1 h1.
+ unfold get, set.
+@@ -54,9 +53,8 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Select_neq : forall {a:Type} {a_WT:WhyType a}
+-  {b:Type} {b_WT:WhyType b}, forall (m:(@map a a_WT b b_WT)), forall (a1:a)
+-  (a2:a), forall (b1:b), (~ (a1 = a2)) -> ((get (set m a1 b1) a2) = (get m
+-  a2)).
++  {b:Type} {b_WT:WhyType b}, forall (m:(map a b)), forall (a1:a) (a2:a),
++  forall (b1:b), (~ (a1 = a2)) -> ((get (set m a1 b1) a2) = (get m a2)).
+ Proof.
+ intros a a_WT b b_WT (m) a1 a2 b1 h1.
+ unfold get, set.
+@@ -65,14 +63,14 @@ Qed.
+ 
+ (* Why3 goal *)
+ Definition const: forall {a:Type} {a_WT:WhyType a} {b:Type} {b_WT:WhyType b},
+-  b -> (@map a a_WT b b_WT).
++  b -> (map a b).
+ intros a a_WT b b_WT y.
+ exact (_map_constr _ _ (fun _ => y)).
+ Defined.
+ 
+ (* Why3 goal *)
+ Lemma Const : forall {a:Type} {a_WT:WhyType a} {b:Type} {b_WT:WhyType b},
+-  forall (b1:b) (a1:a), ((get (const b1: (@map a a_WT b b_WT)) a1) = b1).
++  forall (b1:b) (a1:a), ((get (const b1: (map a b)) a1) = b1).
+ Proof.
+ easy.
+ Qed.
+diff --git a/lib/coq/map/MapInjection.v b/lib/coq/map/MapInjection.v
+index a5d738d..cb367f6 100644
+--- a/lib/coq/map/MapInjection.v
++++ b/lib/coq/map/MapInjection.v
+@@ -204,23 +204,23 @@ Qed.
+ 
+ 
+ (* Why3 assumption *)
+-Definition injective (a:(@map.Map.map Z _ Z _)) (n:Z): Prop := forall (i:Z)
+-  (j:Z), ((0%Z <= i)%Z /\ (i < n)%Z) -> (((0%Z <= j)%Z /\ (j < n)%Z) ->
++Definition injective (a:(map.Map.map Z Z)) (n:Z): Prop := forall (i:Z) (j:Z),
++  ((0%Z <= i)%Z /\ (i < n)%Z) -> (((0%Z <= j)%Z /\ (j < n)%Z) ->
+   ((~ (i = j)) -> ~ ((map.Map.get a i) = (map.Map.get a j)))).
+ 
+ (* Why3 assumption *)
+-Definition surjective (a:(@map.Map.map Z _ Z _)) (n:Z): Prop := forall (i:Z),
++Definition surjective (a:(map.Map.map Z Z)) (n:Z): Prop := forall (i:Z),
+   ((0%Z <= i)%Z /\ (i < n)%Z) -> exists j:Z, ((0%Z <= j)%Z /\ (j < n)%Z) /\
+   ((map.Map.get a j) = i).
+ 
+ (* Why3 assumption *)
+-Definition range (a:(@map.Map.map Z _ Z _)) (n:Z): Prop := forall (i:Z),
++Definition range (a:(map.Map.map Z Z)) (n:Z): Prop := forall (i:Z),
+   ((0%Z <= i)%Z /\ (i < n)%Z) -> ((0%Z <= (map.Map.get a i))%Z /\
+   ((map.Map.get a i) < n)%Z).
+ 
+ (* Why3 goal *)
+-Lemma injective_surjective : forall (a:(@map.Map.map Z _ Z _)) (n:Z),
+-  (injective a n) -> ((range a n) -> (surjective a n)).
++Lemma injective_surjective : forall (a:(map.Map.map Z Z)) (n:Z), (injective a
++  n) -> ((range a n) -> (surjective a n)).
+ unfold injective, range, surjective.
+ intros a n h1 h2.
+ intros.
+diff --git a/lib/coq/map/MapPermut.v b/lib/coq/map/MapPermut.v
+index 952d011..ed6bbf6 100644
+--- a/lib/coq/map/MapPermut.v
++++ b/lib/coq/map/MapPermut.v
+@@ -7,15 +7,15 @@ Require map.Map.
+ Require map.Occ.
+ 
+ (* Why3 assumption *)
+-Definition permut {a:Type} {a_WT:WhyType a} (m1:(@map.Map.map Z _ a a_WT))
+-  (m2:(@map.Map.map Z _ a a_WT)) (l:Z) (u:Z): Prop := forall (v:a),
+-  ((map.Occ.occ v m1 l u) = (map.Occ.occ v m2 l u)).
++Definition permut {a:Type} {a_WT:WhyType a} (m1:(map.Map.map Z a))
++  (m2:(map.Map.map Z a)) (l:Z) (u:Z): Prop := forall (v:a), ((map.Occ.occ v
++  m1 l u) = (map.Occ.occ v m2 l u)).
+ 
+ (* Why3 goal *)
+ Lemma permut_trans : forall {a:Type} {a_WT:WhyType a},
+-  forall (a1:(@map.Map.map Z _ a a_WT)) (a2:(@map.Map.map Z _ a a_WT))
+-  (a3:(@map.Map.map Z _ a a_WT)), forall (l:Z) (u:Z), (permut a1 a2 l u) ->
+-  ((permut a2 a3 l u) -> (permut a1 a3 l u)).
++  forall (a1:(map.Map.map Z a)) (a2:(map.Map.map Z a)) (a3:(map.Map.map Z
++  a)), forall (l:Z) (u:Z), (permut a1 a2 l u) -> ((permut a2 a3 l u) ->
++  (permut a1 a3 l u)).
+ intros a a_WT a1 a2 a3 l u h1 h2.
+ unfold permut in *.
+ intros. transitivity (Occ.occ v a2 l u); auto.
+@@ -23,10 +23,9 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma permut_exists : forall {a:Type} {a_WT:WhyType a},
+-  forall (a1:(@map.Map.map Z _ a a_WT)) (a2:(@map.Map.map Z _ a a_WT)) (l:Z)
+-  (u:Z) (i:Z), (permut a1 a2 l u) -> (((l <= i)%Z /\ (i < u)%Z) ->
+-  exists j:Z, ((l <= j)%Z /\ (j < u)%Z) /\ ((map.Map.get a1
+-  j) = (map.Map.get a2 i))).
++  forall (a1:(map.Map.map Z a)) (a2:(map.Map.map Z a)) (l:Z) (u:Z) (i:Z),
++  (permut a1 a2 l u) -> (((l <= i)%Z /\ (i < u)%Z) -> exists j:Z,
++  ((l <= j)%Z /\ (j < u)%Z) /\ ((map.Map.get a1 j) = (map.Map.get a2 i))).
+ Proof.
+ intros a a_WT a1 a2 l u i h1 Hi.
+ pose (v := Map.get a2 i).
+diff --git a/lib/coq/map/Occ.v b/lib/coq/map/Occ.v
+index 8f674a0..63d318e 100644
+--- a/lib/coq/map/Occ.v
++++ b/lib/coq/map/Occ.v
+@@ -7,8 +7,8 @@ Require map.Map.
+ 
+ Require Recdef.
+ 
+-Function occ_ (a:Type) (a_WT:WhyType a) (v:a) (m: @map.Map.map Z _
+-  a a_WT) (l: Z) (delta: Z) {measure Zabs_nat delta } : Z :=
++Function occ_ (a:Type) (a_WT:WhyType a) (v:a) (m: map.Map.map Z a)
++  (l: Z) (delta: Z) {measure Zabs_nat delta } : Z :=
+   if Z_le_gt_dec delta 0%Z then 0%Z else
+   ((if why_decidable_eq (map.Map.get m (l + delta - 1)%Z) v then 1 else 0) +
+    occ_ a a_WT v m l (delta-1))%Z.
+@@ -19,16 +19,15 @@ now apply Zabs_nat_lt; omega.
+ Defined.
+ 
+ (* Why3 goal *)
+-Definition occ: forall {a:Type} {a_WT:WhyType a}, a -> (@map.Map.map Z _
+-  a a_WT) -> Z -> Z -> Z.
++Definition occ: forall {a:Type} {a_WT:WhyType a}, a -> (map.Map.map Z a) ->
++  Z -> Z -> Z.
+ intros a a_WT v m l u.
+ exact (occ_ a a_WT v m l (u-l)%Z).
+ Defined.
+ 
+ (* Why3 goal *)
+ Lemma occ_empty : forall {a:Type} {a_WT:WhyType a}, forall (v:a)
+-  (m:(@map.Map.map Z _ a a_WT)) (l:Z) (u:Z), (u <= l)%Z -> ((occ v m l
+-  u) = 0%Z).
++  (m:(map.Map.map Z a)) (l:Z) (u:Z), (u <= l)%Z -> ((occ v m l u) = 0%Z).
+ intros a a_WT v m l u h1.
+ unfold occ. rewrite occ__equation.
+ destruct (Z_le_gt_dec (u - l) 0)%Z; intros.
+@@ -38,7 +37,7 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma occ_right_no_add : forall {a:Type} {a_WT:WhyType a}, forall (v:a)
+-  (m:(@map.Map.map Z _ a a_WT)) (l:Z) (u:Z), (l < u)%Z -> ((~ ((map.Map.get m
++  (m:(map.Map.map Z a)) (l:Z) (u:Z), (l < u)%Z -> ((~ ((map.Map.get m
+   (u - 1%Z)%Z) = v)) -> ((occ v m l u) = (occ v m l (u - 1%Z)%Z))).
+ intros a a_WT v m l u h1 h2.
+ unfold occ. rewrite occ__equation.
+@@ -56,7 +55,7 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma occ_right_add : forall {a:Type} {a_WT:WhyType a}, forall (v:a)
+-  (m:(@map.Map.map Z _ a a_WT)) (l:Z) (u:Z), (l < u)%Z -> (((map.Map.get m
++  (m:(map.Map.map Z a)) (l:Z) (u:Z), (l < u)%Z -> (((map.Map.get m
+   (u - 1%Z)%Z) = v) -> ((occ v m l u) = (1%Z + (occ v m l (u - 1%Z)%Z))%Z)).
+ intros a a_WT v m l u h1 h2.
+ unfold occ. rewrite occ__equation.
+@@ -74,8 +73,8 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma occ_bounds : forall {a:Type} {a_WT:WhyType a}, forall (v:a)
+-  (m:(@map.Map.map Z _ a a_WT)) (l:Z) (u:Z), (l <= u)%Z -> ((0%Z <= (occ v m
+-  l u))%Z /\ ((occ v m l u) <= (u - l)%Z)%Z).
++  (m:(map.Map.map Z a)) (l:Z) (u:Z), (l <= u)%Z -> ((0%Z <= (occ v m l
++  u))%Z /\ ((occ v m l u) <= (u - l)%Z)%Z).
+ intros a a_WT v m l u h1.
+ cut (0 <= u - l)%Z. 2: omega.
+ replace (occ v m l u) with (occ v m l (l + (u - l)))%Z.
+@@ -106,7 +105,7 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma occ_append : forall {a:Type} {a_WT:WhyType a}, forall (v:a)
+-  (m:(@map.Map.map Z _ a a_WT)) (l:Z) (mid:Z) (u:Z), ((l <= mid)%Z /\
++  (m:(map.Map.map Z a)) (l:Z) (mid:Z) (u:Z), ((l <= mid)%Z /\
+   (mid <= u)%Z) -> ((occ v m l u) = ((occ v m l mid) + (occ v m mid u))%Z).
+ intros a a_WT v m l mid u (h1,h2).
+ cut (0 <= u - mid)%Z. 2: omega.
+@@ -149,7 +148,7 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma occ_neq : forall {a:Type} {a_WT:WhyType a}, forall (v:a)
+-  (m:(@map.Map.map Z _ a a_WT)) (l:Z) (u:Z), (forall (i:Z), ((l <= i)%Z /\
++  (m:(map.Map.map Z a)) (l:Z) (u:Z), (forall (i:Z), ((l <= i)%Z /\
+   (i < u)%Z) -> ~ ((map.Map.get m i) = v)) -> ((occ v m l u) = 0%Z).
+ intros a a_WT v m l u.
+ assert (h: (u < l \/ 0 <= u - l)%Z) by omega. destruct h.
+@@ -175,8 +174,8 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma occ_exists : forall {a:Type} {a_WT:WhyType a}, forall (v:a)
+-  (m:(@map.Map.map Z _ a a_WT)) (l:Z) (u:Z), (0%Z < (occ v m l u))%Z ->
+-  exists i:Z, ((l <= i)%Z /\ (i < u)%Z) /\ ((map.Map.get m i) = v).
++  (m:(map.Map.map Z a)) (l:Z) (u:Z), (0%Z < (occ v m l u))%Z -> exists i:Z,
++  ((l <= i)%Z /\ (i < u)%Z) /\ ((map.Map.get m i) = v).
+ intros a a_WT v m l u h1.
+ assert (h: (u < l \/ 0 <= u - l)%Z) by omega. destruct h.
+ rewrite occ_empty in h1. elimtype False; omega. omega.
+@@ -198,8 +197,8 @@ exists i. split. omega. assumption.
+ Qed.
+ 
+ (* Why3 goal *)
+-Lemma occ_pos : forall {a:Type} {a_WT:WhyType a}, forall (m:(@map.Map.map Z _
+-  a a_WT)) (l:Z) (u:Z) (i:Z), ((l <= i)%Z /\ (i < u)%Z) ->
++Lemma occ_pos : forall {a:Type} {a_WT:WhyType a}, forall (m:(map.Map.map Z
++  a)) (l:Z) (u:Z) (i:Z), ((l <= i)%Z /\ (i < u)%Z) ->
+   (0%Z < (occ (map.Map.get m i) m l u))%Z.
+ intros a a_WT m l u i (h1,h2).
+ pose (v := (Map.get m i)). fold v.
+@@ -219,9 +218,9 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma occ_eq : forall {a:Type} {a_WT:WhyType a}, forall (v:a)
+-  (m1:(@map.Map.map Z _ a a_WT)) (m2:(@map.Map.map Z _ a a_WT)) (l:Z) (u:Z),
+-  (forall (i:Z), ((l <= i)%Z /\ (i < u)%Z) -> ((map.Map.get m1
+-  i) = (map.Map.get m2 i))) -> ((occ v m1 l u) = (occ v m2 l u)).
++  (m1:(map.Map.map Z a)) (m2:(map.Map.map Z a)) (l:Z) (u:Z), (forall (i:Z),
++  ((l <= i)%Z /\ (i < u)%Z) -> ((map.Map.get m1 i) = (map.Map.get m2 i))) ->
++  ((occ v m1 l u) = (occ v m2 l u)).
+ intros a a_WT v m1 m2 l u h1.
+ assert (h: (u < l \/ 0 <= u - l)%Z) by omega. destruct h.
+ rewrite occ_empty.
+diff --git a/lib/coq/set/Set.v b/lib/coq/set/Set.v
+index 6a652b4..9b0d501 100644
+--- a/lib/coq/set/Set.v
++++ b/lib/coq/set/Set.v
+@@ -12,7 +12,7 @@ Admitted.
+ (* "it is folklore that the two together are consistent" *)
+ 
+ (* Why3 goal *)
+-Definition set : forall (a:Type) {a_WT:WhyType a}, Type.
++Definition set : forall (a:Type), Type.
+ intros.
+ exact (a -> Prop).
+ Defined.
+@@ -27,7 +27,7 @@ apply excluded_middle_informative.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition mem: forall {a:Type} {a_WT:WhyType a}, a -> (@set a a_WT) -> Prop.
++Definition mem: forall {a:Type} {a_WT:WhyType a}, a -> (set a) -> Prop.
+ intros a a_WT x s.
+ exact (s x).
+ Defined.
+@@ -35,94 +35,92 @@ Defined.
+ Hint Unfold mem.
+ 
+ (* Why3 assumption *)
+-Definition infix_eqeq {a:Type} {a_WT:WhyType a} (s1:(@set a a_WT)) (s2:(@set
+-  a a_WT)): Prop := forall (x:a), (mem x s1) <-> (mem x s2).
++Definition infix_eqeq {a:Type} {a_WT:WhyType a} (s1:(set a)) (s2:(set
++  a)): Prop := forall (x:a), (mem x s1) <-> (mem x s2).
+ 
+ Notation "x == y" := (infix_eqeq x y) (at level 70, no associativity).
+ 
+ 
+ (* Why3 goal *)
+-Lemma extensionality : forall {a:Type} {a_WT:WhyType a}, forall (s1:(@set
+-  a a_WT)) (s2:(@set a a_WT)), (infix_eqeq s1 s2) -> (s1 = s2).
++Lemma extensionality : forall {a:Type} {a_WT:WhyType a}, forall (s1:(set a))
++  (s2:(set a)), (infix_eqeq s1 s2) -> (s1 = s2).
+ intros a a_WT s1 s2 h1.
+ apply predicate_extensionality; intro x.
+ apply h1.
+ Qed.
+ 
+ (* Why3 assumption *)
+-Definition subset {a:Type} {a_WT:WhyType a} (s1:(@set a a_WT)) (s2:(@set
+-  a a_WT)): Prop := forall (x:a), (mem x s1) -> (mem x s2).
++Definition subset {a:Type} {a_WT:WhyType a} (s1:(set a)) (s2:(set
++  a)): Prop := forall (x:a), (mem x s1) -> (mem x s2).
+ 
+ (* Why3 goal *)
+-Lemma subset_refl : forall {a:Type} {a_WT:WhyType a}, forall (s:(@set
+-  a a_WT)), (subset s s).
++Lemma subset_refl : forall {a:Type} {a_WT:WhyType a}, forall (s:(set a)),
++  (subset s s).
+ intros a a_WT s.
+ unfold subset; auto.
+ Qed.
+ 
+ (* Why3 goal *)
+-Lemma subset_trans : forall {a:Type} {a_WT:WhyType a}, forall (s1:(@set
+-  a a_WT)) (s2:(@set a a_WT)) (s3:(@set a a_WT)), (subset s1 s2) -> ((subset
+-  s2 s3) -> (subset s1 s3)).
++Lemma subset_trans : forall {a:Type} {a_WT:WhyType a}, forall (s1:(set a))
++  (s2:(set a)) (s3:(set a)), (subset s1 s2) -> ((subset s2 s3) -> (subset s1
++  s3)).
+ intros a a_WT s1 s2 s3 h1 h2.
+ unfold subset; intuition.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition empty: forall {a:Type} {a_WT:WhyType a}, (@set a a_WT).
++Definition empty: forall {a:Type} {a_WT:WhyType a}, (set a).
+ intros.
+ exact (fun _ => False).
+ Defined.
+ 
+ (* Why3 assumption *)
+-Definition is_empty {a:Type} {a_WT:WhyType a} (s:(@set a a_WT)): Prop :=
++Definition is_empty {a:Type} {a_WT:WhyType a} (s:(set a)): Prop :=
+   forall (x:a), ~ (mem x s).
+ 
+ (* Why3 goal *)
+-Lemma empty_def1 : forall {a:Type} {a_WT:WhyType a}, (is_empty (empty : (@set
+-  a a_WT))).
++Lemma empty_def1 : forall {a:Type} {a_WT:WhyType a}, (is_empty (empty : (set
++  a))).
+ intros a a_WT.
+ unfold is_empty; intuition.
+ Qed.
+ 
+ (* Why3 goal *)
+ Lemma mem_empty : forall {a:Type} {a_WT:WhyType a}, forall (x:a), ~ (mem x
+-  (empty : (@set a a_WT))).
++  (empty : (set a))).
+ intros a a_WT x.
+ auto.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition add: forall {a:Type} {a_WT:WhyType a}, a -> (@set a a_WT) -> (@set
+-  a a_WT).
++Definition add: forall {a:Type} {a_WT:WhyType a}, a -> (set a) -> (set a).
+ intros a a_WT x s.
+ exact (fun y => x = y \/ s y).
+ Defined.
+ 
+ (* Why3 goal *)
+ Lemma add_def1 : forall {a:Type} {a_WT:WhyType a}, forall (x:a) (y:a),
+-  forall (s:(@set a a_WT)), (mem x (add y s)) <-> ((x = y) \/ (mem x s)).
++  forall (s:(set a)), (mem x (add y s)) <-> ((x = y) \/ (mem x s)).
+ intros a a_WT x y s.
+ unfold add, mem; intuition.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition remove: forall {a:Type} {a_WT:WhyType a}, a -> (@set a a_WT) ->
+-  (@set a a_WT).
++Definition remove: forall {a:Type} {a_WT:WhyType a}, a -> (set a) -> (set a).
+ intros a a_WT x s.
+ exact (fun y => x <> y /\ s y).
+ Defined.
+ 
+ (* Why3 goal *)
+ Lemma remove_def1 : forall {a:Type} {a_WT:WhyType a}, forall (x:a) (y:a)
+-  (s:(@set a a_WT)), (mem x (remove y s)) <-> ((~ (x = y)) /\ (mem x s)).
++  (s:(set a)), (mem x (remove y s)) <-> ((~ (x = y)) /\ (mem x s)).
+ intros a a_WT x y s.
+ unfold remove, mem; intuition.
+ Qed.
+ 
+ (* Why3 goal *)
+-Lemma add_remove : forall {a:Type} {a_WT:WhyType a}, forall (x:a) (s:(@set
+-  a a_WT)), (mem x s) -> ((add x (remove x s)) = s).
++Lemma add_remove : forall {a:Type} {a_WT:WhyType a}, forall (x:a) (s:(set
++  a)), (mem x s) -> ((add x (remove x s)) = s).
+ intros a a_WT x s h1.
+ apply extensionality; intro y.
+ rewrite add_def1.
+@@ -133,8 +131,8 @@ tauto.
+ Qed.
+ 
+ (* Why3 goal *)
+-Lemma remove_add : forall {a:Type} {a_WT:WhyType a}, forall (x:a) (s:(@set
+-  a a_WT)), ((remove x (add x s)) = (remove x s)).
++Lemma remove_add : forall {a:Type} {a_WT:WhyType a}, forall (x:a) (s:(set
++  a)), ((remove x (add x s)) = (remove x s)).
+ intros a a_WT x s.
+ apply extensionality; intro y.
+ rewrite remove_def1.
+@@ -146,76 +144,73 @@ tauto.
+ Qed.
+ 
+ (* Why3 goal *)
+-Lemma subset_remove : forall {a:Type} {a_WT:WhyType a}, forall (x:a) (s:(@set
+-  a a_WT)), (subset (remove x s) s).
++Lemma subset_remove : forall {a:Type} {a_WT:WhyType a}, forall (x:a) (s:(set
++  a)), (subset (remove x s) s).
+ intros a a_WT x s.
+ unfold subset; intro y.
+ rewrite remove_def1; tauto.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition union: forall {a:Type} {a_WT:WhyType a}, (@set a a_WT) -> (@set
+-  a a_WT) -> (@set a a_WT).
++Definition union: forall {a:Type} {a_WT:WhyType a}, (set a) -> (set a) ->
++  (set a).
+ intros a a_WT s1 s2.
+ exact (fun x => s1 x \/ s2 x).
+ Defined.
+ 
+ (* Why3 goal *)
+-Lemma union_def1 : forall {a:Type} {a_WT:WhyType a}, forall (s1:(@set
+-  a a_WT)) (s2:(@set a a_WT)) (x:a), (mem x (union s1 s2)) <-> ((mem x s1) \/
+-  (mem x s2)).
++Lemma union_def1 : forall {a:Type} {a_WT:WhyType a}, forall (s1:(set a))
++  (s2:(set a)) (x:a), (mem x (union s1 s2)) <-> ((mem x s1) \/ (mem x s2)).
+ intros a a_WT s1 s2 x.
+ now unfold union.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition inter: forall {a:Type} {a_WT:WhyType a}, (@set a a_WT) -> (@set
+-  a a_WT) -> (@set a a_WT).
++Definition inter: forall {a:Type} {a_WT:WhyType a}, (set a) -> (set a) ->
++  (set a).
+ intros a a_WT s1 s2.
+ exact (fun x => s1 x /\ s2 x).
+ Defined.
+ 
+ (* Why3 goal *)
+-Lemma inter_def1 : forall {a:Type} {a_WT:WhyType a}, forall (s1:(@set
+-  a a_WT)) (s2:(@set a a_WT)) (x:a), (mem x (inter s1 s2)) <-> ((mem x s1) /\
+-  (mem x s2)).
++Lemma inter_def1 : forall {a:Type} {a_WT:WhyType a}, forall (s1:(set a))
++  (s2:(set a)) (x:a), (mem x (inter s1 s2)) <-> ((mem x s1) /\ (mem x s2)).
+ intros a a_WT s1 s2 x.
+ now unfold inter.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition diff: forall {a:Type} {a_WT:WhyType a}, (@set a a_WT) -> (@set
+-  a a_WT) -> (@set a a_WT).
++Definition diff: forall {a:Type} {a_WT:WhyType a}, (set a) -> (set a) -> (set
++  a).
+ intros a a_WT s1 s2.
+ exact (fun x => s1 x /\ ~(s2 x)).
+ Defined.
+ 
+ (* Why3 goal *)
+-Lemma diff_def1 : forall {a:Type} {a_WT:WhyType a}, forall (s1:(@set a a_WT))
+-  (s2:(@set a a_WT)) (x:a), (mem x (diff s1 s2)) <-> ((mem x s1) /\ ~ (mem x
+-  s2)).
++Lemma diff_def1 : forall {a:Type} {a_WT:WhyType a}, forall (s1:(set a))
++  (s2:(set a)) (x:a), (mem x (diff s1 s2)) <-> ((mem x s1) /\ ~ (mem x s2)).
+ intros a a_WT s1 s2 x.
+ now unfold diff.
+ Qed.
+ 
+ (* Why3 goal *)
+-Lemma subset_diff : forall {a:Type} {a_WT:WhyType a}, forall (s1:(@set
+-  a a_WT)) (s2:(@set a a_WT)), (subset (diff s1 s2) s1).
++Lemma subset_diff : forall {a:Type} {a_WT:WhyType a}, forall (s1:(set a))
++  (s2:(set a)), (subset (diff s1 s2) s1).
+ intros a a_WT s1 s2.
+ unfold subset; intro x.
+ rewrite diff_def1; tauto.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition choose: forall {a:Type} {a_WT:WhyType a}, (@set a a_WT) -> a.
++Definition choose: forall {a:Type} {a_WT:WhyType a}, (set a) -> a.
+ intros a a_WT s.
+ assert (i: inhabited a) by (apply inhabits, why_inhabitant).
+ exact (epsilon i (fun x => mem x s)).
+ Defined.
+ 
+ (* Why3 goal *)
+-Lemma choose_def : forall {a:Type} {a_WT:WhyType a}, forall (s:(@set
+-  a a_WT)), (~ (is_empty s)) -> (mem (choose s) s).
++Lemma choose_def : forall {a:Type} {a_WT:WhyType a}, forall (s:(set a)),
++  (~ (is_empty s)) -> (mem (choose s) s).
+ intros a a_WT s h.
+ unfold choose.
+ apply epsilon_spec.
+@@ -223,14 +218,14 @@ now apply not_all_not_ex.
+ Qed.
+ 
+ (* Why3 goal *)
+-Definition all: forall {a:Type} {a_WT:WhyType a}, (@set a a_WT).
++Definition all: forall {a:Type} {a_WT:WhyType a}, (set a).
+ intros a a_WT.
+ exact (fun x => True).
+ Defined.
+ 
+ (* Why3 goal *)
+ Lemma all_def : forall {a:Type} {a_WT:WhyType a}, forall (x:a), (mem x
+-  (all : (@set a a_WT))).
++  (all : (set a))).
+ intros a a_WT x.
+ now unfold all.
+ Qed.
+diff --git a/modules/mach/int.mlw b/modules/mach/int.mlw
+index 5a3374e..c7de56d 100644
+--- a/modules/mach/int.mlw
++++ b/modules/mach/int.mlw
+@@ -13,7 +13,8 @@ module Int
+   use export int.ComputerDivision
+ 
+   let (/) (x: int) (y: int)
+-    requires { y <> 0 } ensures { result = div x y }
++    requires { "expl:division by zero" y <> 0 } 
++    ensures  { result = div x y }
+   = div x y
+ 
+ end
+diff --git a/src/printer/coq.ml b/src/printer/coq.ml
+index 33a26cc..0fe1f76 100644
+--- a/src/printer/coq.ml
++++ b/src/printer/coq.ml
+@@ -49,34 +49,29 @@ let tv_set = ref Sid.empty
+ 
+ let print_tv ?(whytypes=false) fmt tv =
+   let n = id_unique iprinter tv.tv_name in
+-  fprintf fmt "%s%s" n (if whytypes then "_WT" else "")
++  fprintf fmt "%s" n;
++  if whytypes then fprintf fmt " %s_WT" n
+ 
+-let print_tv_binder fmt tv =
++let print_tv_binder ?(whytypes=false) ?(implicit=false) fmt tv =
+   tv_set := Sid.add tv.tv_name !tv_set;
+   let n = id_unique iprinter tv.tv_name in
+-  fprintf fmt "(%s:Type) {%s_WT:WhyType %s}" n n n
++  if implicit then fprintf fmt "{%s:Type}" n else fprintf fmt "(%s:Type)" n;
++  if whytypes then fprintf fmt " {%s_WT:WhyType %s}" n n
+ 
+-let print_implicit_tv_binder fmt tv =
+-  tv_set := Sid.add tv.tv_name !tv_set;
+-  let n = id_unique iprinter tv.tv_name in
+-  fprintf fmt "{%s:Type} {%s_WT:WhyType %s}" n n n
++let print_tv_binders ?(whytypes=false) ?(implicit=false) fmt stv =
++  Stv.iter (fprintf fmt "@ %a" (print_tv_binder ~whytypes ~implicit)) stv
+ 
+-let print_ne_params fmt stv =
+-  Stv.iter
+-    (fun tv -> fprintf fmt "@ %a" print_implicit_tv_binder tv)
+-    stv
++let print_tv_binders_list ?(whytypes=false) ?(implicit=false) fmt ltv =
++  List.iter (fprintf fmt "@ %a" (print_tv_binder ~whytypes ~implicit)) ltv
+ 
+-let print_params fmt stv =
++let print_params ?(whytypes=false) fmt stv =
+   if Stv.is_empty stv then () else
+-    fprintf fmt "forall%a,@ " print_ne_params stv
+-
+-let print_implicit_params fmt stv =
+-  Stv.iter (fun tv -> fprintf fmt "%a@ " print_implicit_tv_binder tv) stv
++    fprintf fmt "forall%a,@ " (print_tv_binders ~whytypes ~implicit:true) stv
+ 
+-let print_params_list fmt ltv =
++let print_params_list ?(whytypes=false) fmt ltv =
+   match ltv with
+-    | [] -> ()
+-    | _ -> fprintf fmt "forall %a,@ " (print_list space print_tv_binder) ltv
++  | [] -> ()
++  | _ -> fprintf fmt "forall%a,@ " (print_tv_binders_list ~whytypes ~implicit:false) ltv
+ 
+ let forget_tvs () =
+   Sid.iter (forget_id iprinter) !tv_set;
+@@ -124,21 +119,8 @@ let print_id_real info fmt id =
+     fprintf fmt "%s.%s" path (id_unique ipr id)
+   with Not_found -> print_id fmt id
+ 
+-let lsymbols_under_definition = ref Sls.empty
+-
+ let print_ls_real info fmt ls =
+-  if Sls.mem ls !lsymbols_under_definition then
+-    let _,_,l = ls_ty_vars ls in
+-    if Stv.is_empty l then
+-      print_id_real info fmt ls.ls_name
+-    else
+-      begin
+-        fprintf fmt "(@@%a" (print_id_real info) ls.ls_name;
+-        Stv.iter (fun _ -> fprintf fmt " _ _") l;
+-        fprintf fmt ")"
+-      end
+-  else
+-    print_id_real info fmt ls.ls_name
++  print_id_real info fmt ls.ls_name
+ 
+ let print_ts_real info fmt ts = print_id_real info fmt ts.ts_name
+ (* unused printing function
+@@ -153,34 +135,7 @@ let print_ts_tv fmt ts =
+   | _ -> fprintf fmt "(%a %a)" print_ts ts
+     (print_list space print_tv) ts.ts_args
+ 
+-let rec print_whytype info fmt ty =
+-  begin match ty.ty_node with
+-  | Tyvar v -> print_tv ~whytypes:true fmt v
+-  | Tyapp (ts, _tl) when is_ts_tuple ts -> fprintf fmt "_"
+-(*
+-      begin
+-        match tl with
+-          | []  -> fprintf fmt "unit"
+-          | [ty] -> print_ty info fmt ty
+-          | _   -> fprintf fmt "(%a)%%type" (print_list star (print_ty info)) tl
+-      end
+-*)
+-  | Tyapp (ts, tl) ->
+-    begin match query_syntax info.info_syn ts.ts_name with
+-      | Some _s -> fprintf fmt "_"
+-        (* syntax_arguments s (print_ty info) fmt tl *)
+-      | None ->
+-        begin
+-          match tl with
+-            | []  -> fprintf fmt "%a_WhyType" (print_ts_real info) ts
+-            | l   -> fprintf fmt "(@@%a_WhyType@ %a)"
+-              (print_ts_real info) ts
+-              (print_list space (print_ty ~whytypes:true info)) l
+-        end
+-    end
+-  end
+-
+-and print_ty ?(whytypes=false) info fmt ty =
++let rec print_ty info fmt ty =
+   begin match ty.ty_node with
+   | Tyvar v -> print_tv fmt v
+   | Tyapp (ts, tl) when is_ts_tuple ts ->
+@@ -197,12 +152,11 @@ and print_ty ?(whytypes=false) info fmt ty =
+         begin
+           match tl with
+             | []  -> (print_ts_real info) fmt ts
+-            | l   -> fprintf fmt "(@@%a@ %a)" (print_ts_real info) ts
+-              (print_list space (print_ty ~whytypes:true info)) l
++            | l   -> fprintf fmt "(%a@ %a)" (print_ts_real info) ts
++              (print_list space (print_ty info)) l
+         end
+     end
+-  end;
+-  if whytypes then fprintf fmt " %a" (print_whytype info) ty
++  end
+ 
+ (* can the type of a value be derived from the type of the arguments? *)
+ let unambig_fs fs =
+@@ -697,17 +651,17 @@ let print_type_decl ~prev info fmt ts =
+           fprintf fmt "(* Why3 goal *)@\n%s@\n" c
+         | Some (Axiom _) ->
+           fprintf fmt "(* Why3 goal *)@\n@[<hov 2>Variable %a : %aType.@]@\n@[<hov 2>Hypothesis %a_WhyType : %aWhyType %a.@]@\nExisting Instance %a_WhyType.@\n@\n"
+-            print_ts ts print_params_list ts.ts_args
+-            print_ts ts print_params_list ts.ts_args print_ts_tv ts
++            print_ts ts (print_params_list ~whytypes:false) ts.ts_args
++            print_ts ts (print_params_list ~whytypes:true) ts.ts_args print_ts_tv ts
+             print_ts ts
+         | _ ->
+           fprintf fmt "(* Why3 goal *)@\n@[<hov 2>Definition %a : %aType.@]@\n%a@\n"
+-            print_ts ts print_params_list ts.ts_args
++            print_ts ts (print_params_list ~whytypes:false) ts.ts_args
+             (print_previous_proof None info) prev
+       else
+         fprintf fmt "@[<hov 2>Axiom %a : %aType.@]@\n@[<hov 2>Parameter %a_WhyType : %aWhyType %a.@]@\nExisting Instance %a_WhyType.@\n@\n"
+-          print_ts ts print_params_list ts.ts_args
+-          print_ts ts print_params_list ts.ts_args print_ts_tv ts
++          print_ts ts (print_params_list ~whytypes:false) ts.ts_args
++          print_ts ts (print_params_list ~whytypes:true) ts.ts_args print_ts_tv ts
+           print_ts ts
+     | Some ty ->
+       fprintf fmt "(* Why3 assumption *)@\n@[<hov 2>Definition %a%a :=@ %a.@]@\n@\n"
+@@ -730,14 +684,12 @@ let print_data_decl ~first info fmt ts csl =
+ 
+ let print_data_whytype_and_implicits fmt (name,ts,csl) =
+   fprintf fmt "@[<hov 2>Axiom %s_WhyType : %aWhyType %a.@]@\nExisting Instance %s_WhyType.@\n"
+-    name print_params_list ts.ts_args print_ts_tv ts name;
++    name (print_params_list ~whytypes:true) ts.ts_args print_ts_tv ts name;
+   List.iter
+     (fun (cs,_) ->
+       let _, _, all_ty_params = ls_ty_vars cs in
+       if not (Stv.is_empty all_ty_params) then
+-        let print fmt tv = fprintf fmt "[%a]@ [%a_WT]"
+-          (print_tv ~whytypes:false) tv (print_tv ~whytypes:false) tv
+-        in
++        let print fmt tv = fprintf fmt "[%a]" (print_tv ~whytypes:false) tv in
+         fprintf fmt "@[<hov 2>Implicit Arguments %a@ [%a].@]@\n"
+           print_ls cs
+           (print_list space print) ts.ts_args)
+@@ -773,7 +725,7 @@ let print_param_decl ~prev info fmt ls =
+       fprintf fmt "(* Why3 goal *)@\n%s@\n" c
+     | Some (Axiom _) ->
+       fprintf fmt "(* Why3 goal *)@\n@[<hov 2>Variable %a: %a%a%a.@]@\n@\n"
+-        print_ls ls print_params all_ty_params
++        print_ls ls (print_params ~whytypes:true) all_ty_params
+         (print_arrow_list (print_ty info)) ls.ls_args
+         (print_ls_type info) ls.ls_value
+     | (* Some Info *) _ when Mid.mem ls.ls_name info.info_syn ->
+@@ -784,20 +736,17 @@ let print_param_decl ~prev info fmt ls =
+         "(* Why3 comment *)@\n\
+          (* %a is replaced with %a by the coq driver *)@\n@\n"
+         print_ls ls
+-        (* print_ne_params all_ty_params *)
+-        (* (print_space_list (print_vsty info)) vl *)
+-        (* (print_ls_type info) ls.ls_value *)
+         (print_expr info) e;
+       List.iter forget_var vl
+     | _ ->
+       fprintf fmt "(* Why3 goal *)@\n@[<hov 2>Definition %a: %a%a%a.@]@\n%a@\n"
+-        print_ls ls print_params all_ty_params
++        print_ls ls (print_params ~whytypes:true) all_ty_params
+         (print_arrow_list (print_ty info)) ls.ls_args
+         (print_ls_type info) ls.ls_value
+         (print_previous_proof None info) prev
+   else
+     fprintf fmt "@[<hov 2>Parameter %a: %a%a%a.@]@\n@\n"
+-      print_ls ls print_params all_ty_params
++      print_ls ls (print_params ~whytypes:true) all_ty_params
+       (print_arrow_list (print_ty info)) ls.ls_args
+       (print_ls_type info) ls.ls_value
+ 
+@@ -810,7 +759,7 @@ let print_logic_decl info fmt (ls,ld) =
+   let vl,e = open_ls_defn ld in
+   fprintf fmt "(* Why3 assumption *)@\n@[<hov 2>Definition %a%a%a: %a :=@ %a.@]@\n"
+     print_ls ls
+-    print_ne_params all_ty_params
++    (print_tv_binders ~whytypes:true ~implicit:true) all_ty_params
+     (print_list_pre space (print_vsty info)) vl
+     (print_ls_type info) ls.ls_value
+     (print_expr info) e;
+@@ -823,7 +772,7 @@ let print_equivalence_lemma ~prev info fmt name (ls,ld) =
+   fprintf fmt
+     "(* Why3 goal *)@\n@[<hov 2>Lemma %s %a:@ %a.@]@\n"
+     name
+-    print_ne_params all_ty_params
++    (print_tv_binders ~whytypes:true ~implicit:true) all_ty_params
+     (print_expr info) def_formula;
+   fprintf fmt "%a@\n"
+     (print_previous_proof (Some (all_ty_params,def_formula)) info) prev
+@@ -851,7 +800,7 @@ let print_recursive_decl info fmt (ls,ld) =
+   let vl,e = open_ls_defn ld in
+   fprintf fmt "%a%a%a {struct %a}: %a :=@ %a@]"
+     print_ls ls
+-    print_ne_params all_ty_params
++    (print_tv_binders ~whytypes:true ~implicit:true) all_ty_params
+     (print_list_pre space (print_vsty info)) vl
+     print_vs (List.nth vl i)
+     (print_ls_type info) ls.ls_value
+@@ -879,12 +828,10 @@ let print_ind info fmt (pr,f) =
+ 
+ let print_ind_decl info fmt ps bl =
+   let _, _, all_ty_params = ls_ty_vars ps in
+-  lsymbols_under_definition := Sls.add ps Sls.empty;
+-  fprintf fmt " %a %a: %aProp :=@ @[<hov>%a@]"
+-    print_ls ps print_implicit_params all_ty_params
++  fprintf fmt " %a%a: %aProp :=@ @[<hov>%a@]"
++    print_ls ps (print_tv_binders ~whytypes:true ~implicit:true) all_ty_params
+     (print_arrow_list (print_ty info)) ps.ls_args
+-    (print_list newline (print_ind info)) bl;
+-  lsymbols_under_definition := Sls.empty
++    (print_list newline (print_ind info)) bl
+ 
+ let print_ind_decls info s fmt tl =
+   let none =
+@@ -915,16 +862,16 @@ let print_prop_decl ~prev info fmt (k,pr,f) =
+     match prev with
+     | Some (Axiom _) when stt = "Lemma" ->
+       fprintf fmt "(* Why3 goal *)@\n@[<hov 2>Hypothesis %a : %a%a.@]@\n@\n"
+-        print_pr pr print_params params
++        print_pr pr (print_params ~whytypes:true) params
+         (print_fmla info) f
+     | _ ->
+       fprintf fmt "(* Why3 goal *)@\n@[<hov 2>%s %a : %a%a.@]@\n%a@\n"
+-        stt print_pr pr print_params params
++        stt print_pr pr (print_params ~whytypes:true) params
+         (print_fmla info) f
+         (print_previous_proof (Some (params,f)) info) prev
+   else
+     fprintf fmt "@[<hov 2>Axiom %a : %a%a.@]@\n@\n"
+-      print_pr pr print_params params
++      print_pr pr (print_params ~whytypes:true) params
+       (print_fmla info) f;
+   forget_tvs ()
+ 
+diff --git a/theories/map.why b/theories/map.why
+index c9c9cca..235b944 100644
+--- a/theories/map.why
++++ b/theories/map.why
+@@ -219,7 +219,7 @@ theory Occ
+   lemma occ_bounds:
+     forall v: 'a, m: map int 'a, l u: int.
+     l <= u -> 0 <= occ v m l u <= u - l
+-    (* direct when l>=u, by induction on b when l <= u *)
++    (* direct when l>=u, by induction on u when l <= u *)
+ 
+   lemma occ_append:
+     forall v: 'a, m: map int 'a, l mid u: int.

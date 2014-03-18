@@ -7,8 +7,8 @@
 %global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.82
-Release:        2%{?dist}
+Version:        0.83
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -19,9 +19,11 @@ Source0:        http://why3.lri.fr/download/%{name}-%{version}.tar.gz
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
 # Post-release fixes from upstream.  Currently this contains:
-# 14ee7f4912d0e18bd5831d56070376d0a5f2330c
-#   Add an explicit coercion so that it compiles with both lablgtk 2.16 and
-#   2.18.
+# 414ef4ae1c0864a3194acce3db78407c5f704ebc
+#   Small fixes in standard library
+# 5bd2e913fd2bb08c57d1cbb5e59a47e55235b391
+#   Move nonemptiness constraints from type definitions to function
+#   definitions in the Coq printer.
 Patch0:         %{name}-fixes.patch
 
 BuildRequires:  coq
@@ -36,6 +38,7 @@ BuildRequires:  ocaml-lablgtk-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-sqlite-devel
+BuildRequires:  ocaml-zarith-devel
 BuildRequires:  rubber
 BuildRequires:  sqlite-devel
 BuildRequires:  tex(comment.sty)
@@ -107,7 +110,7 @@ This package is not needed to use the Emacs support.
 %package all
 Summary:        Complete Why3 software verification platform suite
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       alt-ergo coq cvc3 E gappalib-coq
+Requires:       alt-ergo coq cvc4 E gappalib-coq
 
 %description all
 This package provides a complete software verification platform suite
@@ -116,7 +119,7 @@ based on Why3, including various automated and interactive provers.
 %prep
 %setup -q
 %setup -q -T -D -a 1
-%patch0
+%patch0 -p1
 
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use
@@ -219,6 +222,10 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Fri Mar 14 2014 Jerry James <loganjerry@gmail.com> - 0.83-1
+- New upstream release
+- Use cvc4 instead of cvc3
+
 * Wed Feb 26 2014 Jerry James <loganjerry@gmail.com> - 0.82-2
 - Rebuild for ocamlgraph 1.8.4
 - BR ocaml-findlib instead of ocaml-findlib-devel
