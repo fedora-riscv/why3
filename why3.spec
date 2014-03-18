@@ -21,9 +21,6 @@ Source1:        %{name}-man.tar.xz
 # Post-release fixes from upstream.  Currently this contains:
 # 414ef4ae1c0864a3194acce3db78407c5f704ebc
 #   Small fixes in standard library
-# 5bd2e913fd2bb08c57d1cbb5e59a47e55235b391
-#   Move nonemptiness constraints from type definitions to function
-#   definitions in the Coq printer.
 Patch0:         %{name}-fixes.patch
 
 BuildRequires:  coq
