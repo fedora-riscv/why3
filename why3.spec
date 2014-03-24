@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -21,6 +21,8 @@ Source1:        %{name}-man.tar.xz
 # Post-release fixes from upstream.  Currently this contains:
 # 414ef4ae1c0864a3194acce3db78407c5f704ebc
 #   Small fixes in standard library
+# 1ce26290c0e7cdd66804be9956e0e6eb6626d6ac
+#   fixed configure.in when zarith is installed in subdirectory zarith
 Patch0:         %{name}-fixes.patch
 
 BuildRequires:  coq
@@ -125,6 +127,16 @@ sed -e "s/-Wall/$RPM_OPT_FLAGS/" \
     -e "s/Aer-29/& -ccopt -Wl,-z,relro,-z,now/" \
     -i Makefile.in
 
+# Remove spurious executable bits
+find -O3 examples -type f -perm /0111 | xargs chmod a-x
+
+# Fix encoding
+for fil in examples/logic/einstein.why; do
+  iconv -f iso8859-1 -t utf-8 $fil > $fil.utf8
+  touch -r $fil $fil.utf8
+  mv -f $fil.utf8 $fil
+done
+
 %build
 %configure
 make #%%{?_smp_mflags}
@@ -181,6 +193,12 @@ popd
 # Remove misplaced documentation
 rm -fr %{buildroot}%{_datadir}/doc
 
+# Fix permissions
+chmod 0755 %{buildroot}%{_bindir}/* \
+           %{buildroot}%{_libdir}/%{name}/coq-tactic/*.cmxs \
+           %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs \
+           %{buildroot}%{_libdir}/%{name}/why3-cpulimit
+
 %post
 mktexlsr &> /dev/null || :
 
@@ -219,6 +237,11 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Mon Mar 24 2014 Jerry James <loganjerry@gmail.com> - 0.83-3
+- Apply upstream fix for building with ocaml-zarith
+- Fix file encodings
+- Fix permission bits
+
 * Tue Mar 18 2014 Jerry James <loganjerry@gmail.com> - 0.83-2
 - Back out the post-release fix to the Coq printer, which breaks Frama-C
 
