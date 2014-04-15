@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -48,8 +48,6 @@ Requires:       texlive-base
 Requires:       vim-filesystem
 Requires(posttrans): tex(tex)
 Requires(postun): tex(tex)
-
-ExclusiveArch:  %{ocaml_arches}
 
 # The corresponding Provides is not generated, so filter this out
 %global __requires_exclude ocaml\\\(Why3\\\)
@@ -237,6 +235,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Tue Apr 15 2014 Richard W.M. Jones <rjones@redhat.com> - 0.83-4
+- Remove ocaml_arches macro (RHBZ#1087794).
+
 * Mon Mar 24 2014 Jerry James <loganjerry@gmail.com> - 0.83-3
 - Apply upstream fix for building with ocaml-zarith
 - Fix file encodings
