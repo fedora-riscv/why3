@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -39,7 +39,6 @@ BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  rubber
-BuildRequires:  sqlite-devel
 BuildRequires:  tex(comment.sty)
 BuildRequires:  emacs xemacs xemacs-packages-extra
 
@@ -235,6 +234,10 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Mon Apr 21 2014 Jerry James <loganjerry@gmail.com> - 0.83-5
+- Rebuild for flocq 2.3.0 and ocamlgraph 1.8.5
+- Drop unnecessary sqlite-devel BR
+
 * Tue Apr 15 2014 Richard W.M. Jones <rjones@redhat.com> - 0.83-4
 - Remove ocaml_arches macro (RHBZ#1087794).
 
