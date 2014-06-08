@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -234,6 +234,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.83-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Tue May 13 2014 Jerry James <loganjerry@gmail.com> - 0.83-6
 - Rebuild for coq 8.4pl4
 
