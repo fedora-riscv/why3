@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -121,7 +121,7 @@ based on Why3, including various automated and interactive provers.
 # network use
 sed -e "s/-Wall/$RPM_OPT_FLAGS/" \
     -e "s/cp /cp -p /" \
-    -e "s/Aer-29/& -ccopt -Wl,-z,relro,-z,now/" \
+    -e "s/Aer-29/& -ccopt $RPM_LD_FLAGS/" \
     -i Makefile.in
 
 # Remove spurious executable bits
@@ -234,6 +234,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Thu Jun 26 2014 Jerry James <loganjerry@gmail.com> - 0.83-8
+- Linking with -z relro -z now breaks plugins; omit "-z now"
+
 * Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.83-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
