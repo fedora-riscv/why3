@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -124,7 +124,7 @@ based on Why3, including various automated and interactive provers.
 # network use
 sed -e "s/-Wall/$RPM_OPT_FLAGS/" \
     -e "s/cp /cp -p /" \
-    -e "s/Aer-29/& -ccopt -Wl,-z,relro,-z,now/" \
+    -e "s/Aer-29/& -ccopt $RPM_LD_FLAGS/" \
     -i Makefile.in
 
 # Remove spurious executable bits
@@ -237,6 +237,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Thu Jun 26 2014 Jerry James <loganjerry@gmail.com> - 0.83-6
+- Linking with -z relro -z now breaks plugins; omit "-z now"
+
 * Tue May 13 2014 Jerry James <loganjerry@gmail.com> - 0.83-5
 - Rebuild for coq 8.4pl4
 
