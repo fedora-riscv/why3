@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -234,6 +234,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Fri Aug 01 2014 Richard W.M. Jones <rjones@redhat.com> - 0.83-9
+- OCaml 4.02.0 beta rebuild.
+
 * Thu Jun 26 2014 Jerry James <loganjerry@gmail.com> - 0.83-8
 - Linking with -z relro -z now breaks plugins; omit "-z now"
 
