@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -234,6 +234,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Sat Aug 02 2014 Richard W.M. Jones <rjones@redhat.com> - 0.83-10
+- ocaml-4.02.0-0.8.git10e45753.fc22 rebuild.
+
 * Fri Aug 01 2014 Richard W.M. Jones <rjones@redhat.com> - 0.83-9
 - OCaml 4.02.0 beta rebuild.
 
