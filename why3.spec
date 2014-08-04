@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -234,6 +234,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Mon Aug  4 2014 Jerry James <loganjerry@gmail.com> - 0.83-11
+- Rebuild for new gappalib-coq build
+
 * Sat Aug 02 2014 Richard W.M. Jones <rjones@redhat.com> - 0.83-10
 - ocaml-4.02.0-0.8.git10e45753.fc22 rebuild.
 
