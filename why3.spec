@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.83
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -234,6 +234,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Mon Aug 18 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.83-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Thu Jun 26 2014 Jerry James <loganjerry@gmail.com> - 0.83-8
 - Linking with -z relro -z now breaks plugins; omit "-z now"
 
