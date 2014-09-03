@@ -7,8 +7,8 @@
 %global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.83
-Release:        14%{?dist}
+Version:        0.84
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -18,12 +18,6 @@ Source0:        http://why3.lri.fr/download/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
-# Post-release fixes from upstream.  Currently this contains:
-# 414ef4ae1c0864a3194acce3db78407c5f704ebc
-#   Small fixes in standard library
-# 1ce26290c0e7cdd66804be9956e0e6eb6626d6ac
-#   fixed configure.in when zarith is installed in subdirectory zarith
-Patch0:         %{name}-fixes.patch
 
 BuildRequires:  coq
 BuildRequires:  evince
@@ -38,8 +32,10 @@ BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  ocaml-zarith-devel
+BuildRequires:  ocaml-zip-devel
 BuildRequires:  rubber
 BuildRequires:  tex(comment.sty)
+BuildRequires:  tex(upquote.sty)
 BuildRequires:  emacs xemacs xemacs-packages-extra
 
 Requires:       gtksourceview2
@@ -115,7 +111,6 @@ based on Why3, including various automated and interactive provers.
 %prep
 %setup -q
 %setup -q -T -D -a 1
-%patch0 -p1
 
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use
@@ -173,16 +168,12 @@ mkdir -p %{buildroot}%{_datadir}/vim/vimfiles
 mv %{buildroot}%{_datadir}/%{name}/vim \
    %{buildroot}%{_datadir}/vim/vimfiles/syntax
 
-# Move the (X)Emacs support file to the right place and byte compile.
+# Byte compile the (X)Emacs support file
 mkdir -p %{buildroot}%{_xemacs_sitelispdir}
-cp -p %{buildroot}%{_datadir}/%{name}/emacs/%{name}.el \
+cp -p %{buildroot}%{_emacs_sitelispdir}/%{name}.el \
    %{buildroot}%{_xemacs_sitelispdir}
 pushd %{buildroot}%{_xemacs_sitelispdir}
 %{_xemacs_bytecompile} %{name}.el
-mkdir -p %{buildroot}%{_emacs_sitelispdir}
-mv %{buildroot}%{_datadir}/%{name}/emacs/%{name}.el \
-   %{buildroot}%{_emacs_sitelispdir}
-rmdir %{buildroot}%{_datadir}/%{name}/emacs
 cd %{buildroot}%{_emacs_sitelispdir}
 %{_emacs_bytecompile} %{name}.el
 popd
@@ -192,6 +183,7 @@ rm -fr %{buildroot}%{_datadir}/doc
 
 # Fix permissions
 chmod 0755 %{buildroot}%{_bindir}/* \
+           %{buildroot}%{_libdir}/%{name}/commands/* \
            %{buildroot}%{_libdir}/%{name}/coq-tactic/*.cmxs \
            %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs \
            %{buildroot}%{_libdir}/%{name}/why3-cpulimit
@@ -203,8 +195,9 @@ mktexlsr &> /dev/null || :
 mktexlsr &> /dev/null || :
 
 %files
-%doc AUTHORS CHANGES LICENSE README doc/manual.pdf
-%{_bindir}/%{name}*
+%doc AUTHORS CHANGES README doc/manual.pdf
+%license LICENSE
+%{_bindir}/%{name}
 %{_datadir}/%{name}/
 %{_datadir}/bash-completion/
 %{_datadir}/gtksourceview-2.0/language-specs/%{name}.lang
@@ -234,6 +227,10 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Tue Sep  2 2014 Jerry James <loganjerry@gmail.com> - 0.84-1
+- New upstream release
+- Fix license handling
+
 * Mon Aug 25 2014 Jerry James <loganjerry@gmail.com> - 0.83-14
 - Rebuild for new gappalib-coq build
 
