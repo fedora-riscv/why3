@@ -7,14 +7,14 @@
 %global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.84
+Version:        0.85
 Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        http://why3.lri.fr/download/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/34074/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -116,7 +116,7 @@ based on Why3, including various automated and interactive provers.
 # network use
 sed -e "s/-Wall/$RPM_OPT_FLAGS/" \
     -e "s/cp /cp -p /" \
-    -e "s/Aer-29/& -ccopt $RPM_LD_FLAGS/" \
+    -e "s/Aer[[:digit:]-]*/& -ccopt \"$RPM_LD_FLAGS\"/" \
     -i Makefile.in
 
 # Remove spurious executable bits
@@ -227,6 +227,10 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Wed Sep 17 2014 Jerry James <loganjerry@gmail.com> - 0.85-1
+- New upstream release
+- New source URL
+
 * Tue Sep  2 2014 Jerry James <loganjerry@gmail.com> - 0.84-1
 - New upstream release
 - Fix license handling
