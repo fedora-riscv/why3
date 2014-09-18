@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.85
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -227,6 +227,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Thu Sep 18 2014 Jerry James <loganjerry@gmail.com> - 0.85-2
+- Bump and rebuild
+
 * Wed Sep 17 2014 Jerry James <loganjerry@gmail.com> - 0.85-1
 - New upstream release
 - New source URL
