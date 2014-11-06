@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.85
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -227,6 +227,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Thu Nov  6 2014 Jerry James <loganjerry@gmail.com> - 0.85-5
+- Rebuild for ocaml-camlp5 6.12
+
 * Thu Oct 30 2014 Jerry James <loganjerry@gmail.com> - 0.85-4
 - Rebuild for coq 8.4pl5
 
