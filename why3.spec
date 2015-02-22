@@ -117,7 +117,7 @@ based on Why3, including various automated and interactive provers.
 # network use
 sed -e "s/-Wall/$RPM_OPT_FLAGS/" \
     -e "s/cp /cp -p /" \
-    -e "s/Aer[[:digit:]-]*/& -ccopt \"$RPM_LD_FLAGS\"/" \
+    -e "s|Aer[[:digit:]-]*|& -ccopt \"$RPM_LD_FLAGS\"|" \
     -i Makefile.in
 
 # Remove spurious executable bits
@@ -230,6 +230,7 @@ mktexlsr &> /dev/null || :
 %changelog
 * Sat Feb 21 2015 Jerry James <loganjerry@gmail.com> - 0.85-7
 - Note bundled jquery
+- Fix sed expression separator for new RPM_LD_FLAGS
 
 * Wed Feb 18 2015 Richard W.M. Jones <rjones@redhat.com> - 0.85-6
 - ocaml-4.02.1 rebuild.
