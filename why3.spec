@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.85
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -43,6 +43,7 @@ Requires:       texlive-base
 Requires:       vim-filesystem
 Requires(posttrans): tex(tex)
 Requires(postun): tex(tex)
+Provides:       bundled(jquery)
 
 # The corresponding Provides is not generated, so filter this out
 %global __requires_exclude ocaml\\\(Why3\\\)
@@ -227,6 +228,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Sat Feb 21 2015 Jerry James <loganjerry@gmail.com> - 0.85-7
+- Note bundled jquery
+
 * Wed Feb 18 2015 Richard W.M. Jones <rjones@redhat.com> - 0.85-6
 - ocaml-4.02.1 rebuild.
 
