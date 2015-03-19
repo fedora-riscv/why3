@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.85
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -228,6 +228,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Wed Mar 18 2015 Jerry James <loganjerry@gmail.com> - 0.85-8
+- Rebuild for ocaml-ocamlgraph 1.8.6
+
 * Sat Feb 21 2015 Jerry James <loganjerry@gmail.com> - 0.85-7
 - Note bundled jquery
 - Fix sed expression separators for new RPM_OPT_FLAGS and RPM_LD_FLAGS
