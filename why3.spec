@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.85
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -228,6 +228,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Sat Apr 11 2015 Jerry James <loganjerry@gmail.com> - 0.85-9
+- Rebuild for coq 8.4pl6
+
 * Wed Mar 18 2015 Jerry James <loganjerry@gmail.com> - 0.85-8
 - Rebuild for ocaml-ocamlgraph 1.8.6
 
