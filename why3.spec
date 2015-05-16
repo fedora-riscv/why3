@@ -7,14 +7,14 @@
 %global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.85
-Release:        9%{?dist}
+Version:        0.86
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/34074/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/34775/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -30,6 +30,7 @@ BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
+BuildRequires:  ocaml-menhir-devel
 BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
@@ -228,6 +229,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Sat May 16 2015 Jerry James <loganjerry@gmail.com> - 0.86-1
+- New upstream release
+
 * Sat Apr 11 2015 Jerry James <loganjerry@gmail.com> - 0.85-9
 - Rebuild for coq 8.4pl6
 
