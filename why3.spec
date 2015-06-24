@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.86.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -229,6 +229,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Wed Jun 24 2015 Richard W.M. Jones <rjones@redhat.com> - 0.86.1-2
+- ocaml-4.02.2 final rebuild.
+
 * Mon Jun 22 2015 Jerry James <loganjerry@gmail.com> - 0.86.1-1
 - New upstream release
 
