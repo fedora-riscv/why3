@@ -7,14 +7,14 @@
 %global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.86.1
-Release:        2%{?dist}
+Version:        0.86.2
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/34797/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/35214/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -104,7 +104,7 @@ This package is not needed to use the Emacs support.
 %package all
 Summary:        Complete Why3 software verification platform suite
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       alt-ergo coq cvc4 E gappalib-coq
+Requires:       alt-ergo coq cvc4 E gappalib-coq z3 zenon
 
 %description all
 This package provides a complete software verification platform suite
@@ -113,6 +113,11 @@ based on Why3, including various automated and interactive provers.
 %prep
 %setup -q
 %setup -q -T -D -a 1
+
+fixtimestamp() {
+  touch -r $1.orig $1
+  rm -f $1.orig
+}
 
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use
@@ -124,12 +129,16 @@ sed -e "s|-Wall|$RPM_OPT_FLAGS|" \
 # Remove spurious executable bits
 find -O3 examples -type f -perm /0111 | xargs chmod a-x
 
-# Fix encoding
-for fil in examples/logic/einstein.why; do
-  iconv -f iso8859-1 -t utf-8 $fil > $fil.utf8
-  touch -r $fil $fil.utf8
-  mv -f $fil.utf8 $fil
-done
+# Do not use the nonfree boomy icons
+sed -i.orig '/iconset boomy/,/^$/d' share/images/icons.rc
+fixtimestamp share/images/icons.rc
+sed -e 's/boomy/fatcow/' \
+    -e 's/folder16\.png/folder.png/' \
+    -e 's/file16\.png/script.png/' \
+    -e 's/wizard16\.png/magic_wand_2.png/' \
+    -e 's/configure16\.png/multitool.png/' \
+    -i.orig src/why3session/why3session_html.ml
+fixtimestamp src/why3session/why3session_html.ml
 
 %build
 %configure
@@ -183,6 +192,9 @@ popd
 # Remove misplaced documentation
 rm -fr %{buildroot}%{_datadir}/doc
 
+# Remove nonfree boomy icons
+rm -fr %{buildroot}%{_datadir}/%{name}/images/boomy
+
 # Fix permissions
 chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/%{name}/commands/* \
@@ -229,6 +241,10 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Wed Oct 14 2015 Jerry James <loganjerry@gmail.com> - 0.86.2-1
+- New upstream release
+- Do not ship the nonfree boomy icons
+
 * Wed Jun 24 2015 Richard W.M. Jones <rjones@redhat.com> - 0.86.1-2
 - ocaml-4.02.2 final rebuild.
 
