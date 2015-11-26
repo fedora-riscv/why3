@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.86.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -71,17 +71,12 @@ Requires:       %{name} = %{version}-%{release}
 Requires:       emacs(bin)
 BuildArch:      noarch
 
+# This can be removed once Fedora 23 reaches EOL
+Obsoletes:      %{name}-emacs-el < 0.86.2-2
+Provides:       %{name}-emacs-el = %{version}-%{release}
+
 %description emacs
 This package contains an Emacs support file for working with %{name} files.
-
-%package emacs-el
-Summary:        Emacs source file for %{name} support
-Requires:       %{name}-emacs = %{version}-%{release}
-BuildArch:      noarch
-
-%description emacs-el
-This package contains the Emacs source file for the Emacs %{name} support.
-This package is not needed to use the Emacs support.
 
 %package xemacs
 Summary:        XEmacs support file for %{name} files
@@ -89,17 +84,12 @@ Requires:       %{name} = %{version}-%{release}
 Requires:       xemacs(bin)
 BuildArch:      noarch
 
+# This can be removed once Fedora 23 reaches EOL
+Obsoletes:      %{name}-xemacs-el < 0.86.2-2
+Provides:       %{name}-xemacs-el = %{version}-%{release}
+
 %description xemacs
 This package contains an XEmacs support file for working with %{name} files.
-
-%package xemacs-el
-Summary:        XEmacs source file for %{name} support
-Requires:       %{name}-xemacs = %{version}-%{release}
-BuildArch:      noarch
-
-%description xemacs-el
-This package contains the XEmacs source file for the XEmacs %{name} support.
-This package is not needed to use the Emacs support.
 
 %package all
 Summary:        Complete Why3 software verification platform suite
@@ -225,22 +215,19 @@ mktexlsr &> /dev/null || :
 %doc examples
 
 %files emacs
-%{_emacs_sitelispdir}/%{name}.elc
-
-%files emacs-el
-%{_emacs_sitelispdir}/%{name}.el
+%{_emacs_sitelispdir}/%{name}.el*
 
 %files xemacs
-%{_xemacs_sitelispdir}/%{name}.elc
-
-%files xemacs-el
-%{_xemacs_sitelispdir}/%{name}.el
+%{_xemacs_sitelispdir}/%{name}.el*
 
 # "why3-all" is a meta-package; it just depends on other packages, so that
 # it's easier to install a useful suite of tools.  Thus, it has no files:
 %files all
 
 %changelog
+* Wed Nov 25 2015 Jerry James <loganjerry@gmail.com> - 0.86.2-2
+- Rebuild for ocaml-zarith 1.4.1 and ocaml-menhir 20151112
+
 * Wed Oct 14 2015 Jerry James <loganjerry@gmail.com> - 0.86.2-1
 - New upstream release
 - Do not ship the nonfree boomy icons
