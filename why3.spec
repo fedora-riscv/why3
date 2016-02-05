@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.86.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -225,6 +225,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Fri Feb 05 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.86.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Wed Nov 25 2015 Jerry James <loganjerry@gmail.com> - 0.86.2-2
 - Rebuild for ocaml-zarith 1.4.1 and ocaml-menhir 20151112
 
