@@ -7,14 +7,14 @@
 %global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.86.2
-Release:        3%{?dist}
+Version:        0.86.3
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/35214/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/35537/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -25,7 +25,7 @@ BuildRequires:  flocq
 BuildRequires:  gtksourceview2-devel
 BuildRequires:  hevea
 BuildRequires:  ocaml
-BuildRequires:  ocaml-camlp5-devel
+BuildRequires:  ocaml-camlp4-devel
 BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk-devel
 BuildRequires:  ocaml-ocamldoc
@@ -225,6 +225,10 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Fri Feb 12 2016 Jerry James <loganjerry@gmail.com> - 0.86.3-1
+- New upstream release
+- Use camlp4 in preference to camlp5
+
 * Fri Feb 05 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.86.2-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
