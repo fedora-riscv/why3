@@ -7,14 +7,14 @@
 %global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.86.3
+Version:        0.87.0
 Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/35537/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/35643/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -104,31 +104,15 @@ based on Why3, including various automated and interactive provers.
 %setup -q
 %setup -q -T -D -a 1
 
-fixtimestamp() {
-  touch -r $1.orig $1
-  rm -f $1.orig
-}
-
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use
 sed -e "s|-Wall|$RPM_OPT_FLAGS|" \
     -e "s/cp /cp -p /" \
-    -e "s|Aer[[:digit:]-]*|& -ccopt \"$RPM_LD_FLAGS\"|" \
+    -e "s|^OLINKFLAGS =.*|& -ccopt \"$RPM_LD_FLAGS\"|" \
     -i Makefile.in
 
 # Remove spurious executable bits
 find -O3 examples -type f -perm /0111 | xargs chmod a-x
-
-# Do not use the nonfree boomy icons
-sed -i.orig '/iconset boomy/,/^$/d' share/images/icons.rc
-fixtimestamp share/images/icons.rc
-sed -e 's/boomy/fatcow/' \
-    -e 's/folder16\.png/folder.png/' \
-    -e 's/file16\.png/script.png/' \
-    -e 's/wizard16\.png/magic_wand_2.png/' \
-    -e 's/configure16\.png/multitool.png/' \
-    -i.orig src/why3session/why3session_html.ml
-fixtimestamp src/why3session/why3session_html.ml
 
 %build
 %configure
@@ -225,6 +209,10 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Fri Mar 18 2016 Jerry James <loganjerry@gmail.com> - 0.87.0-1
+- New upstream release
+- Drop boomy icon removal; upstream no longer ships them
+
 * Fri Feb 12 2016 Jerry James <loganjerry@gmail.com> - 0.86.3-1
 - New upstream release
 - Use camlp4 in preference to camlp5
