@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.87.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -209,6 +209,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Sat Apr 16 2016 Jerry James <loganjerry@gmail.com> - 0.87.0-2
+- Rebuild for ocaml-ocamlgraph 1.8.7
+
 * Fri Mar 18 2016 Jerry James <loganjerry@gmail.com> - 0.87.0-1
 - New upstream release
 - Drop boomy icon removal; upstream no longer ships them
