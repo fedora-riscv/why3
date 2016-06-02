@@ -7,14 +7,14 @@
 %global texmf_dir %{_datadir}/texmf
 
 Name:           why3
-Version:        0.87.0
-Release:        3%{?dist}
+Version:        0.87.1
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/35643/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/35893/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -209,6 +209,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Wed Jun  1 2016 Jerry James <loganjerry@gmail.com> - 0.87.1-1
+- New upstream release
+
 * Fri Apr 22 2016 Jerry James <loganjerry@gmail.com> - 0.87.0-3
 - Rebuild for coq 8.5pl1
 
