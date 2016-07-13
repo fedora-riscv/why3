@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.87.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -209,6 +209,9 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Wed Jul 13 2016 Jerry James <loganjerry@gmail.com> - 0.87.1-2
+- Rebuild for coq 8.5pl2
+
 * Wed Jun  1 2016 Jerry James <loganjerry@gmail.com> - 0.87.1-1
 - New upstream release
 
