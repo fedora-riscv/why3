@@ -4,11 +4,11 @@
 # release.
 
 %global opt %(test -x %{_bindir}/ocamlopt && echo 1 || echo 0)
-%global texmf_dir %{_datadir}/texmf
+%global tex_dir %{_texmf}/tex/latex
 
 Name:           why3
 Version:        0.87.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -42,8 +42,6 @@ BuildRequires:  emacs xemacs xemacs-packages-extra
 Requires:       gtksourceview2
 Requires:       texlive-base
 Requires:       vim-filesystem
-Requires(posttrans): tex(tex)
-Requires(postun): tex(tex)
 Provides:       bundled(jquery)
 
 # The corresponding Provides is not generated, so filter this out
@@ -140,8 +138,8 @@ mkdir -p %{buildroot}%{_datadir}/zsh/site-functions
 cp -p share/zsh/_why3 %{buildroot}%{_datadir}/zsh/site-functions
 
 # Install the LaTeX style
-mkdir -p %{buildroot}%{_datadir}/texmf/tex/latex/why3
-cp -p share/latex/why3lang.sty %{buildroot}%{_datadir}/texmf/tex/latex/why3
+mkdir -p %{buildroot}%{tex_dir}/why3
+cp -p share/latex/why3lang.sty %{buildroot}%{tex_dir}/why3
 
 # Move the gtksourceview language file to the right place
 mkdir -p %{buildroot}%{_datadir}/gtksourceview-2.0
@@ -176,12 +174,6 @@ chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs \
            %{buildroot}%{_libdir}/%{name}/why3-cpulimit
 
-%post
-mktexlsr &> /dev/null || :
-
-%postun
-mktexlsr &> /dev/null || :
-
 %files
 %doc AUTHORS CHANGES README doc/manual.pdf
 %license LICENSE
@@ -189,9 +181,9 @@ mktexlsr &> /dev/null || :
 %{_datadir}/%{name}/
 %{_datadir}/bash-completion/
 %{_datadir}/gtksourceview-2.0/language-specs/%{name}.lang
-%{_datadir}/texmf/tex/latex/why3/
 %{_datadir}/vim/vimfiles/syntax/%{name}.vim
 %{_datadir}/zsh/
+%{tex_dir}/why3/
 %{_libdir}/%{name}/
 %{_mandir}/man1/%{name}*
 
@@ -209,6 +201,11 @@ mktexlsr &> /dev/null || :
 %files all
 
 %changelog
+* Fri Oct 28 2016 Jerry James <loganjerry@gmail.com> - 0.87.2-3
+- Rebuild for coq 8.5pl3
+- Remove obsolete scriptlets
+- Fix install location of why3lang.sty
+
 * Thu Sep 29 2016 Jerry James <loganjerry@gmail.com> - 0.87.2-2
 - Rebuild for flocq 2.5.2 and gappalib-coq 1.3.1
 
