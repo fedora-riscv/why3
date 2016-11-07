@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.87.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -201,6 +201,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Mon Nov 07 2016 Richard W.M. Jones <rjones@redhat.com> - 0.87.2-4
+- Rebuild for OCaml 4.04.0.
+
 * Fri Oct 28 2016 Jerry James <loganjerry@gmail.com> - 0.87.2-3
 - Rebuild for coq 8.5pl3
 - Remove obsolete scriptlets
