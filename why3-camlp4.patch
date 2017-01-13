@@ -1,0 +1,13 @@
+--- src/coq-tactic/why3tac.ml4.orig	2017-01-11 04:58:27.000000000 -0700
++++ src/coq-tactic/why3tac.ml4	2017-01-12 09:59:08.631842966 -0700
+@@ -1398,9 +1398,7 @@ let why3tac ?(timelimit=timelimit) s gl
+   | StepLimitExceeded -> error "Step Limit Exceeded"
+   | HighFailure -> error ("Prover failure\n" ^ res.pr_output ^ "\n")
+ 
+-IFDEF COQ84 THEN
+-
+-ELSE
++IFNDEF COQ84 THEN
+ 
+ let why3tac ?timelimit s = Proofview.V82.tactic (why3tac ?timelimit s)
+ 

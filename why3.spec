@@ -7,17 +7,19 @@
 %global tex_dir %{_texmf}/tex/latex
 
 Name:           why3
-Version:        0.87.2
-Release:        4%{?dist}
+Version:        0.87.3
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/36133/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/36398/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
+# Fix the build with camlp4
+Patch0:         %{name}-camlp4.patch
 
 BuildRequires:  coq
 BuildRequires:  evince
@@ -69,10 +71,6 @@ Requires:       %{name} = %{version}-%{release}
 Requires:       emacs(bin)
 BuildArch:      noarch
 
-# This can be removed once Fedora 23 reaches EOL
-Obsoletes:      %{name}-emacs-el < 0.86.2-2
-Provides:       %{name}-emacs-el = %{version}-%{release}
-
 %description emacs
 This package contains an Emacs support file for working with %{name} files.
 
@@ -81,10 +79,6 @@ Summary:        XEmacs support file for %{name} files
 Requires:       %{name} = %{version}-%{release}
 Requires:       xemacs(bin)
 BuildArch:      noarch
-
-# This can be removed once Fedora 23 reaches EOL
-Obsoletes:      %{name}-xemacs-el < 0.86.2-2
-Provides:       %{name}-xemacs-el = %{version}-%{release}
 
 %description xemacs
 This package contains an XEmacs support file for working with %{name} files.
@@ -101,6 +95,7 @@ based on Why3, including various automated and interactive provers.
 %prep
 %setup -q
 %setup -q -T -D -a 1
+%patch0
 
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use
@@ -113,7 +108,7 @@ sed -e "s|-Wall|$RPM_OPT_FLAGS|" \
 find -O3 examples -type f -perm /0111 | xargs chmod a-x
 
 %build
-%configure
+%configure --enable-verbose-make
 make #%%{?_smp_mflags}
 make doc/manual.pdf
 
@@ -201,6 +196,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Jan 12 2017 Jerry James <loganjerry@gmail.com> - 0.87.3-1
+- New upstream release
+
 * Mon Nov 07 2016 Richard W.M. Jones <rjones@redhat.com> - 0.87.2-4
 - Rebuild for OCaml 4.04.0.
 
