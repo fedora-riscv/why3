@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.87.3
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -196,6 +196,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Sep 06 2017 Richard W.M. Jones <rjones@redhat.com> - 0.87.3-11
+- OCaml 4.05.0 rebuild.
+
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.87.3-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
