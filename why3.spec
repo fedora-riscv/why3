@@ -7,19 +7,17 @@
 %global tex_dir %{_texmf}/tex/latex
 
 Name:           why3
-Version:        0.87.3
-Release:        12%{?dist}
+Version:        0.88.0
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/36398/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/37147/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
-# Fix the build with camlp4
-Patch0:         %{name}-camlp4.patch
 
 BuildRequires:  coq
 BuildRequires:  evince
@@ -95,7 +93,6 @@ based on Why3, including various automated and interactive provers.
 %prep
 %setup -q
 %setup -q -T -D -a 1
-%patch0
 
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use
@@ -143,8 +140,9 @@ mv %{buildroot}%{_datadir}/%{name}/lang \
 
 # Move the vim file to the right place
 mkdir -p %{buildroot}%{_datadir}/vim/vimfiles
-mv %{buildroot}%{_datadir}/%{name}/vim \
-   %{buildroot}%{_datadir}/vim/vimfiles/syntax
+mv %{buildroot}%{_datadir}/%{name}/vim/ftdetect \
+   %{buildroot}%{_datadir}/%{name}/vim/syntax \
+   %{buildroot}%{_datadir}/vim/vimfiles
 
 # Byte compile the (X)Emacs support file
 mkdir -p %{buildroot}%{_xemacs_sitelispdir}
@@ -166,8 +164,7 @@ rm -fr %{buildroot}%{_datadir}/%{name}/images/boomy
 chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/%{name}/commands/* \
            %{buildroot}%{_libdir}/%{name}/coq-tactic/*.cmxs \
-           %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs \
-           %{buildroot}%{_libdir}/%{name}/why3-cpulimit
+           %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs
 
 %files
 %doc AUTHORS CHANGES README doc/manual.pdf
@@ -176,6 +173,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %{_datadir}/%{name}/
 %{_datadir}/bash-completion/
 %{_datadir}/gtksourceview-2.0/language-specs/%{name}.lang
+%{_datadir}/vim/vimfiles/ftdetect/%{name}.vim
 %{_datadir}/vim/vimfiles/syntax/%{name}.vim
 %{_datadir}/zsh/
 %{tex_dir}/why3/
@@ -196,6 +194,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Oct  7 2017 Jerry James <loganjerry@gmail.com> - 0.88.0-1
+- New usptream release
+
 * Thu Oct  5 2017 Jerry James <loganjerry@gmail.com> - 0.87.3-12
 - Rebuild for flocq 2.6.0
 
