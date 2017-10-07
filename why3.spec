@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.87.3
-Release:        11%{?dist}
+Release:        12%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -196,6 +196,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Oct  5 2017 Jerry James <loganjerry@gmail.com> - 0.87.3-12
+- Rebuild for flocq 2.6.0
+
 * Wed Sep 06 2017 Richard W.M. Jones <rjones@redhat.com> - 0.87.3-11
 - OCaml 4.05.0 rebuild.
 
