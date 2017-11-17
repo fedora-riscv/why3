@@ -7,14 +7,14 @@
 %global tex_dir %{_texmf}/tex/latex
 
 Name:           why3
-Version:        0.88.0
-Release:        2%{?dist}
+Version:        0.88.1
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/37147/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/37185/why3-0.88.1.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -96,9 +96,11 @@ based on Why3, including various automated and interactive provers.
 
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use
+# Link the binaries with runtime compiled with -fPIC.
+# This avoids many link-time errors.
 sed -e "s|-Wall|$RPM_OPT_FLAGS|" \
     -e "s/cp /cp -p /" \
-    -e "s|^OLINKFLAGS =.*|& -ccopt \"$RPM_LD_FLAGS\"|" \
+    -e "s|^OLINKFLAGS =.*|& -runtime-variant _pic -ccopt \"$RPM_LD_FLAGS\"|" \
     -i Makefile.in
 
 # Remove spurious executable bits
@@ -194,7 +196,8 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
-* Fri Nov 17 2017 Richard W.M. Jones <rjones@redhat.com> - 0.88.0-2
+* Fri Nov 17 2017 Richard W.M. Jones <rjones@redhat.com> - 0.88.1-1
+- New upstream version 0.88.1.
 - OCaml 4.06.0 rebuild.
 
 * Sat Oct  7 2017 Jerry James <loganjerry@gmail.com> - 0.88.0-1
