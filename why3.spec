@@ -31,6 +31,7 @@ BuildRequires:  ocaml-lablgtk-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-menhir-devel
+BuildRequires:  ocaml-num-devel
 BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
