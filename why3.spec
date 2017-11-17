@@ -170,7 +170,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs
 
 %files
-%doc AUTHORS CHANGES README doc/manual.pdf
+%doc AUTHORS CHANGES.md README.md doc/manual.pdf
 %license LICENSE
 %{_bindir}/%{name}
 %{_datadir}/%{name}/
