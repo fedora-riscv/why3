@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.88.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -194,6 +194,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Nov 17 2017 Richard W.M. Jones <rjones@redhat.com> - 0.88.0-2
+- OCaml 4.06.0 rebuild.
+
 * Sat Oct  7 2017 Jerry James <loganjerry@gmail.com> - 0.88.0-1
 - New usptream release
 
