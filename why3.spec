@@ -7,14 +7,14 @@
 %global tex_dir %{_texmf}/tex/latex
 
 Name:           why3
-Version:        0.88.1
+Version:        0.88.2
 Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/37185/why3-0.88.1.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/37236/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -38,6 +38,7 @@ BuildRequires:  ocaml-zip-devel
 BuildRequires:  rubber
 BuildRequires:  tex(comment.sty)
 BuildRequires:  tex(upquote.sty)
+BuildRequires:  tex-urlbst
 BuildRequires:  emacs xemacs xemacs-packages-extra
 
 Requires:       gtksourceview2
@@ -197,6 +198,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Dec  9 2017 Jerry James <loganjerry@gmail.com> - 0.88.2-1
+- New upstream release
+
 * Fri Nov 17 2017 Richard W.M. Jones <rjones@redhat.com> - 0.88.1-1
 - New upstream version 0.88.1.
 - OCaml 4.06.0 rebuild.
