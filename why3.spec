@@ -8,7 +8,7 @@
 
 Name:           why3
 Version:        0.88.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -198,6 +198,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.88.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Sat Dec  9 2017 Jerry James <loganjerry@gmail.com> - 0.88.2-1
 - New upstream release
 
