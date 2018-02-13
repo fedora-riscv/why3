@@ -3,18 +3,19 @@
 # enabling it for now.  We abide by their wishes.  Revisit this decision each
 # release.
 
-%global opt %(test -x %{_bindir}/ocamlopt && echo 1 || echo 0)
-%global tex_dir %{_texmf}/tex/latex
+%ifnarch %{ocaml_native_compiler}
+%global debug_package %{nil}
+%endif
 
 Name:           why3
-Version:        0.88.2
-Release:        2%{?dist}
+Version:        0.88.3
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/37236/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/37313/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -25,7 +26,7 @@ BuildRequires:  flocq
 BuildRequires:  gtksourceview2-devel
 BuildRequires:  hevea
 BuildRequires:  ocaml
-BuildRequires:  ocaml-camlp4-devel
+BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk-devel
 BuildRequires:  ocaml-ocamldoc
@@ -86,7 +87,7 @@ This package contains an XEmacs support file for working with %{name} files.
 %package all
 Summary:        Complete Why3 software verification platform suite
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       alt-ergo coq cvc4 E gappalib-coq z3 zenon
+Requires:       alt-ergo coq cvc4 E gappalib-coq yices z3 zenon
 
 %description all
 This package provides a complete software verification platform suite
@@ -134,8 +135,8 @@ mkdir -p %{buildroot}%{_datadir}/zsh/site-functions
 cp -p share/zsh/_why3 %{buildroot}%{_datadir}/zsh/site-functions
 
 # Install the LaTeX style
-mkdir -p %{buildroot}%{tex_dir}/why3
-cp -p share/latex/why3lang.sty %{buildroot}%{tex_dir}/why3
+mkdir -p %{buildroot}%{_texmf}/tex/latex/why3
+cp -p share/latex/why3lang.sty %{buildroot}%{_texmf}/tex/latex/why3
 
 # Move the gtksourceview language file to the right place
 mkdir -p %{buildroot}%{_datadir}/gtksourceview-2.0
@@ -161,9 +162,6 @@ popd
 # Remove misplaced documentation
 rm -fr %{buildroot}%{_datadir}/doc
 
-# Remove nonfree boomy icons
-rm -fr %{buildroot}%{_datadir}/%{name}/images/boomy
-
 # Fix permissions
 chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/%{name}/commands/* \
@@ -180,7 +178,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %{_datadir}/vim/vimfiles/ftdetect/%{name}.vim
 %{_datadir}/vim/vimfiles/syntax/%{name}.vim
 %{_datadir}/zsh/
-%{tex_dir}/why3/
+%{_texmf}/tex/latex/why3/
 %{_libdir}/%{name}/
 %{_mandir}/man1/%{name}*
 
@@ -198,6 +196,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Mon Feb 12 2018 Jerry James <loganjerry@gmail.com> - 0.88.3-1
+- New upstream release
+
 * Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.88.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
