@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        0.88.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -196,6 +196,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Jul 12 2018 Richard W.M. Jones <rjones@redhat.com> - 0.88.3-4
+- OCaml 4.07.0 (final) rebuild.
+
 * Wed Jun 20 2018 Richard W.M. Jones <rjones@redhat.com> - 0.88.3-3
 - Bump release and rebuild.
 
