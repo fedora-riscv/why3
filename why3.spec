@@ -8,14 +8,14 @@
 %endif
 
 Name:           why3
-Version:        0.88.3
-Release:        5%{?dist}
+Version:        1.1.1
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/37313/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/37842/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -165,7 +165,6 @@ rm -fr %{buildroot}%{_datadir}/doc
 # Fix permissions
 chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/%{name}/commands/* \
-           %{buildroot}%{_libdir}/%{name}/coq-tactic/*.cmxs \
            %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs
 
 %files
@@ -196,6 +195,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Jan 26 2018 Jerry James <loganjerry@gmail.com> - 1.1.1-1
+- New upstream release
+
 * Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.88.3-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
