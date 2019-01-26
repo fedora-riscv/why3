@@ -195,7 +195,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
-* Sat Jan 26 2018 Jerry James <loganjerry@gmail.com> - 1.1.1-1
+* Sat Jan 26 2019 Jerry James <loganjerry@gmail.com> - 1.1.1-1
 - New upstream release
 
 * Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.88.3-5
