@@ -8,14 +8,14 @@
 %endif
 
 Name:           why3
-Version:        1.1.1
-Release:        2%{?dist}
+Version:        1.2.0
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/37842/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/37903/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -97,6 +97,11 @@ based on Why3, including various automated and interactive provers.
 %setup -q
 %setup -q -T -D -a 1
 
+fixtimestamp() {
+  touch -r $1.orig $1
+  rm $1.orig
+}
+
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use
 # Link the binaries with runtime compiled with -fPIC.
@@ -107,7 +112,16 @@ sed -e "s|-Wall|$RPM_OPT_FLAGS|" \
     -i Makefile.in
 
 # Remove spurious executable bits
-find -O3 examples -type f -perm /0111 | xargs chmod a-x
+find -O3 examples -type f -perm /0111 -exec chmod a-x {} \+
+
+# Remove spurious shebangs
+sed -i.orig '/#!.*/d' examples/use_api/runstrat/{echo,run}_wait.ml
+fixtimestamp examples/use_api/runstrat/echo_wait.ml
+fixtimestamp examples/use_api/runstrat/run_wait.ml
+
+# Fix end of line encodings
+sed -i.orig 's/\r//' examples/bts/20881.why
+fixtimestamp examples/bts/20881.why
 
 %build
 %configure --enable-verbose-make
@@ -195,6 +209,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Jun  5 2019 Jerry James <loganjerry@gmail.com> - 1.2.0-1
+- New upstream release
+
 * Sun Feb 03 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.1.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
