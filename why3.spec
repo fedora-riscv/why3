@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -209,6 +209,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Jul 27 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Wed Jun  5 2019 Jerry James <loganjerry@gmail.com> - 1.2.0-1
 - New upstream release
 
