@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.2.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -93,6 +93,24 @@ Requires:       alt-ergo coq cvc4 E gappalib-coq yices z3 zenon
 This package provides a complete software verification platform suite
 based on Why3, including various automated and interactive provers.
 
+%package -n ocaml-%{name}
+Summary:        Software verification library for ocaml
+
+%description -n ocaml-%{name}
+This package contains an ocaml library that exposes the functionality
+of why3 to applications.
+
+%package -n ocaml-%{name}-devel
+Summary:        Development files for using the ocaml-%{name} library
+Requires:       ocaml-%{name}%{?_isa} = %{version}-%{release}
+Requires:       ocaml-menhir-devel%{?_isa}
+Requires:       ocaml-num-devel%{?_isa}
+Requires:       ocaml-zip-devel%{?_isa}
+
+%description -n ocaml-%{name}-devel
+This package contains development files needed to build applications
+that use the ocaml-%{name} library.
+
 %prep
 %setup -q
 %setup -q -T -D -a 1
@@ -130,6 +148,7 @@ make doc/manual.pdf
 
 %install
 make install DESTDIR=%{buildroot}
+make install-lib DESTDIR=%{buildroot}
 
 # Install the man pages
 mkdir -p %{buildroot}%{_mandir}/man1
@@ -179,7 +198,8 @@ rm -fr %{buildroot}%{_datadir}/doc
 # Fix permissions
 chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/%{name}/commands/* \
-           %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs
+           %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs \
+           %{buildroot}%{_libdir}/ocaml/%{name}/*.cmxs
 
 %files
 %doc AUTHORS CHANGES.md README.md doc/manual.pdf
@@ -195,6 +215,23 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %{_libdir}/%{name}/
 %{_mandir}/man1/%{name}*
 
+%files -n ocaml-%{name}
+%dir %{_libdir}/ocaml/%{name}/
+%{_libdir}/ocaml/%{name}/META
+%{_libdir}/ocaml/%{name}/*.cmi
+%ifarch %{ocaml_native_compiler}
+%{_libdir}/ocaml/%{name}/*.cmxs
+%endif
+
+%files -n ocaml-%{name}-devel
+%ifarch %{ocaml_native_compiler}
+%{_libdir}/ocaml/%{name}/*.a
+%{_libdir}/ocaml/%{name}/*.cmx
+%{_libdir}/ocaml/%{name}/*.cmxa
+%else
+%{_libdir}/ocaml/%{name}/*.cma
+%endif
+
 %files examples
 %doc examples
 
@@ -209,6 +246,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Aug  1 2019 Jerry James <loganjerry@gmail.com> - 1.2.0-4
+- Also install the library, for consumption by frama-c
+
 * Thu Aug  1 2019 Jerry James <loganjerry@gmail.com> - 1.2.0-3
 - Rebuild for flocq 3.2.0
 
