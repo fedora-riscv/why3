@@ -8,23 +8,28 @@
 %endif
 
 Name:           why3
-Version:        1.2.0
-Release:        6%{?dist}
+Version:        1.2.1
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/37903/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/38185/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
+# Desktop file written by Jerry James
+Source2:        %{name}.desktop
+# AppData file written by Jerry James
+Source3:        %{name}.appdata.xml
 
 BuildRequires:  coq
+BuildRequires:  emacs-proofgeneral
 BuildRequires:  evince
 BuildRequires:  flocq
-BuildRequires:  gtksourceview2-devel
 BuildRequires:  hevea
+BuildRequires:  libappstream-glib
 BuildRequires:  ocaml
 BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
@@ -36,6 +41,7 @@ BuildRequires:  ocaml-num-devel
 BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
+BuildRequires:  pkgconfig(gtksourceview-2.0)
 BuildRequires:  rubber
 BuildRequires:  tex(comment.sty)
 BuildRequires:  tex(upquote.sty)
@@ -43,6 +49,7 @@ BuildRequires:  tex-urlbst
 BuildRequires:  emacs xemacs xemacs-packages-extra
 
 Requires:       gtksourceview2
+Requires:       hicolor-icon-theme
 Requires:       texlive-base
 Requires:       vim-filesystem
 Provides:       bundled(jquery)
@@ -111,6 +118,15 @@ Requires:       ocaml-zip-devel%{?_isa}
 This package contains development files needed to build applications
 that use the ocaml-%{name} library.
 
+%package proofgeneral
+Summary:        Why3 integration with ProofGeneral
+Requires:       %{name} = %{version}-%{release}
+Requires:       emacs-proofgeneral
+BuildArch:      noarch
+
+%description proofgeneral
+This package provides a why3 plugin for ProofGeneral.
+
 %prep
 %setup -q
 %setup -q -T -D -a 1
@@ -124,13 +140,14 @@ fixtimestamp() {
 # network use
 # Link the binaries with runtime compiled with -fPIC.
 # This avoids many link-time errors.
-sed -e "s|-Wall|$RPM_OPT_FLAGS|" \
+sed -e "s|-Wall|$RPM_OPT_FLAGS|;s/ -O -g//" \
     -e "s/cp /cp -p /" \
     -e "s|^OLINKFLAGS =.*|& -runtime-variant _pic -ccopt \"$RPM_LD_FLAGS\"|" \
     -i Makefile.in
 
 # Remove spurious executable bits
 find -O3 examples -type f -perm /0111 -exec chmod a-x {} \+
+chmod a+x examples/*.sh
 
 # Remove spurious shebangs
 sed -i.orig '/#!.*/d' examples/use_api/runstrat/{echo,run}_wait.ml
@@ -140,6 +157,10 @@ fixtimestamp examples/use_api/runstrat/run_wait.ml
 # Fix end of line encodings
 sed -i.orig 's/\r//' examples/bts/20881.why
 fixtimestamp examples/bts/20881.why
+
+# Update the ProofGeneral integration instructions
+sed -i.orig 's,(MY_PATH_TO_WHY3)/share/whyitp,%{_emacs_sitelispdir},' share/whyitp/README
+fixtimestamp share/whyitp/README
 
 %build
 %configure --enable-verbose-make
@@ -176,20 +197,35 @@ mkdir -p %{buildroot}%{_datadir}/gtksourceview-2.0
 mv %{buildroot}%{_datadir}/%{name}/lang \
    %{buildroot}%{_datadir}/gtksourceview-2.0/language-specs
 
+# Install the desktop file
+mkdir -p %{buildroot}%{_datadir}/applications
+desktop-file-install --dir=%{buildroot}%{_datadir}/applications %{SOURCE2}
+
+# Install the icon
+mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable
+cp -p share/images/src/logo-kim.svg \
+      %{buildroot}%{_datadir}/icons/hicolor/scalable/%{name}.svg
+
+# Install the AppStream metadata
+mkdir -p %{buildroot}%{_metainfodir}
+cp -p %{SOURCE3} %{buildroot}%{_metainfodir}
+appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{name}.appdata.xml
+
 # Move the vim file to the right place
 mkdir -p %{buildroot}%{_datadir}/vim/vimfiles
 mv %{buildroot}%{_datadir}/%{name}/vim/ftdetect \
    %{buildroot}%{_datadir}/%{name}/vim/syntax \
    %{buildroot}%{_datadir}/vim/vimfiles
 
-# Byte compile the (X)Emacs support file
+# Byte compile the (X)Emacs support files
 mkdir -p %{buildroot}%{_xemacs_sitelispdir}
 cp -p %{buildroot}%{_emacs_sitelispdir}/%{name}.el \
    %{buildroot}%{_xemacs_sitelispdir}
+cp -p share/whyitp/whyitp.el %{buildroot}%{_emacs_sitelispdir}
 pushd %{buildroot}%{_xemacs_sitelispdir}
 %{_xemacs_bytecompile} %{name}.el
 cd %{buildroot}%{_emacs_sitelispdir}
-%{_emacs_bytecompile} %{name}.el
+%{_emacs_bytecompile} %{name}.el whyitp.el
 popd
 
 # Remove misplaced documentation
@@ -206,14 +242,17 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %license LICENSE
 %{_bindir}/%{name}
 %{_datadir}/%{name}/
+%{_datadir}/applications/%{name}.desktop
 %{_datadir}/bash-completion/
 %{_datadir}/gtksourceview-2.0/language-specs/%{name}.lang
+%{_datadir}/icons/hicolor/scalable/%{name}.svg
 %{_datadir}/vim/vimfiles/ftdetect/%{name}.vim
 %{_datadir}/vim/vimfiles/syntax/%{name}.vim
 %{_datadir}/zsh/
 %{_texmf}/tex/latex/why3/
 %{_libdir}/%{name}/
 %{_mandir}/man1/%{name}*
+%{_metainfodir}/%{name}.appdata.xml
 
 %files -n ocaml-%{name}
 %dir %{_libdir}/ocaml/%{name}/
@@ -241,11 +280,20 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files xemacs
 %{_xemacs_sitelispdir}/%{name}.el*
 
+%files proofgeneral
+%doc share/whyitp/README
+%{_emacs_sitelispdir}/whyitp.el*
+
 # "why3-all" is a meta-package; it just depends on other packages, so that
 # it's easier to install a useful suite of tools.  Thus, it has no files:
 %files all
 
 %changelog
+* Tue Oct 29 2019 Jerry James <loganjerry@gmail.com> - 1.2.1-1
+- New upstream release
+- Add -proofgeneral subpackage
+- Add desktop and AppData files
+
 * Fri Oct 11 2019 Jerry James <loganjerry@gmail.com> - 1.2.0-6
 - Rebuild for ocaml-menhir 20190924
 

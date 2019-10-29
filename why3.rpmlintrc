@@ -1,0 +1,28 @@
+# THIS FILE IS FOR WHITELISTING RPMLINT ERRORS AND WARNINGS IN TASKOTRON
+# https://fedoraproject.org/wiki/Taskotron/Tasks/dist.rpmlint#Whitelisting_errors
+
+# The dictionary lacks some technical words
+addFilter(r'W: spelling-error .* provers')
+
+# Caused by ocaml; this package cannot fix it
+addFilter(r'why3\.[^:]+: E: missing-call-to-chdir-with-chroot')
+
+# Indeed there is no documentation
+addFilter(r'ocaml-why3(|-devel).[^:]+: W: no-documentation')
+addFilter(r'why3-(all|emacs|xemacs).[^:]+: W: no-documentation')
+
+# This file is not a text file
+addFilter(r'W: file-not-utf8 .*\.mlw')
+
+# The TeX input carries its own character encoding declaration
+addFilter(r'why3-examples\.noarch: W: file-not-utf8 .*digit_sum\.tex')
+
+# The .notempty files are markers
+addFilter(r'why3-examples\.noarch: W: hidden-file-or-dir .*/\.notempty')
+addFilter(r'why3-examples\.noarch: E: zero-length .*/\.notempty')
+
+# We use the version of jquery provided by ocamldoc
+addFilter(r'W: unversioned-explicit-provides bundled\(jquery\)')
+
+# The man pages were created by the Fedora packager; there is no URL
+addFilter(r'why3\.spec: W: invalid-url Source1: why3-man\.tar\.xz')

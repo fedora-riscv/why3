@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Why3
+GenericName=Software Verifier
+Comment=Software verification platform
+Exec=why3 ide %f
+Icon=why3
+Type=Application
+Terminal=false
+Categories=Development;
