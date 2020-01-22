@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.2.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -289,6 +289,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Jan 22 2020 Jerry James <loganjerry@gmail.com> - 1.2.1-3
+- OCaml 4.10.0+beta1 rebuild.
+
 * Fri Dec 06 2019 Richard W.M. Jones <rjones@redhat.com> - 1.2.1-2
 - OCaml 4.09.0 (final) rebuild.
 
