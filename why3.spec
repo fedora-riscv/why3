@@ -94,7 +94,7 @@ This package contains an XEmacs support file for working with %{name} files.
 %package all
 Summary:        Complete Why3 software verification platform suite
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       alt-ergo coq cvc4 E gappalib-coq yices z3 zenon
+Requires:       alt-ergo coq cvc4 E gappalib-coq yices-tools z3 zenon
 
 %description all
 This package provides a complete software verification platform suite
