@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.2.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -289,6 +289,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Jan 31 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
 * Wed Jan 22 2020 Jerry James <loganjerry@gmail.com> - 1.2.1-3
 - OCaml 4.10.0+beta1 rebuild.
 
