@@ -8,14 +8,14 @@
 %endif
 
 Name:           why3
-Version:        1.2.1
-Release:        4%{?dist}
+Version:        1.3.1
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/38185/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/38291/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -29,26 +29,36 @@ BuildRequires:  emacs-proofgeneral
 BuildRequires:  evince
 BuildRequires:  flocq
 BuildRequires:  hevea
+BuildRequires:  latexmk
 BuildRequires:  libappstream-glib
 BuildRequires:  ocaml
 BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
-BuildRequires:  ocaml-lablgtk-devel
+BuildRequires:  ocaml-lablgtk3-sourceview3-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-menhir-devel
+BuildRequires:  ocaml-mlmpfr-devel
 BuildRequires:  ocaml-num-devel
+BuildRequires:  ocaml-re-devel
+BuildRequires:  ocaml-seq-devel
 BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
-BuildRequires:  pkgconfig(gtksourceview-2.0)
-BuildRequires:  rubber
+BuildRequires:  python3dist(sphinx)
+BuildRequires:  python3dist(sphinxcontrib-bibtex)
+BuildRequires:  tex(capt-of.sty)
 BuildRequires:  tex(comment.sty)
+BuildRequires:  tex(fncychap.sty)
+BuildRequires:  tex(framed.sty)
+BuildRequires:  tex(needspace.sty)
+BuildRequires:  tex(tabulary.sty)
 BuildRequires:  tex(upquote.sty)
+BuildRequires:  tex(wrapfig.sty)
 BuildRequires:  tex-urlbst
 BuildRequires:  emacs xemacs xemacs-packages-extra
 
-Requires:       gtksourceview2
+Requires:       gtksourceview3
 Requires:       hicolor-icon-theme
 Requires:       texlive-base
 Requires:       vim-filesystem
@@ -94,7 +104,7 @@ This package contains an XEmacs support file for working with %{name} files.
 %package all
 Summary:        Complete Why3 software verification platform suite
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       alt-ergo coq cvc4 E gappalib-coq yices-tools z3 zenon
+Requires:       alt-ergo coq cvc4 E yices-tools z3 zenon
 
 %description all
 This package provides a complete software verification platform suite
@@ -110,8 +120,10 @@ of why3 to applications.
 %package -n ocaml-%{name}-devel
 Summary:        Development files for using the ocaml-%{name} library
 Requires:       ocaml-%{name}%{?_isa} = %{version}-%{release}
-Requires:       ocaml-menhir-devel%{?_isa}
+Requires:       ocaml-menhir%{?_isa}
 Requires:       ocaml-num-devel%{?_isa}
+Requires:       ocaml-re-devel%{?_isa}
+Requires:       ocaml-seq-devel%{?_isa}
 Requires:       ocaml-zip-devel%{?_isa}
 
 %description -n ocaml-%{name}-devel
@@ -128,7 +140,7 @@ BuildArch:      noarch
 This package provides a why3 plugin for ProofGeneral.
 
 %prep
-%setup -q
+%autosetup -p0
 %setup -q -T -D -a 1
 
 fixtimestamp() {
@@ -162,10 +174,15 @@ fixtimestamp examples/bts/20881.why
 sed -i.orig 's,(MY_PATH_TO_WHY3)/share/whyitp,%{_emacs_sitelispdir},' share/whyitp/README
 fixtimestamp share/whyitp/README
 
+# Fix building with mlmpfr support
+sed -i '/EXTPKGS/s/@ZIPLIB@/& @MLMPFR@/' Makefile.in
+sed -i 's/4\.0\.0/4.0.2/g' configure
+
 %build
 %configure --enable-verbose-make
 make #%%{?_smp_mflags}
-make doc/manual.pdf
+make doc
+rm -f doc/html/.buildinfo examples/use_api/.merlin.in
 
 %install
 make install DESTDIR=%{buildroot}
@@ -193,9 +210,9 @@ mkdir -p %{buildroot}%{_texmf}/tex/latex/why3
 cp -p share/latex/why3lang.sty %{buildroot}%{_texmf}/tex/latex/why3
 
 # Move the gtksourceview language file to the right place
-mkdir -p %{buildroot}%{_datadir}/gtksourceview-2.0
+mkdir -p %{buildroot}%{_datadir}/gtksourceview-3.0
 mv %{buildroot}%{_datadir}/%{name}/lang \
-   %{buildroot}%{_datadir}/gtksourceview-2.0/language-specs
+   %{buildroot}%{_datadir}/gtksourceview-3.0/language-specs
 
 # Install the desktop file
 mkdir -p %{buildroot}%{_datadir}/applications
@@ -238,13 +255,15 @@ chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/ocaml/%{name}/*.cmxs
 
 %files
-%doc AUTHORS CHANGES.md README.md doc/manual.pdf
+%doc AUTHORS CHANGES.md README.md doc/html doc/latex/manual.pdf
 %license LICENSE
 %{_bindir}/%{name}
 %{_datadir}/%{name}/
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/bash-completion/
-%{_datadir}/gtksourceview-2.0/language-specs/%{name}.lang
+%{_datadir}/gtksourceview-3.0/language-specs/%{name}.lang
+%{_datadir}/gtksourceview-3.0/language-specs/%{name}c.lang
+%{_datadir}/gtksourceview-3.0/language-specs/%{name}py.lang
 %{_datadir}/icons/hicolor/scalable/%{name}.svg
 %{_datadir}/vim/vimfiles/ftdetect/%{name}.vim
 %{_datadir}/vim/vimfiles/syntax/%{name}.vim
@@ -289,6 +308,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Mar 25 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-1
+- Version 1.3.1
+
 * Fri Jan 31 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.1-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
