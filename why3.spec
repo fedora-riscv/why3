@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -26,9 +26,7 @@ Source3:        %{name}.appdata.xml
 
 BuildRequires:  coq
 BuildRequires:  emacs-proofgeneral
-BuildRequires:  evince
 BuildRequires:  flocq
-BuildRequires:  hevea
 BuildRequires:  latexmk
 BuildRequires:  libappstream-glib
 BuildRequires:  ocaml
@@ -36,13 +34,9 @@ BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk3-sourceview3-devel
 BuildRequires:  ocaml-ocamldoc
-BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-menhir-devel
 BuildRequires:  ocaml-mlmpfr-devel
 BuildRequires:  ocaml-num-devel
-BuildRequires:  ocaml-re-devel
-BuildRequires:  ocaml-seq-devel
-BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
 BuildRequires:  python3dist(sphinx)
@@ -51,6 +45,7 @@ BuildRequires:  tex(capt-of.sty)
 BuildRequires:  tex(comment.sty)
 BuildRequires:  tex(fncychap.sty)
 BuildRequires:  tex(framed.sty)
+BuildRequires:  tex(latex)
 BuildRequires:  tex(needspace.sty)
 BuildRequires:  tex(tabulary.sty)
 BuildRequires:  tex(upquote.sty)
@@ -308,6 +303,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Mar 28 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-2
+- Remove useless BRs and Rs (bz 1817878)
+
 * Wed Mar 25 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-1
 - Version 1.3.1
 
