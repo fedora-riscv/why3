@@ -7,9 +7,12 @@
 %global debug_package %{nil}
 %endif
 
+# The plugin loader does not work with PIE
+%undefine _hardened_build
+
 Name:           why3
 Version:        1.3.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -35,7 +38,6 @@ BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk3-sourceview3-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-menhir-devel
-BuildRequires:  ocaml-mlmpfr-devel
 BuildRequires:  ocaml-num-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
@@ -53,14 +55,22 @@ BuildRequires:  tex(wrapfig.sty)
 BuildRequires:  tex-urlbst
 BuildRequires:  emacs xemacs xemacs-packages-extra
 
-Requires:       gtksourceview3
+Requires:       gtksourceview3%{?_isa}
 Requires:       hicolor-icon-theme
-Requires:       texlive-base
+Requires:       texlive-base%{?_isa}
 Requires:       vim-filesystem
 Provides:       bundled(jquery)
 
 # The corresponding Provides is not generated, so filter this out
 %global __requires_exclude ocaml\\\(Why3\\\)
+
+# This can be removed when F36 reaches EOL
+Obsoletes:      why < 2.41-12
+Provides:       why = 2.41-12%{?dist}
+Obsoletes:      why-jessie < 2.41-12
+Provides:       why-jessie = 2.41-12%{?dist}
+Obsoletes:      why-pvs-support < 2.41-12
+Provides:       why-pvs-support = 2.41-12%{?dist}
 
 %description
 Why3 is the next generation of the Why software verification platform.
@@ -99,7 +109,11 @@ This package contains an XEmacs support file for working with %{name} files.
 %package all
 Summary:        Complete Why3 software verification platform suite
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       alt-ergo coq cvc4 E yices-tools z3 zenon
+Requires:       alt-ergo coq cvc4 E gappa yices-tools z3 zenon
+
+# This can be removed when F36 reaches EOL
+Obsoletes:      why-all < 2.41-12
+Provides:       why-all = 2.41-12%{?dist}
 
 %description all
 This package provides a complete software verification platform suite
@@ -168,10 +182,6 @@ fixtimestamp examples/bts/20881.why
 # Update the ProofGeneral integration instructions
 sed -i.orig 's,(MY_PATH_TO_WHY3)/share/whyitp,%{_emacs_sitelispdir},' share/whyitp/README
 fixtimestamp share/whyitp/README
-
-# Fix building with mlmpfr support
-sed -i '/EXTPKGS/s/@ZIPLIB@/& @MLMPFR@/' Makefile.in
-sed -i 's/4\.0\.0/4.0.2/g' configure
 
 %build
 %configure --enable-verbose-make
@@ -303,6 +313,11 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Apr  1 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-3
+- Do not build with mlmpfr; symbols clash with mlgmpidl, causing frama-c to
+  fail to start
+- Obsolete the why2 packages
+
 * Sat Mar 28 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-2
 - Remove useless BRs and Rs (bz 1817878)
 
