@@ -12,7 +12,7 @@
 
 Name:           why3
 Version:        1.3.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -313,6 +313,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sun Apr 05 2020 Richard W.M. Jones <rjones@redhat.com> - 1.3.1-4
+- Update all OCaml dependencies for RPM 4.16.
+
 * Wed Apr  1 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-3
 - Do not build with mlmpfr; symbols clash with mlgmpidl, causing frama-c to
   fail to start
