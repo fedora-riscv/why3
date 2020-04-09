@@ -12,7 +12,7 @@
 
 Name:           why3
 Version:        1.3.1
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -313,6 +313,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Apr  8 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-5
+- Rebuild for flocq 3.2.1
+
 * Sun Apr 05 2020 Richard W.M. Jones <rjones@redhat.com> - 1.3.1-4
 - Update all OCaml dependencies for RPM 4.16.
 
