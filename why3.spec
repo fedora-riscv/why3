@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.2.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -40,7 +40,6 @@ BuildRequires:  ocaml-menhir-devel
 BuildRequires:  ocaml-num-devel
 BuildRequires:  ocaml-sqlite-devel
 BuildRequires:  ocaml-zarith-devel
-BuildRequires:  ocaml-zip-devel
 BuildRequires:  pkgconfig(gtksourceview-2.0)
 BuildRequires:  rubber
 BuildRequires:  tex(comment.sty)
@@ -112,7 +111,6 @@ Summary:        Development files for using the ocaml-%{name} library
 Requires:       ocaml-%{name}%{?_isa} = %{version}-%{release}
 Requires:       ocaml-menhir-devel%{?_isa}
 Requires:       ocaml-num-devel%{?_isa}
-Requires:       ocaml-zip-devel%{?_isa}
 
 %description -n ocaml-%{name}-devel
 This package contains development files needed to build applications
@@ -289,6 +287,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Apr 10 2020 Jerry James <loganjerry@gmail.com> - 1.2.1-2
+- Rebuild without zip support; otherwise frama-c cannot start
+
 * Tue Oct 29 2019 Jerry James <loganjerry@gmail.com> - 1.2.1-1
 - New upstream release
 - Add -proofgeneral subpackage
