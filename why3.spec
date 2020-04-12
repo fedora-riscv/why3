@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.2.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -101,6 +101,7 @@ based on Why3, including various automated and interactive provers.
 
 %package -n ocaml-%{name}
 Summary:        Software verification library for ocaml
+Requires:       ocaml-num%{?_isa}
 
 %description -n ocaml-%{name}
 This package contains an ocaml library that exposes the functionality
@@ -287,6 +288,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sun Apr 12 2020 Jerry James <loganjerry@gmail.com> - 1.2.1-3
+- Make the dependency on ocaml-num explicit (bz 1795083)
+
 * Fri Apr 10 2020 Jerry James <loganjerry@gmail.com> - 1.2.1-2
 - Rebuild without zip support; otherwise frama-c cannot start
 
