@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -118,6 +118,8 @@ based on Why3, including various automated and interactive provers.
 
 %package -n ocaml-%{name}
 Summary:        Software verification library for ocaml
+Requires:       ocaml-num%{?_isa}
+Requires:       ocaml-zip-devel%{?_isa}
 
 %description -n ocaml-%{name}
 This package contains an ocaml library that exposes the functionality
@@ -130,7 +132,6 @@ Requires:       ocaml-menhir%{?_isa}
 Requires:       ocaml-num-devel%{?_isa}
 Requires:       ocaml-re-devel%{?_isa}
 Requires:       ocaml-seq-devel%{?_isa}
-Requires:       ocaml-zip-devel%{?_isa}
 
 %description -n ocaml-%{name}-devel
 This package contains development files needed to build applications
@@ -310,6 +311,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sun Apr 12 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-4
+- Make the dependencies on ocaml-num and ocaml-zip explicit (bz 1795083)
+
 * Wed Apr  8 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-3
 - Rebuild for flocq 3.2.1
 - Do not build with mlmpfr; symbols clash with mlgmpidl, causing frama-c to
