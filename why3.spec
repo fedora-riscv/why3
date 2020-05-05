@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.1
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -311,6 +311,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Tue May 05 2020 Richard W.M. Jones <rjones@redhat.com> - 1.3.1-7
+- OCaml 4.11.0+dev2-2020-04-22 rebuild
+
 * Sun Apr 12 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-6
 - Make the dependencies on ocaml-num and ocaml-zip explicit (bz 1795083)
 
