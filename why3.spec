@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.1
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -56,6 +56,9 @@ Requires:       gtksourceview3%{?_isa}
 Requires:       hicolor-icon-theme
 Requires:       texlive-base%{?_isa}
 Requires:       vim-filesystem
+
+Recommends:     bash-completion
+
 Provides:       bundled(jquery)
 
 # The corresponding Provides is not generated, so filter this out
@@ -263,7 +266,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %{_bindir}/%{name}
 %{_datadir}/%{name}/
 %{_datadir}/applications/%{name}.desktop
-%{_datadir}/bash-completion/
+%{_datadir}/bash-completion/completions/why3
 %{_datadir}/gtksourceview-3.0/language-specs/%{name}.lang
 %{_datadir}/gtksourceview-3.0/language-specs/%{name}c.lang
 %{_datadir}/gtksourceview-3.0/language-specs/%{name}py.lang
@@ -311,6 +314,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed May 20 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-8
+- Rebuild for coq 8.11.1
+
 * Tue May 05 2020 Richard W.M. Jones <rjones@redhat.com> - 1.3.1-7
 - OCaml 4.11.0+dev2-2020-04-22 rebuild
 
