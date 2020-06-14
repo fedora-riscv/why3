@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.1
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -159,11 +159,14 @@ fixtimestamp() {
 }
 
 # Use the correct compiler flags, keep timestamps, and harden the build due to
-# network use
+# network use.  Force native compilation when available.
 # Link the binaries with runtime compiled with -fPIC.
 # This avoids many link-time errors.
 sed -e "s|-Wall|$RPM_OPT_FLAGS|;s/ -O -g//" \
     -e "s/cp /cp -p /" \
+%ifarch %{ocaml_native_compiler}
+    -e 's/\$(COQC)/& -native-compiler yes/' \
+%endif
     -e "s|^OLINKFLAGS =.*|& -runtime-variant _pic -ccopt \"$RPM_LD_FLAGS\"|" \
     -i Makefile.in
 
@@ -193,6 +196,15 @@ rm -f doc/html/.buildinfo examples/use_api/.merlin.in
 %install
 make install DESTDIR=%{buildroot}
 make install-lib DESTDIR=%{buildroot}
+
+%ifarch %{ocaml_native_compiler}
+# Install the native coq files
+cd lib/coq
+for dir in $(find . -name .coq-native); do
+  cp -a $dir %{buildroot}%{_libdir}/%{name}/coq/$dir
+done
+cd -
+%endif
 
 # Install the man pages
 mkdir -p %{buildroot}%{_mandir}/man1
@@ -314,6 +326,10 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Jun 13 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-9
+- Rebuild for flocq 3.3.1
+- Build the coq files with the native compiler when possible
+
 * Wed May 20 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-8
 - Rebuild for coq 8.11.1
 
