@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.1
-Release:        11%{?dist}
+Release:        12%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -33,13 +33,13 @@ BuildRequires:  ocaml
 BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk3-sourceview3-devel
-BuildRequires:  ocaml-ocamldoc
-BuildRequires:  ocaml-menhir-devel
+BuildRequires:  ocaml-menhir
 BuildRequires:  ocaml-num-devel
+BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
-BuildRequires:  python3dist(sphinx)
-BuildRequires:  python3dist(sphinxcontrib-bibtex)
+BuildRequires:  %{py3_dist sphinx}
+BuildRequires:  %{py3_dist sphinxcontrib-bibtex}
 BuildRequires:  tex(capt-of.sty)
 BuildRequires:  tex(comment.sty)
 BuildRequires:  tex(fncychap.sty)
@@ -326,6 +326,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Aug  6 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-13
+- Rebuild for ocaml-lablgtk3 3.1.1 and ocaml-menhir 20200624
+
 * Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.1-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
