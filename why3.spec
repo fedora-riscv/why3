@@ -51,6 +51,7 @@ BuildRequires:  tex(upquote.sty)
 BuildRequires:  tex(wrapfig.sty)
 BuildRequires:  tex-urlbst
 BuildRequires:  emacs xemacs xemacs-packages-extra
+BuildRequires:  graphviz
 
 Requires:       gtksourceview3%{?_isa}
 Requires:       hicolor-icon-theme
