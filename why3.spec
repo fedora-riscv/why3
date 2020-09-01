@@ -160,14 +160,10 @@ fixtimestamp() {
 }
 
 # Use the correct compiler flags, keep timestamps, and harden the build due to
-# network use.  Force native compilation when available.
-# Link the binaries with runtime compiled with -fPIC.
+# network use.  Link the binaries with runtime compiled with -fPIC.
 # This avoids many link-time errors.
 sed -e "s|-Wall|$RPM_OPT_FLAGS|;s/ -O -g//" \
     -e "s/cp /cp -p /" \
-%ifarch %{ocaml_native_compiler}
-    -e 's/\$(COQC)/& -native-compiler yes/' \
-%endif
     -e "s|^OLINKFLAGS =.*|& -runtime-variant _pic -ccopt \"$RPM_LD_FLAGS\"|" \
     -i Makefile.in
 
@@ -327,10 +323,13 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Tue Sep  1 2020  Jerry James <loganjerry@gmail.com> - 1.3.1-13
+- Rebuild for coq 8.12.0
+
 * Mon Aug 24 2020 Richard W.M. Jones <rjones@redhat.com> - 1.3.1-13
 - OCaml 4.11.0 rebuild
 
-* Thu Aug  6 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-13
+* Thu Aug  6 2020 Jerry James <loganjerry@gmail.com> - 1.3.1-12
 - Rebuild for ocaml-lablgtk3 3.1.1 and ocaml-menhir 20200624
 
 * Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.1-11
