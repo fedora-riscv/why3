@@ -24,6 +24,9 @@ Source2:        %{name}.desktop
 # AppData file written by Jerry James
 Source3:        %{name}.appdata.xml
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1874879
+ExcludeArch: s390x
+
 BuildRequires:  coq
 BuildRequires:  emacs-proofgeneral
 BuildRequires:  flocq
