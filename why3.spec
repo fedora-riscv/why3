@@ -8,14 +8,14 @@
 %endif
 
 Name:           why3
-Version:        1.3.1
-Release:        14%{?dist}.1
+Version:        1.3.3
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/38291/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/38367/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -174,15 +174,6 @@ sed -e "s|-Wall|$RPM_OPT_FLAGS|;s/ -O -g//" \
 find -O3 examples -type f -perm /0111 -exec chmod a-x {} \+
 chmod a+x examples/*.sh
 
-# Remove spurious shebangs
-sed -i.orig '/#!.*/d' examples/use_api/runstrat/{echo,run}_wait.ml
-fixtimestamp examples/use_api/runstrat/echo_wait.ml
-fixtimestamp examples/use_api/runstrat/run_wait.ml
-
-# Fix end of line encodings
-sed -i.orig 's/\r//' examples/bts/20881.why
-fixtimestamp examples/bts/20881.why
-
 # Update the ProofGeneral integration instructions
 sed -i.orig 's,(MY_PATH_TO_WHY3)/share/whyitp,%{_emacs_sitelispdir},' share/whyitp/README
 fixtimestamp share/whyitp/README
@@ -194,8 +185,8 @@ make doc
 rm -f doc/html/.buildinfo examples/use_api/.merlin.in
 
 %install
-make install DESTDIR=%{buildroot}
-make install-lib DESTDIR=%{buildroot}
+%make_install
+make install-lib DESTDIR=%{?buildroot} INSTALL="%{__install} -p"
 
 %ifarch %{ocaml_native_compiler}
 # Install the native coq files
@@ -326,6 +317,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Sep 25 2020 Jerry James <loganjerry@gmail.com> - 1.3.3-1
+- Version 1.3.3
+
 * Thu Sep 03 2020 Richard W.M. Jones <rjones@redhat.com> - 1.3.1-14.1
 - Bump release and rebuild.
 
