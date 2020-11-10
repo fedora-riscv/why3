@@ -32,6 +32,7 @@ BuildRequires:  emacs-proofgeneral
 BuildRequires:  flocq
 BuildRequires:  latexmk
 BuildRequires:  libappstream-glib
+BuildRequires:  make
 BuildRequires:  ocaml
 BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
