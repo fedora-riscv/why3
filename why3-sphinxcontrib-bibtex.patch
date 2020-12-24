@@ -1,0 +1,10 @@
+--- doc/conf.py.orig	2020-09-11 08:06:19.000000000 -0600
++++ doc/conf.py	2020-12-23 08:29:46.914254118 -0700
+@@ -50,6 +50,7 @@ master_doc = 'index'
+ project = 'Why3'
+ copyright = '2020, The Why3 Development Team'
+ author = 'The Why3 Development Team'
++bibtex_bibfiles = ['manual.bib']
+ 
+ # The version info for the project you're documenting, acts as replacement for
+ # |version| and |release|, also used in various other places throughout the

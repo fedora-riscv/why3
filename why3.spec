@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -23,6 +23,8 @@ Source1:        %{name}-man.tar.xz
 Source2:        %{name}.desktop
 # AppData file written by Jerry James
 Source3:        %{name}.appdata.xml
+# Adapt to sphinxcontrib-bibtex 2.x
+Patch0:         %{name}-sphinxcontrib-bibtex.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1874879
 ExcludeArch: s390x
@@ -318,6 +320,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Dec 23 2020 Jerry James <loganjerry@gmail.com> - 1.3.3-3
+- Rebuild for coq 8.12.2
+
 * Wed Dec  2 2020 Jerry James <loganjerry@gmail.com> - 1.3.3-2
 - Rebuild for coq 8.12.1 and menhir 20201201
 
