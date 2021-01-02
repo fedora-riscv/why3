@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -318,6 +318,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Jan  2 2021 Jerry James <loganjerry@gmail.com> - 1.3.3-4
+- Rebuild for flocq 3.4.0
+
 * Wed Dec 23 2020 Jerry James <loganjerry@gmail.com> - 1.3.3-3
 - Rebuild for coq 8.12.2
 
