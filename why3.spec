@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.3
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -320,6 +320,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
 * Sat Jan  2 2021 Jerry James <loganjerry@gmail.com> - 1.3.3-4
 - Rebuild for flocq 3.4.0
 
