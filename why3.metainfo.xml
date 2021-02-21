@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>why3.desktop</id>
+  <metadata_license>0BSD</metadata_license>
+  <project_license>LGPL-2.1-only WITH OCaml-LGPL-linking-exception</project_license>
+  <name>Why3</name>
+  <summary>Software verification platform</summary>
+  <description>
+    <p>
+      Why3 is the next generation of the Why software verification platform.
+      Why3 clearly separates the purely logical specification part from
+      generation of verification conditions for programs.  It features a rich
+      library of proof task transformations that can be chained to produce a
+      suitable input for a large set of theorem provers, including SMT solvers,
+      TPTP provers, as well as interactive proof assistants.
+    </p>
+  </description>
+  <launchable type="desktop-id">why3.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>http://why3.lri.fr/doc/gui-1.png</image>
+      <caption>Initial Why3 GUI window</caption>
+    </screenshot>
+    <screenshot>
+      <image>http://why3.lri.fr/doc/gui-2.png</image>
+      <image>The Why3 GUI with goal G1 selected</image>
+    </screenshot>
+    <screenshot>
+      <image>http://why3.lri.fr/doc/gui-3.png</image>
+      <image>The Why3 GUI after running Alt-Ergo on each goal</image>
+    </screenshot>
+    <screenshot>
+      <image>http://why3.lri.fr/doc/gui-4.png</image>
+      <image>The Why3 GUI after splitting goal G2</image>
+    </screenshot>
+    <screenshot>
+      <image>http://why3.lri.fr/doc/gui-5.png</image>
+      <image>File reloaded after modifying	 goal G2</image>
+    </screenshot>
+  </screenshots>
+  <update_contact>loganjerry@gmail.com</update_contact>
+  <url type="homepage">http://why3.lri.fr/</url>
+  <url type="bugtracker">https://gitlab.inria.fr/why3/why3/issues</url>
+  <content_rating type="oars-1.0"></content_rating>
+  <provides>
+    <binary>why3</binary>
+  </provides>
+</component>

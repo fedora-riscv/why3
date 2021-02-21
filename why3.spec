@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.3
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -22,9 +22,12 @@ Source1:        %{name}-man.tar.xz
 # Desktop file written by Jerry James
 Source2:        %{name}.desktop
 # AppData file written by Jerry James
-Source3:        %{name}.appdata.xml
+Source3:        %{name}.metainfo.xml
 # Adapt to sphinxcontrib-bibtex 2.x
 Patch0:         %{name}-sphinxcontrib-bibtex.patch
+# Permit use of coq 8.13.0
+# https://gitlab.inria.fr/why3/why3/-/commit/31b5bf527804793c10f26acd2a14045be71d256c
+Patch1:         %{name}-coq8.13.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1874879
 ExcludeArch: s390x
@@ -42,6 +45,8 @@ BuildRequires:  ocaml-lablgtk3-sourceview3-devel
 BuildRequires:  ocaml-menhir
 BuildRequires:  ocaml-num-devel
 BuildRequires:  ocaml-ocamldoc
+BuildRequires:  ocaml-re-devel
+BuildRequires:  ocaml-seq-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
 BuildRequires:  %{py3_dist sphinx}
@@ -65,6 +70,7 @@ Requires:       texlive-base%{?_isa}
 Requires:       vim-filesystem
 
 Recommends:     bash-completion
+Recommends:     flocq
 
 Provides:       bundled(jquery)
 
@@ -238,7 +244,7 @@ cp -p share/images/src/logo-kim.svg \
 # Install the AppStream metadata
 mkdir -p %{buildroot}%{_metainfodir}
 cp -p %{SOURCE3} %{buildroot}%{_metainfodir}
-appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{name}.appdata.xml
+appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{name}.metainfo.xml
 
 # Move the vim file to the right place
 mkdir -p %{buildroot}%{_datadir}/vim/vimfiles
@@ -283,7 +289,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %{_texmf}/tex/latex/why3/
 %{_libdir}/%{name}/
 %{_mandir}/man1/%{name}*
-%{_metainfodir}/%{name}.appdata.xml
+%{_metainfodir}/%{name}.metainfo.xml
 
 %files -n ocaml-%{name}
 %dir %{_libdir}/ocaml/%{name}/
@@ -320,6 +326,10 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Feb 20 2021 Jerry James <loganjerry@gmail.com> - 1.3.3-6
+- Rebuild for coq 8.13.0
+- Update metainfo and install in metainfodir
+
 * Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.3.3-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
