@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.3.3
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -326,6 +326,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Tue Jun  8 2021 Jerry James <loganjerry@gmail.com> - 1.3.3-8
+- Rebuild for ocaml-menhir 20210419
+
 * Wed Mar  3 2021 Jerry James <loganjerry@gmail.com> - 1.3.3-7
 - Rebuild for coq 8.13.1 and ocaml-zarith 1.12
 
