@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>why3.desktop</id>
+  <id>fr.lri.why3.desktop</id>
   <metadata_license>0BSD</metadata_license>
   <project_license>LGPL-2.1-only WITH OCaml-LGPL-linking-exception</project_license>
   <name>Why3</name>
@@ -15,27 +15,27 @@
       TPTP provers, as well as interactive proof assistants.
     </p>
   </description>
-  <launchable type="desktop-id">why3.desktop</launchable>
+  <launchable type="desktop-id">fr.lri.why3.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image>http://why3.lri.fr/doc/gui-1.png</image>
+      <image>http://why3.lri.fr/doc/_images/gui-1.png</image>
       <caption>Initial Why3 GUI window</caption>
     </screenshot>
     <screenshot>
-      <image>http://why3.lri.fr/doc/gui-2.png</image>
-      <image>The Why3 GUI with goal G1 selected</image>
+      <image>http://why3.lri.fr/doc/_images/gui-2.png</image>
+      <caption>The Why3 GUI with goal G1 selected</caption>
     </screenshot>
     <screenshot>
-      <image>http://why3.lri.fr/doc/gui-3.png</image>
-      <image>The Why3 GUI after running Alt-Ergo on each goal</image>
+      <image>http://why3.lri.fr/doc/_images/gui-3.png</image>
+      <caption>The Why3 GUI after running Alt-Ergo on each goal</caption>
     </screenshot>
     <screenshot>
-      <image>http://why3.lri.fr/doc/gui-4.png</image>
-      <image>The Why3 GUI after splitting goal G2</image>
+      <image>http://why3.lri.fr/doc/_images/gui-4.png</image>
+      <caption>The Why3 GUI after splitting goal G2</caption>
     </screenshot>
     <screenshot>
-      <image>http://why3.lri.fr/doc/gui-5.png</image>
-      <image>File reloaded after modifying	 goal G2</image>
+      <image>http://why3.lri.fr/doc/_images/gui-5.png</image>
+      <caption>File reloaded after modifying goal G2</caption>
     </screenshot>
   </screenshots>
   <update_contact>loganjerry@gmail.com</update_contact>
