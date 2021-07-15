@@ -8,35 +8,30 @@
 %endif
 
 Name:           why3
-Version:        1.3.3
-Release:        8%{?dist}
+Version:        1.4.0
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/38367/%{name}-%{version}.tar.gz
+Source0:        https://gforge.inria.fr/frs/download.php/file/38425/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
 # Desktop file written by Jerry James
-Source2:        %{name}.desktop
+Source2:        fr.lri.%{name}.desktop
 # AppData file written by Jerry James
-Source3:        %{name}.metainfo.xml
-# Adapt to sphinxcontrib-bibtex 2.x
-Patch0:         %{name}-sphinxcontrib-bibtex.patch
-# Permit use of coq 8.13.0
-# https://gitlab.inria.fr/why3/why3/-/commit/31b5bf527804793c10f26acd2a14045be71d256c
-Patch1:         %{name}-coq8.13.patch
+Source3:        fr.lri.%{name}.metainfo.xml
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1874879
 ExcludeArch: s390x
 
+BuildRequires:  appstream
 BuildRequires:  coq
 BuildRequires:  emacs-proofgeneral
 BuildRequires:  flocq
 BuildRequires:  latexmk
-BuildRequires:  libappstream-glib
 BuildRequires:  make
 BuildRequires:  ocaml
 BuildRequires:  ocaml-camlp5-devel
@@ -244,7 +239,8 @@ cp -p share/images/src/logo-kim.svg \
 # Install the AppStream metadata
 mkdir -p %{buildroot}%{_metainfodir}
 cp -p %{SOURCE3} %{buildroot}%{_metainfodir}
-appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{name}.metainfo.xml
+appstreamcli validate --no-net \
+  %{buildroot}%{_metainfodir}/fr.lri.%{name}.metainfo.xml
 
 # Move the vim file to the right place
 mkdir -p %{buildroot}%{_datadir}/vim/vimfiles
@@ -277,7 +273,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %license LICENSE
 %{_bindir}/%{name}
 %{_datadir}/%{name}/
-%{_datadir}/applications/%{name}.desktop
+%{_datadir}/applications/fr.lri.%{name}.desktop
 %{_datadir}/bash-completion/completions/why3
 %{_datadir}/gtksourceview-3.0/language-specs/%{name}.lang
 %{_datadir}/gtksourceview-3.0/language-specs/%{name}c.lang
@@ -289,7 +285,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %{_texmf}/tex/latex/why3/
 %{_libdir}/%{name}/
 %{_mandir}/man1/%{name}*
-%{_metainfodir}/%{name}.metainfo.xml
+%{_metainfodir}/fr.lri.%{name}.metainfo.xml
 
 %files -n ocaml-%{name}
 %dir %{_libdir}/ocaml/%{name}/
@@ -307,6 +303,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %else
 %{_libdir}/ocaml/%{name}/*.cma
 %endif
+%{_libdir}/ocaml/%{name}/*.cmt
 
 %files examples
 %doc examples
@@ -326,6 +323,11 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Jul 14 2021 Jerry James <loganjerry@gmail.com> - 1.4.0-1
+- Version 1.4.0
+- Drop all patches
+- Validate with appstreamcli instead of appstream-util
+
 * Tue Jun  8 2021 Jerry James <loganjerry@gmail.com> - 1.3.3-8
 - Rebuild for ocaml-menhir 20210419
 
