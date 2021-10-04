@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.4.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -23,9 +23,6 @@ Source1:        %{name}-man.tar.xz
 Source2:        fr.lri.%{name}.desktop
 # AppData file written by Jerry James
 Source3:        fr.lri.%{name}.metainfo.xml
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1874879
-ExcludeArch: s390x
 
 BuildRequires:  appstream
 BuildRequires:  coq
@@ -323,6 +320,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Mon Oct 04 2021 Richard W.M. Jones <rjones@redhat.com> - 1.4.0-4
+- Try to build on s390x with OCaml 4.13
+
 * Fri Jul 30 2021 Jerry James <loganjerry@gmail.com> - 1.4.0-3
 - Rebuild for rebuilt coq
 
