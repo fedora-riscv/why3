@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.4.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -320,6 +320,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Tue Oct 05 2021 Richard W.M. Jones <rjones@redhat.com> - 1.4.0-5
+- OCaml 4.13.1 build
+
 * Mon Oct 04 2021 Richard W.M. Jones <rjones@redhat.com> - 1.4.0-4
 - Try to build on s390x with OCaml 4.13
 
