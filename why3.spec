@@ -9,13 +9,13 @@
 
 Name:           why3
 Version:        1.4.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
-Source0:        https://gforge.inria.fr/frs/download.php/file/38425/%{name}-%{version}.tar.gz
+Source0:        https://why3.gitlabpages.inria.fr/releases/%{name}-%{version}.tar.gz
 # Man pages written by Jerry James using text found in the sources.  Hence,
 # the copyright and license are the same as for the upstream sources.
 Source1:        %{name}-man.tar.xz
@@ -23,6 +23,9 @@ Source1:        %{name}-man.tar.xz
 Source2:        fr.lri.%{name}.desktop
 # AppData file written by Jerry James
 Source3:        fr.lri.%{name}.metainfo.xml
+# Add support for coq 8.14.0
+# https://gitlab.inria.fr/why3/why3/-/commit/a41e40f88987a26a7ac35f62e7637a2f6fcf1c07
+Patch0:         %{name}-coq8.14.patch
 
 BuildRequires:  appstream
 BuildRequires:  coq
@@ -35,10 +38,15 @@ BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk3-sourceview3-devel
 BuildRequires:  ocaml-menhir
+BuildRequires:  ocaml-mlmpfr-devel
 BuildRequires:  ocaml-num-devel
 BuildRequires:  ocaml-ocamldoc
+BuildRequires:  ocaml-ocamlgraph-devel
+BuildRequires:  ocaml-ppx-deriving-devel
+BuildRequires:  ocaml-ppx-sexp-conv-devel
 BuildRequires:  ocaml-re-devel
 BuildRequires:  ocaml-seq-devel
+BuildRequires:  ocaml-sexplib-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
 BuildRequires:  %{py3_dist sphinx}
@@ -53,7 +61,7 @@ BuildRequires:  tex(tabulary.sty)
 BuildRequires:  tex(upquote.sty)
 BuildRequires:  tex(wrapfig.sty)
 BuildRequires:  tex-urlbst
-BuildRequires:  emacs xemacs xemacs-packages-extra
+BuildRequires:  emacs
 BuildRequires:  graphviz
 
 Requires:       gtksourceview3%{?_isa}
@@ -76,6 +84,9 @@ Obsoletes:      why-jessie < 2.41-12
 Provides:       why-jessie = 2.41-12%{?dist}
 Obsoletes:      why-pvs-support < 2.41-12
 Provides:       why-pvs-support = 2.41-12%{?dist}
+
+# This can be removed when F39 reaches EOL
+Obsoletes:      %{name}-xemacs < 1.4.0-4
 
 %description
 Why3 is the next generation of the Why software verification platform.
@@ -101,15 +112,6 @@ BuildArch:      noarch
 
 %description emacs
 This package contains an Emacs support file for working with %{name} files.
-
-%package xemacs
-Summary:        XEmacs support file for %{name} files
-Requires:       %{name} = %{version}-%{release}
-Requires:       xemacs(bin)
-BuildArch:      noarch
-
-%description xemacs
-This package contains an XEmacs support file for working with %{name} files.
 
 %package all
 Summary:        Complete Why3 software verification platform suite
@@ -155,7 +157,7 @@ BuildArch:      noarch
 This package provides a why3 plugin for ProofGeneral.
 
 %prep
-%autosetup -p0
+%autosetup -p1
 %setup -q -T -D -a 1
 
 fixtimestamp() {
@@ -245,16 +247,11 @@ mv %{buildroot}%{_datadir}/%{name}/vim/ftdetect \
    %{buildroot}%{_datadir}/%{name}/vim/syntax \
    %{buildroot}%{_datadir}/vim/vimfiles
 
-# Byte compile the (X)Emacs support files
-mkdir -p %{buildroot}%{_xemacs_sitelispdir}
-cp -p %{buildroot}%{_emacs_sitelispdir}/%{name}.el \
-   %{buildroot}%{_xemacs_sitelispdir}
+# Byte compile the Emacs support files
 cp -p share/whyitp/whyitp.el %{buildroot}%{_emacs_sitelispdir}
-pushd %{buildroot}%{_xemacs_sitelispdir}
-%{_xemacs_bytecompile} %{name}.el
 cd %{buildroot}%{_emacs_sitelispdir}
 %{_emacs_bytecompile} %{name}.el whyitp.el
-popd
+cd -
 
 # Remove misplaced documentation
 rm -fr %{buildroot}%{_datadir}/doc
@@ -308,9 +305,6 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files emacs
 %{_emacs_sitelispdir}/%{name}.el*
 
-%files xemacs
-%{_xemacs_sitelispdir}/%{name}.el*
-
 %files proofgeneral
 %doc share/whyitp/README
 %{_emacs_sitelispdir}/whyitp.el*
@@ -320,6 +314,11 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Oct 21 2021 Jerry James <loganjerry@gmail.com> - 1.4.0-6
+- Rebuild for coq 8.14.0 and menhir 20211012
+- Add -coq8.14 patch
+- Drop XEmacs support
+
 * Tue Oct 05 2021 Richard W.M. Jones <rjones@redhat.com> - 1.4.0-5
 - OCaml 4.13.1 build
 

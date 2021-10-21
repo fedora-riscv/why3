@@ -1,0 +1,3446 @@
+--- a/configure	2021-03-13 02:24:39.000000000 -0700
++++ b/configure	2021-10-20 08:34:30.402015180 -0600
+@@ -5293,14 +5293,11 @@ if test "$enable_coq_support" = yes; the
+    COQLIB=`$COQC -where | sed -e 's|\\\|/|g' -e 's| |\\ |g'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking Coq version" >&5
+ $as_echo_n "checking Coq version... " >&6; }
+-   COQVERSION=`$COQC -v | sed -n -e 's|.*version *\([^ ]*\) .*$|\1|p'`
++   COQVERSION=`$COQC -v | sed -n -e 's|.*version  *\([^ ]*\).*|\1|p'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $COQVERSION" >&5
+ $as_echo "$COQVERSION" >&6; }
+ 
+    case $COQVERSION in
+-      8.6*)
+-         coq_compat_version="COQ86"
+-         ;;
+       8.7*)
+          coq_compat_version="COQ87"
+          ;;
+@@ -5322,11 +5319,14 @@ $as_echo "$COQVERSION" >&6; }
+       8.13*)
+          coq_compat_version="COQ813"
+          ;;
++      8.14*)
++         coq_compat_version="COQ814"
++         ;;
+       *)
+          enable_coq_support=no
+-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: You need Coq 8.6 or later; Coq discarded" >&5
+-$as_echo "$as_me: WARNING: You need Coq 8.6 or later; Coq discarded" >&2;}
+-         reason_coq_support=" (need version >= 8.6)"
++         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: You need Coq 8.7 or later; Coq discarded" >&5
++$as_echo "$as_me: WARNING: You need Coq 8.7 or later; Coq discarded" >&2;}
++         reason_coq_support=" (need version >= 8.7)"
+          ;;
+    esac
+ fi
+--- a/lib/coq/bv/BV_Gen.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/bv/BV_Gen.v	2021-10-20 08:43:59.506098099 -0600
+@@ -19,6 +19,8 @@ Require int.Abs.
+ Require int.EuclideanDivision.
+ Require bv.Pow2int.
+ 
++Require Import Lia.
++
+ Local Parameter last_bit : nat.
+ (* Important notice: do not remove 'Local' above, otherwise 'why3 realize' will
+    assume it comes from Why3 and will remove it. We use 'Parameter' instead of
+@@ -38,7 +40,7 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma size_pos : (0%Z < size)%Z.
+-  rewrite size_int_S; omega.
++  rewrite size_int_S; lia.
+ Qed.
+ 
+ Require Import Bool.Bvector.
+@@ -60,29 +62,29 @@ Lemma nth_cons {l} (v : Vector.t bool l)
+   nth_aux (Vector.cons bool b l v) (Z.succ m) = nth_aux v m.
+   intro; simpl.
+   case Z.eq_dec; intro.
+-  assert False by omega; easy.
++  assert False by lia; easy.
+   rewrite <- Zpred_succ; easy.
+ Qed.
+ 
+ Lemma nth_cons_pred {l} (v : Vector.t bool l) (m : Z) b : (m <> 0)%Z ->
+   nth_aux (Vector.cons bool b l v) m = nth_aux v (Z.pred m).
+   intro.
+-  rewrite Zsucc_pred with (n := m), <- Zpred_succ; apply nth_cons; omega.
++  rewrite Zsucc_pred with (n := m), <- Zpred_succ; apply nth_cons; lia.
+ Qed.
+ 
+ Lemma nth_high : forall {l} (v : Vector.t bool l) m, (m >= (Z.of_nat l))%Z -> nth_aux v m = false.
+   induction v.
+   easy.
+   rewrite Nat2Z.inj_succ.
+-  intros; rewrite nth_cons_pred by omega.
+-  apply IHv; omega.
++  intros; rewrite nth_cons_pred by lia.
++  apply IHv; lia.
+ Qed.
+ 
+ Lemma nth_low : forall {l} (v : Vector.t bool l) m, (m < 0)%Z -> nth_aux v m = false.
+   induction v.
+   easy.
+-  intros; rewrite nth_cons_pred by omega.
+-  apply IHv; omega.
++  intros; rewrite nth_cons_pred by lia.
++  apply IHv; lia.
+ Qed.
+ 
+ Lemma nth_zeros_is_hd : forall {l} (b : Vector.t bool (S l)), nth_aux b 0 = Vector.hd b.
+@@ -93,7 +95,7 @@ Lemma nth_predl_is_last : forall {l} (b
+   apply Vector.rectS.
+   easy.
+   intros.
+-  rewrite Nat2Z.inj_succ, nth_cons by omega.
++  rewrite Nat2Z.inj_succ, nth_cons by lia.
+   easy.
+ Qed.
+ 
+@@ -101,22 +103,22 @@ Lemma nth_const {l} (m : Z) b: (0 <= m <
+   revert b m.
+   induction l.
+   simpl.
+-  intros; assert False by omega; easy.
++  intros; assert False by lia; easy.
+   rewrite Nat2Z.inj_succ; intros; simpl.
+   case (Z.eq_dec m 0); intro.
+   easy.
+-  apply IHl; omega.
++  apply IHl; lia.
+ Qed.
+ 
+ Lemma nth_aux_map : forall {l} (f : bool -> bool) (v : Vector.t bool l) m,
+                        (0 <= m < Z.of_nat l)%Z ->
+                        f (nth_aux v m) = nth_aux (Vector.map f v) m.
+   induction v.
+-  simpl; intros; assert False by omega; easy.
++  simpl; intros; assert False by lia; easy.
+   rewrite Nat2Z.inj_succ; intros; simpl.
+   case (Z.eq_dec m 0); intro.
+   easy.
+-  apply IHv; omega.
++  apply IHv; lia.
+ Qed.
+ 
+ Lemma nth_aux_map2 : forall {l} (f : bool -> bool -> bool) (v1 v2 : Vector.t bool l) m,
+@@ -124,12 +126,12 @@ Lemma nth_aux_map2 : forall {l} (f : boo
+                        f (nth_aux v1 m) (nth_aux v2 m) = nth_aux (Vector.map2 f v1 v2) m.
+   intros l f v1 v2; pattern l, v1, v2.
+   apply Vector.rect2.
+-  simpl; intros; assert False by omega; easy.
++  simpl; intros; assert False by lia; easy.
+   intros.
+   rewrite Nat2Z.inj_succ in H0; simpl.
+   case (Z.eq_dec m 0); intro.
+   easy.
+-  apply H; omega.
++  apply H; lia.
+ Qed.
+ 
+ Lemma nth_aux_tl : forall {l} (v : Vector.t bool (S l)) m, (m <> -1)%Z -> nth_aux (Vector.tl v) m = nth_aux v (Z.succ m).
+@@ -137,11 +139,11 @@ Lemma nth_aux_tl : forall {l} (v : Vecto
+   apply Vector.rectS.
+   simpl.
+   intros; case Z.eq_dec.
+-  intro; assert False by omega; easy.
++  intro; assert False by lia; easy.
+   trivial.
+   intros.
+   simpl (Vector.tl (a :: v0)).
+-  symmetry; apply nth_cons; omega.
++  symmetry; apply nth_cons; lia.
+ Qed.
+ 
+ Lemma nth_aux_shiftout_last : forall {l} (v : Vector.t bool (S l)), nth_aux (Vector.shiftout v) (Z.of_nat l) = false.
+@@ -150,7 +152,7 @@ Lemma nth_aux_shiftout_last : forall {l}
+   easy.
+   rewrite Nat2Z.inj_succ.
+   assert (Vector.shiftout (a :: v0) = a :: (Vector.shiftout v0)) by easy.
+-  rewrite H0, nth_cons by omega.
++  rewrite H0, nth_cons by lia.
+   apply H.
+ Qed.
+ 
+@@ -160,7 +162,7 @@ Lemma nth_aux_shiftout_not_last : forall
+   simpl; case Z.eq_dec; easy.
+   simpl; case Z.eq_dec; trivial.
+   intro; apply H.
+-  rewrite Nat2Z.inj_succ in H0; omega.
++  rewrite Nat2Z.inj_succ in H0; lia.
+ Qed.
+ 
+ Lemma nth_aux_shiftin_false : forall {l} (v : Vector.t bool l) m, nth_aux (Vector.shiftin false v) m = nth_aux v m.
+@@ -173,7 +175,7 @@ Lemma nth_aux_shiftin_low : forall {l} (
+   simpl; case Z.eq_dec.
+   easy.
+   rewrite Nat2Z.inj_succ in H0.
+-  intro; apply IHv; omega.
++  intro; apply IHv; lia.
+ Qed.
+ 
+ Lemma nth_aux_shiftin_high : forall {l} (v : Vector.t bool l) b, nth_aux (Vector.shiftin b v) (Z.of_nat l) = b.
+@@ -182,7 +184,7 @@ Lemma nth_aux_shiftin_high : forall {l}
+   unfold Vector.shiftin.
+   fold (@Vector.shiftin bool).
+   rewrite Nat2Z.inj_succ.
+-  intro; rewrite nth_cons by omega.
++  intro; rewrite nth_cons by lia.
+   apply IHv.
+ Qed.
+ 
+@@ -201,7 +203,7 @@ simpl.
+ intros.
+ case Z.eq_dec.
+ intros; elimtype False; destruct H.
+-omega.
++lia.
+ subst n0.
+ auto with zarith.
+ intro; rewrite IHv;auto.
+@@ -209,7 +211,7 @@ destruct H.
+ left; auto with zarith.
+ right.
+ rewrite Zpos_P_of_succ_nat in H.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -335,10 +337,10 @@ Lemma bshiftRl_iter_nth : forall b s m,
+   rewrite Nat2Z.inj_succ; intros.
+   simpl BshiftRl_iter.
+   unfold BshiftRl, Bhigh.
+-  rewrite nth_aux_tl by omega.
++  rewrite nth_aux_tl by lia.
+   rewrite nth_aux_shiftin_false.
+   rewrite <- Zplus_succ_r_reverse, <- Z.add_succ_l.
+-  apply IHs; omega.
++  apply IHs; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -348,7 +350,7 @@ Lemma Lsr_nth_low :
+   ((nth (lsr b s) n) = (nth b (n + s)%Z)).
+ intros b n s h1 h2 h3.
+ rewrite <-Z2Nat.id with (n := s) at 2; auto.
+-apply bshiftRl_iter_nth; omega.
++apply bshiftRl_iter_nth; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -361,9 +363,9 @@ Lemma Lsr_nth_high :
+   cut (nth_aux b (n + Z.of_nat (Z.to_nat s)) = false).
+   intro.
+   rewrite <-H.
+-  apply bshiftRl_iter_nth; omega.
+-  rewrite Z2Nat.id by omega.
+-  apply nth_out_of_bound; omega.
++  apply bshiftRl_iter_nth; lia.
++  rewrite Z2Nat.id by lia.
++  apply nth_out_of_bound; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -385,13 +387,13 @@ Lemma eq_aux_cons : forall {l} v1 v2 b b
+   split; intros.
+   simpl; case Z.eq_dec; intro.
+   easy.
+-  apply H; omega.
++  apply H; lia.
+   split.
+-  apply (H 0%Z); omega.
++  apply (H 0%Z); lia.
+   intros.
+-  rewrite <- (nth_cons v1 n b) by omega.
+-  rewrite <- (nth_cons v2 n b') by omega.
+-  apply H; omega.
++  rewrite <- (nth_cons v1 n b) by lia.
++  rewrite <- (nth_cons v2 n b') by lia.
++  apply H; lia.
+ Qed.
+ 
+ Lemma Extensionality_aux : forall {l} (x y : Vector.t bool l), eq_aux x y -> x = y.
+@@ -408,7 +410,7 @@ Qed.
+ 
+ Lemma singleton_is_singl : forall b : Vector.t bool 1, b = [ Vector.hd b ].
+   intro; apply Extensionality_aux; unfold eq_aux; intros.
+-  change (Z.of_nat 1) with 1%Z in H; assert (n = 0%Z) as e by omega; rewrite e; simpl.
++  change (Z.of_nat 1) with 1%Z in H; assert (n = 0%Z) as e by lia; rewrite e; simpl.
+   apply nth_zeros_is_hd.
+ Qed.
+ 
+@@ -438,13 +440,13 @@ Lemma BshiftRa_iter_nth_low : forall (b:
+   rewrite Nat2Z.inj_succ; intros.
+   simpl BshiftRa_iter.
+   unfold BshiftRa, Bhigh.
+-  rewrite nth_aux_tl by omega.
++  rewrite nth_aux_tl by lia.
+   rewrite shiftrepeat_is_shiftin.
+   rewrite nth_aux_shiftin_low.
+   rewrite <- Zplus_succ_r_reverse, <- Z.add_succ_l.
+-  apply IHs; omega.
+-  omega.
+-  fold size_nat; fold size; omega.
++  apply IHs; lia.
++  lia.
++  fold size_nat; fold size; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -455,9 +457,9 @@ Lemma Asr_nth_low :
+   unfold nth, lsr.
+   intros.
+   assert ((n + s)%Z = (n + Z.of_nat (Z.to_nat s))%Z).
+-  rewrite Z2Nat.id with (n := s); omega.
++  rewrite Z2Nat.id with (n := s); lia.
+   rewrite H2.
+-  apply BshiftRa_iter_nth_low; omega.
++  apply BshiftRa_iter_nth_low; lia.
+ Qed.
+ 
+ Lemma bshiftra_iter_last : forall {l} (v : Bvector (S l)) s, Vector.last (BshiftRa_iter l v s) = Vector.last v.
+@@ -476,11 +478,11 @@ Lemma BhiftRa_iter_nth_high : forall (b:
+   simpl BshiftRa_iter.
+   simpl (Z.of_nat 0).
+   intros.
+-  assert (n = size - 1)%Z by omega; rewrite H1; trivial.
++  assert (n = size - 1)%Z by lia; rewrite H1; trivial.
+   rewrite Nat2Z.inj_succ; intros.
+   simpl BshiftRa_iter.
+   unfold BshiftRa, Bhigh.
+-  rewrite nth_aux_tl by omega.
++  rewrite nth_aux_tl by lia.
+   rewrite shiftrepeat_is_shiftin.
+   case (Z.eq_dec (Z.succ n) size).
+   intro; unfold size in e.
+@@ -489,9 +491,9 @@ Lemma BhiftRa_iter_nth_high : forall (b:
+   rewrite size_int_S, Z.sub_1_r, <- Zpred_succ.
+   symmetry; apply nth_predl_is_last.
+   intro; rewrite nth_aux_shiftin_low.
+-  apply IHs; omega.
+-  omega.
+-  fold size_nat; fold size; omega.
++  apply IHs; lia.
++  lia.
++  fold size_nat; fold size; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -502,8 +504,8 @@ Lemma Asr_nth_high :
+   unfold nth, asr.
+   intros.
+   apply BhiftRa_iter_nth_high.
+-  omega.
+-  rewrite Z2Nat.id; omega.
++  lia.
++  rewrite Z2Nat.id; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -526,10 +528,10 @@ Lemma bshiftL_iter_nth_high : forall {l}
+   rewrite e; simpl; apply Pos2Z.neg_is_neg.
+   rewrite Nat2Z.inj_succ in H, H0.
+   case (Z.eq_dec (Z.pred m) (Z.of_nat l));intro.
+-  assert False by omega; easy.
+-  rewrite nth_aux_shiftout_not_last by omega.
++  assert False by lia; easy.
++  rewrite nth_aux_shiftout_not_last by lia.
+   rewrite Zpos_P_of_succ_nat, Z.sub_succ_r, <- Z.sub_pred_l.
+-  apply IHs; omega.
++  apply IHs; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -539,28 +541,28 @@ Lemma Lsl_nth_high :
+   ((nth (lsl b s) n) = (nth b (n - s)%Z)).
+   intros.
+   unfold lsl, nth.
+-  rewrite <-Z2Nat.id with (n := s) at 2 by omega.
++  rewrite <-Z2Nat.id with (n := s) at 2 by lia.
+   destruct H.
+   destruct H0.
+   apply (bshiftL_iter_nth_high b (Z.to_nat s) n).
+   auto with zarith.
+-  rewrite Z2Nat.id; omega.
++  rewrite Z2Nat.id; lia.
+   rewrite size_int_S in H1.
+-  omega.
++  lia.
+ Qed.
+ 
+ Lemma Lsl_nth_low_aux : forall {l} x b (n : int),
+                           (0 <= n < Z.of_nat x)%Z -> nth_aux (BshiftL_iter l b x) n = false.
+   induction x.
+-  simpl; intros; assert False by omega; easy.
++  simpl; intros; assert False by lia; easy.
+   rewrite Nat2Z.inj_succ; intros.
+   simpl.
+   case Z.eq_dec;intro.
+   trivial.
+   case (Z.eq_dec (Z.pred n) (Z.of_nat l));intro.
+-  apply nth_high; omega.
++  apply nth_high; lia.
+   rewrite nth_aux_shiftout_not_last by auto.
+-  apply IHx; omega.
++  apply IHx; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -569,7 +571,7 @@ Lemma Lsl_nth_low :
+   (0%Z <= n)%Z /\ (n < s)%Z -> ((nth (lsl b s) n) = Init.Datatypes.false).
+   intros.
+   apply Lsl_nth_low_aux.
+-  rewrite Z2Nat.id; omega.
++  rewrite Z2Nat.id; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -582,7 +584,7 @@ Lemma max_int_nat : forall l, (0 <= Pow2
+   rewrite Z.sub_1_r.
+   apply Zlt_0_le_0_pred.
+   apply Pow2int.pow2pos.
+-  omega.
++  lia.
+ Qed.
+ 
+ Fixpoint bvec_to_nat n (v : Bvector n) {struct v} : nat :=
+@@ -593,7 +595,7 @@ Fixpoint bvec_to_nat n (v : Bvector n) {
+   end.
+ 
+ Lemma bvec_to_nat_zeros : forall {l}, bvec_to_nat l (Vector.const false l) = 0.
+-  induction l; [easy|simpl; omega].
++  induction l; [easy|simpl; lia].
+ Qed.
+ 
+ Definition twos_complement n (v : Bvector n) : Z.
+@@ -630,10 +632,10 @@ Lemma bvec_to_nat_extensionality : foral
+   apply Vector.rect2.
+   trivial.
+   case a, b; intros.
+-  rewrite H; auto; inversion H0; omega.
+-  inversion H0; assert False; omega.
+-  inversion H0; assert False; omega.
+-  rewrite H; auto; inversion H0; omega.
++  rewrite H; auto; inversion H0; lia.
++  inversion H0; assert False; lia.
++  inversion H0; assert False; lia.
++  rewrite H; auto; inversion H0; lia.
+ Qed.
+ 
+ (* pow2 helper lemmas *)
+@@ -644,23 +646,23 @@ Lemma id_lt_pow2: forall n, (Z.of_nat (S
+   easy.
+   rewrite Nat2Z.inj_succ.
+   apply Z.le_lt_trans with (m := (2 * Z.of_nat (S n))%Z).
+-  rewrite Nat2Z.inj_succ; omega.
++  rewrite Nat2Z.inj_succ; lia.
+   apply Z.lt_le_trans with (m := (2 * Pow2int.pow2 (Z.of_nat (S n)))%Z).
+-  omega.
+-  rewrite two_p_S by omega.
+-  unfold Pow2int.pow2; omega.
++  lia.
++  rewrite two_p_S by lia.
++  unfold Pow2int.pow2; lia.
+ Qed.
+ 
+ Lemma pow2_lt_mono_nat : forall i j : nat, (i < j) -> (Pow2int.pow2 (Z.of_nat i) < Pow2int.pow2 (Z.of_nat j))%Z.
+   intros.
+   unfold Pow2int.pow2; rewrite two_p_equiv, two_p_equiv.
+-  apply Z.pow_lt_mono_r; omega.
++  apply Z.pow_lt_mono_r; lia.
+ Qed.
+ 
+ Lemma pow2_le_mono_nat : forall i j : nat, (i <= j) -> (Pow2int.pow2 (Z.of_nat i) <= Pow2int.pow2 (Z.of_nat j))%Z.
+   intros.
+   unfold Pow2int.pow2; rewrite two_p_equiv, two_p_equiv.
+-  apply Z.pow_le_mono_r; omega.
++  apply Z.pow_le_mono_r; lia.
+ Qed.
+ 
+ Lemma pow2_le_mono_pos : forall i j : positive, (Pos.le i j) -> (Pow2int.pow2 (Zpos i) <= Pow2int.pow2 (Zpos j))%Z.
+@@ -682,7 +684,7 @@ Qed.
+ (* arithmetic helper lemmas *)
+ 
+ Lemma lem_time2 : forall a b, a < b -> 1 + 2 * a < 2 * b.
+-  intros; omega.
++  intros; lia.
+ Qed.
+ 
+ Lemma le_le_le: forall x y z t, (t <= z)%Z -> (x <= y <= t)%Z -> (x <= y <= z)%Z.
+@@ -700,7 +702,7 @@ Lemma factor_sub : forall n m p, (n * m
+ Qed.
+ 
+ Lemma lt_sym: forall x y, (x < y)%Z <-> (y > x)%Z.
+-  intro; split; omega.
++  intro; split; lia.
+ Qed.
+ 
+ (* end of arithmetic helpers *)
+@@ -709,15 +711,15 @@ Lemma bvec_to_nat_range : forall {n} v,
+   induction v.
+   simpl bvec_to_nat; auto.
+   apply Nat.le_lt_trans with (m := 1 + (bvec_to_nat n v * 2)).
+-  simpl; case h; omega.
+-  rewrite Nat2Z.inj_succ, <- Z.add_1_r, Pow2int.Power_s by omega.
++  simpl; case h; lia.
++  rewrite Nat2Z.inj_succ, <- Z.add_1_r, Pow2int.Power_s by lia.
+   rewrite Z2Nat.inj_mul.
+   assert (Z.to_nat 2 = 2) by easy; rewrite H.
+   rewrite mult_comm.
+   apply lem_time2.
+   easy.
+   easy.
+-  apply Zlt_le_weak, Pow2int.pow2pos; omega.
++  apply Zlt_le_weak, Pow2int.pow2pos; lia.
+ Qed.
+ 
+ Lemma twos_complement_neg : forall {n} v, Bsign n v = true -> (twos_complement (S n) v < 0)%Z.
+@@ -729,14 +731,14 @@ Lemma twos_complement_neg : forall {n} v
+   rewrite Z2Nat.inj_lt.
+   rewrite Nat2Z.id.
+   apply bvec_to_nat_range.
+-  omega.
+-  apply Zlt_le_weak, Pow2int.pow2pos; omega.
+-  omega.
++  lia.
++  apply Zlt_le_weak, Pow2int.pow2pos; lia.
++  lia.
+ Qed.
+ 
+ Lemma twos_complement_pos : forall {n} v, Bsign n v = false -> (twos_complement (S n) v >= 0)%Z.
+   intros.
+-  unfold twos_complement; rewrite H; omega.
++  unfold twos_complement; rewrite H; lia.
+ Qed.
+ 
+ 
+@@ -757,28 +759,28 @@ Lemma twos_complement_extensionality : f
+               Z.of_nat (bvec_to_nat (S m) v') < 0)%Z.
+       {
+         split.
+-        + omega.
++        + lia.
+         + rewrite <- H. generalize (bvec_to_nat_range v). intros.
+           eapply Z.lt_sub_0. rewrite <- Z2Nat.id.
+           apply inj_lt. assumption.
+           eapply Z.le_trans. apply (max_int_nat (S m)).
+-          omega.
++          lia.
+       }
+-      omega.
++      lia.
+       destruct Bsign.
+       (* TODO improve this (copy/paste) *)
+       assert (Z.of_nat (bvec_to_nat (S m) v) >= 0 /\
+               Z.of_nat (bvec_to_nat (S m) v) < 0)%Z.
+       {
+         split.
+-        + omega.
++        + lia.
+         + rewrite H. generalize (bvec_to_nat_range v'). intros.
+           eapply Z.lt_sub_0. rewrite <- Z2Nat.id.
+           apply inj_lt. assumption.
+           eapply Z.le_trans. apply (max_int_nat (S m)).
+-          omega.
++          lia.
+       }
+-      omega.
++      lia.
+       reflexivity.
+     }
+     unfold twos_complement in H. rewrite <- H0 in H.
+@@ -797,9 +799,9 @@ Lemma odd_is_odd : forall n : nat, Even.
+   rewrite Zodd_bool_iff, Zodd_ex_iff, Even.odd_equiv.
+   unfold Nat.Odd.
+   split; intro; destruct H.
+-  exists (Z.of_nat x); omega.
+-  rewrite <-Z2Nat.id with (n := x) in H by omega.
+-  exists (Z.to_nat x); omega.
++  exists (Z.of_nat x); lia.
++  rewrite <-Z2Nat.id with (n := x) in H by lia.
++  exists (Z.to_nat x); lia.
+ Qed.
+ 
+ Lemma even_not_odd : forall n : nat, Even.even n <-> not (Even.odd n).
+@@ -833,7 +835,7 @@ Qed.
+ Lemma pow2_is_even : forall n, (n > 0)%Z -> Z.even (Pow2int.pow2 n) = true.
+   intros.
+   unfold Pow2int.pow2.
+-  rewrite two_p_equiv, Z.even_pow by omega; easy.
++  rewrite two_p_equiv, Z.even_pow by lia; easy.
+ Qed.
+ 
+ Lemma max_int_is_odd : forall n, (n > 0)%Z -> Z.odd (Pow2int.pow2 n - 1) = true.
+@@ -847,7 +849,7 @@ Qed.
+ Lemma bvec_to_nat_nat_to_bvec : forall {n} i, (Z.of_nat i <= Pow2int.pow2 (Z.of_nat n) - 1)%Z ->
+   bvec_to_nat n (nat_to_bvec n i) = i.
+   induction n.
+-  simpl; intro; omega.
++  simpl; intro; lia.
+   destruct i; intros.
+   simpl.
+   rewrite <- Nat_to_bvec_zeros, bvec_to_nat_zeros; trivial.
+@@ -865,9 +867,9 @@ Lemma bvec_to_nat_nat_to_bvec : forall {
+   rewrite Z.mul_le_mono_pos_l with (p := 2%Z) by easy.
+   rewrite Z.add_le_mono_l with (p := 1%Z) by easy.
+   apply Z.le_trans with (m := Z.of_nat (S i)).
+-  rewrite <- Div2.even_div2, <- Nat2Z.inj_mul with (n:= 2), <- Nat.double_twice, <- Div2.even_double, Nat2Z.inj_succ by trivial; omega.
++  rewrite <- Div2.even_div2, <- Nat2Z.inj_mul with (n:= 2), <- Nat.double_twice, <- Div2.even_double, Nat2Z.inj_succ by trivial; lia.
+   apply Z.le_trans with (m := (Pow2int.pow2 (Z.of_nat (S n)) - 1)%Z); trivial.
+-  rewrite Nat2Z.inj_succ, <- Z.add_1_r, Pow2int.Power_s; omega.
++  rewrite Nat2Z.inj_succ, <- Z.add_1_r, Pow2int.Power_s; lia.
+   rewrite e.
+   change (2 * bvec_to_nat n (nat_to_bvec n (Div2.div2 (S i))) = S i).
+   rewrite IHn.
+@@ -876,16 +878,16 @@ Lemma bvec_to_nat_nat_to_bvec : forall {
+   rewrite Z.mul_le_mono_pos_l with (p := 2%Z) by easy.
+   apply Z.le_trans with (m := Z.of_nat (S i)).
+   rewrite <- Nat2Z.inj_mul with (n := 2), <- Nat.double_twice, <- Div2.even_double.
+-  omega.
++  lia.
+   rewrite even_not_odd, odd_is_odd, not_true_iff_false; trivial.
+   apply odd_even_le, Z.lt_le_pred in H.
+   apply Z.le_trans with (m := (Pow2int.pow2 (Z.of_nat (S n)) - 2)%Z).
+-  omega.
+-  rewrite Nat2Z.inj_succ, <- Z.add_1_r, Pow2int.Power_s; omega.
++  lia.
++  rewrite Nat2Z.inj_succ, <- Z.add_1_r, Pow2int.Power_s; lia.
+   rewrite Zeven.Zeven_odd_bool, e; easy.
+   unfold Pow2int.pow2.
+   rewrite Z.sub_1_r, Z.odd_pred, Nat2Z.inj_succ.
+-  rewrite pow2_is_even by omega; easy.
++  rewrite pow2_is_even by lia; easy.
+ Qed.
+ 
+ Lemma Nat_to_bvec_ones : forall {n}, Vector.const true n = nat_to_bvec n (Z.to_nat (Pow2int.pow2 (Z.of_nat n) - 1)).
+@@ -900,12 +902,12 @@ Lemma Nat_to_bvec_ones : forall {n}, Vec
+   rewrite Div2.odd_div2.
+   rewrite <- Z2Nat.inj_succ by (apply max_int_nat).
+   rewrite Z.sub_1_r, <- Zsucc_pred, Nat2Z.inj_succ, <- Z.add_1_r.
+-  rewrite Pow2int.Power_s by omega.
++  rewrite Pow2int.Power_s by lia.
+   rewrite Z2Nat.inj_mul, Div2.div2_double.
+   rewrite <- Z2Nat.inj_succ by (apply max_int_nat).
+   rewrite Z.sub_1_r, <- Zsucc_pred; trivial.
+   easy.
+-  apply Z.lt_le_incl, Pow2int.pow2pos; omega.
++  apply Z.lt_le_incl, Pow2int.pow2pos; lia.
+   rewrite odd_is_odd.
+   rewrite Z2Nat.id by (apply max_int_nat).
+   apply max_int_is_odd; easy.
+@@ -920,32 +922,32 @@ Lemma mod1_nat : forall x y, 0 < y -> 0
+   intros.
+   unfold mod1, div.
+   case Z_le_dec; intro.
+-  apply Zle_minus_le_0, Z_mult_div_ge; omega.
++  apply Zle_minus_le_0, Z_mult_div_ge; lia.
+   destruct n; apply Z.mod_pos_bound; trivial.
+ Qed.
+ 
+ Lemma mod1_nat_high_bound_lt: forall u v, 0 < v -> mod1 u v < v.
+   intros.
+-  rewrite <- Z.abs_eq by omega.
+-  apply Mod_bound; omega.
++  rewrite <- Z.abs_eq by lia.
++  apply Mod_bound; lia.
+ Qed.
+ 
+ Lemma mod1_nat_high_bound_le: forall u v, 0 <= v ->
+                                        mod1 u (v + 1) <= v.
+   intros.
+   rewrite Zpred_succ, <- Z.lt_le_pred.
+-  apply mod1_nat_high_bound_lt; omega.
++  apply mod1_nat_high_bound_lt; lia.
+ Qed.
+ 
+ Lemma mod1_out : forall x y, 0 <= x < y -> mod1 x y = x.
+   intros; unfold mod1.
+-  rewrite Div_inf; omega.
++  rewrite Div_inf; lia.
+ Qed.
+ 
+ Lemma mod_mod_mult: forall a b c, b > 0 -> c > 0 -> ((a mod (c * b)) mod b) = a mod b.
+   intros.
+   rewrite Z.mul_comm.
+-  rewrite Z.rem_mul_r by omega.
++  rewrite Z.rem_mul_r by lia.
+   rewrite <-Zplus_mod_idemp_r.
+   rewrite Z.mul_comm, Z_mod_mult, Zplus_0_r.
+   apply Zmod_mod.
+@@ -970,39 +972,39 @@ end.
+ Lemma mod1_is_mod : forall x y, y > 0 -> mod1 x y = Zmod x y.
+   intros; unfold mod1, div.
+   case Z_le_dec; intro.
+-  rewrite Z.mod_eq by omega; trivial.
+-  destruct n; apply Z_mod_lt; omega.
++  rewrite Z.mod_eq by lia; trivial.
++  destruct n; apply Z_mod_lt; lia.
+ Qed.
+ 
+ Lemma mod1_succ_low : forall x y, y > 0 -> mod1 x y < (Z.pred y) -> mod1 (Z.succ x) y = Z.succ (mod1 x y).
+   intros x y H.
+   rewrite mod1_is_mod, mod1_is_mod by trivial.
+-  rewrite Z.mod_eq, Z.mod_eq by omega.
++  rewrite Z.mod_eq, Z.mod_eq by lia.
+   intro; cut (Z.succ x / y = x / y).
+-  intro e; rewrite e; omega.
++  intro e; rewrite e; lia.
+   rewrite Z.div_unique_pos with (a := Z.succ x) (b := y) (r := (x mod y) + 1) (q := x / y).
+   trivial.
+-  rewrite <- Z.mod_eq in H0 by omega.
+-  split; [apply Z.le_le_succ_r, Z_mod_lt; trivial|omega].
+-  rewrite <- Zplus_assoc_reverse, <- Z_div_mod_eq by omega; omega.
++  rewrite <- Z.mod_eq in H0 by lia.
++  split; [apply Z.le_le_succ_r, Z_mod_lt; trivial|lia].
++  rewrite <- Zplus_assoc_reverse, <- Z_div_mod_eq by lia; lia.
+ Qed.
+ 
+ Lemma mod1_succ_high : forall x y, y > 0 -> mod1 x y = (Z.pred y) -> mod1 (Z.succ x) y = 0.
+   intros x y H.
+-  rewrite mod1_is_mod, mod1_is_mod by omega; intro.
++  rewrite mod1_is_mod, mod1_is_mod by lia; intro.
+   rewrite <- Z.add_1_r, Zplus_mod, H0.
+   case (Z.eq_dec y 1); intro e.
+   rewrite e; easy.
+-  rewrite Zmod_1_l by omega.
++  rewrite Zmod_1_l by lia.
+   rewrite Z.add_1_r, <- Zsucc_pred.
+   apply Z_mod_same_full.
+ Qed.
+ 
+ Lemma mod1_add : forall x y, y > 0 -> mod1 (x + y) y = mod1 x y.
+   intros.
+-  rewrite mod1_is_mod, mod1_is_mod by omega.
++  rewrite mod1_is_mod, mod1_is_mod by lia.
+   rewrite <- Z.mul_1_l with (n := x + y), <- Zred_factor4, Z.mul_1_l.
+-  apply Z.mod_add; omega.
++  apply Z.mod_add; lia.
+ Qed.
+ 
+ Lemma Nth_rotate_aux_left :
+@@ -1018,13 +1020,13 @@ Lemma Nth_rotate_aux_left :
+   rewrite <-mod1_add by auto with zarith.
+   rewrite Z.sub_0_l, Int.Comm, Z.add_opp_r.
+   rewrite Nat2Z.inj_succ, Z.sub_succ_r, <-Z.sub_pred_l, <-Zpred_succ.
+-  rewrite <-IHn by omega.
++  rewrite <-IHn by lia.
+   simpl.
+   symmetry; apply nth_predl_is_last.
+ 
+   rewrite Nat2Z.inj_succ, Z.sub_succ_r, <-Z.sub_pred_l.
+   rewrite <-Nat2Z.inj_pred by auto with zarith.
+-  rewrite <-IHn by (rewrite Nat2Z.inj_pred; omega).
++  rewrite <-IHn by (rewrite Nat2Z.inj_pred; lia).
+   rewrite Nat2Z.inj_pred by auto with zarith.
+   simpl.
+   destruct Z.eq_dec; try easy.
+@@ -1035,37 +1037,37 @@ Lemma Nth_rotate_aux_right : forall {l}
+   (Z.of_nat i < (Z.succ (Z.of_nat l))) ->
+   (nth_aux (rotate_right_aux v n) (Z.of_nat i)) = (nth_aux v (mod1 ((Z.of_nat i) + (Z.of_nat n)) (Z.succ (Z.of_nat l)))).
+   induction n.
+-  simpl; intros; rewrite <- Zplus_0_r_reverse, mod1_out; [trivial|omega].
++  simpl; intros; rewrite <- Zplus_0_r_reverse, mod1_out; [trivial|lia].
+   intros; rewrite Nat2Z.inj_succ, <-Z.add_succ_comm, <-Nat2Z.inj_succ.
+   case (Z.eq_dec (Z.of_nat i) (Z.of_nat l)); intro e.
+   rewrite Nat2Z.inj_succ, e.
+   simpl (rotate_right_aux v (S n)).
+   rewrite nth_aux_shiftin_high.
+-  rewrite Z.add_comm, mod1_add by omega.
++  rewrite Z.add_comm, mod1_add by lia.
+   rewrite <-nth_zeros_is_hd.
+-  apply (IHn 0%nat); simpl; omega.
+-  rewrite <-IHn by (rewrite Nat2Z.inj_succ; omega).
++  apply (IHn 0%nat); simpl; lia.
++  rewrite <-IHn by (rewrite Nat2Z.inj_succ; lia).
+   simpl (rotate_right_aux v (S n)).
+-  rewrite nth_aux_shiftin_low by omega.
++  rewrite nth_aux_shiftin_low by lia.
+   rewrite Nat2Z.inj_succ.
+-  apply nth_aux_tl; omega.
++  apply nth_aux_tl; lia.
+ Qed.
+ 
+ Lemma bvec_to_nat_tl: forall {l} v, Z.of_nat (bvec_to_nat l (Vector.tl v)) = Z.of_nat (bvec_to_nat (S l) v) / 2.
+   apply Vector.rectS; intros.
+   simpl.
+   symmetry; case a.
+-  apply Zdiv_1_l; omega.
++  apply Zdiv_1_l; lia.
+   apply Zdiv_0_l.
+   simpl (Vector.tl (a :: v)).
+   case a.
+   change (Z.of_nat (bvec_to_nat (S n) v) =
+    Z.of_nat (S (2 * bvec_to_nat (S n) v)) / 2).
+   rewrite Nat2Z.inj_succ, Nat2Z.inj_mul, Z.mul_comm, <-Z.add_1_l.
+-  rewrite Z.div_add, Zdiv_1_l by omega; omega.
++  rewrite Z.div_add, Zdiv_1_l by lia; lia.
+   change (Z.of_nat (bvec_to_nat (S n) v) =
+    Z.of_nat (2 * bvec_to_nat (S n) v) / 2).
+-  rewrite Nat2Z.inj_mul, Z.mul_comm, Z_div_mult_full; omega.
++  rewrite Nat2Z.inj_mul, Z.mul_comm, Z_div_mult_full; lia.
+ Qed.
+ 
+ Lemma bvec_to_nat_shiftin: forall {l} v, bvec_to_nat (S l) (Vector.shiftin false v) = bvec_to_nat l v.
+@@ -1082,7 +1084,7 @@ Lemma bvec_to_nat_shiftout_mod1 : forall
+   symmetry; apply Zmod_1_r.
+   case a.
+   change (Z.of_nat (S (2 * bvec_to_nat n (Vector.shiftout v))) = (Z.of_nat (S (2 * bvec_to_nat (S n) v))) mod (Pow2int.pow2 (Z.of_nat (S n)))).
+-  rewrite Nat2Z.inj_succ with (n := n), <-Z.add_1_r with (n := Z.of_nat n), Pow2int.Power_s by omega.
++  rewrite Nat2Z.inj_succ with (n := n), <-Z.add_1_r with (n := Z.of_nat n), Pow2int.Power_s by lia.
+   rewrite Nat2Z.inj_succ, Nat2Z.inj_succ, <-Z.add_1_l, <-Z.add_1_l, Nat2Z.inj_mul, Nat2Z.inj_mul.
+   rewrite Z.rem_mul_r.
+   rewrite Zmod_odd.
+@@ -1090,10 +1092,10 @@ Lemma bvec_to_nat_shiftout_mod1 : forall
+   rewrite H0.
+   rewrite Int.Comm1 with (y := Z.of_nat (bvec_to_nat (S n) v)), Z_div_plus_full, Zdiv_1_l by easy.
+   rewrite H; easy.
+-  omega.
+-  apply Pow2int.pow2pos; omega.
++  lia.
++  apply Pow2int.pow2pos; lia.
+   change (Z.of_nat (2 * bvec_to_nat n (Vector.shiftout v)) = (Z.of_nat (2 * bvec_to_nat (S n) v)) mod (Pow2int.pow2 (Z.of_nat (S n)))).
+-  rewrite Nat2Z.inj_succ with (n := n), <-Z.add_1_r with (n := Z.of_nat n), Pow2int.Power_s by omega.
++  rewrite Nat2Z.inj_succ with (n := n), <-Z.add_1_r with (n := Z.of_nat n), Pow2int.Power_s by lia.
+   rewrite Nat2Z.inj_mul, Nat2Z.inj_mul.
+   rewrite Zmult_mod_distr_l.
+   rewrite H; trivial.
+@@ -1244,12 +1246,12 @@ Lemma to_uint_bounds :
+   intros v.
+   unfold to_uint, uint_in_range.
+   split.
+-  omega.
++  lia.
+   assert (two_power_size = Z.of_nat (Z.to_nat two_power_size)).
+   rewrite Z2Nat.id.
+   easy.
+   unfold two_power_size, size.
+-  transitivity (Pow2int.pow2 (Z.of_nat size_nat) - 1);[apply max_int_nat|omega].
++  transitivity (Pow2int.pow2 (Z.of_nat size_nat) - 1);[apply max_int_nat|lia].
+   rewrite H.
+   apply inj_lt.
+   apply bvec_to_nat_range.
+@@ -1265,7 +1267,7 @@ Qed.
+ Lemma to_uint_lsr_aux : forall (v:t) (n:nat), ((to_uint (lsr v
+   (Z.of_nat n))) = (div (to_uint v) (Pow2int.pow2 (Z.of_nat n)))).
+   unfold div.
+-  intros; case Z_le_dec; [|intro e; destruct e; apply Z_mod_lt, lt_sym, Pow2int.pow2pos; omega].
++  intros; case Z_le_dec; [|intro e; destruct e; apply Z_mod_lt, lt_sym, Pow2int.pow2pos; lia].
+   revert v n.
+   induction n; intro.
+   simpl.
+@@ -1276,22 +1278,22 @@ Lemma to_uint_lsr_aux : forall (v:t) (n:
+   unfold BshiftRl, Bhigh, to_uint, div.
+   rewrite bvec_to_nat_tl.
+   rewrite bvec_to_nat_shiftin.
+-  rewrite Nat2Z.inj_succ, <-Z.add_1_r, Pow2int.Power_s by omega.
++  rewrite Nat2Z.inj_succ, <-Z.add_1_r, Pow2int.Power_s by lia.
+   rewrite Z.mul_comm, <-Zdiv_Zdiv.
+   rewrite <- Nat2Z.id with (n := n).
+   change (to_uint (lsr v (Z.of_nat n)) / 2 =
+           to_uint v / Pow2int.pow2 (Z.of_nat (Z.to_nat (Z.of_nat n))) / 2).
+   rewrite Nat2Z.id.
+   rewrite IHn.
+-  omega.
+-  apply Z_mod_lt, lt_sym, Pow2int.pow2pos; omega.
+-  apply Z.lt_le_incl, Pow2int.pow2pos; omega.
+-  omega.
++  lia.
++  apply Z_mod_lt, lt_sym, Pow2int.pow2pos; lia.
++  apply Z.lt_le_incl, Pow2int.pow2pos; lia.
++  lia.
+ Qed.
+ 
+ Lemma size_in_range: uint_in_range size.
+   unfold uint_in_range, max_int, size, size.
+-  split; [omega|apply Z.lt_le_pred, id_lt_pow2].
++  split; [lia|apply Z.lt_le_pred, id_lt_pow2].
+ Qed.
+ 
+ Lemma mod1_in_range : forall x, uint_in_range (mod1 x two_power_size).
+@@ -1317,7 +1319,7 @@ Proof.
+   simpl.
+   apply Zmod_unique with (q := 0).
+   apply to_uint_bounds.
+-  assert (lsl v 0 = v) as H by easy; rewrite H; omega.
++  assert (lsl v 0 = v) as H by easy; rewrite H; lia.
+   unfold lsl.
+   rewrite Nat2Z.id.
+   unfold BshiftL, Bcons, to_uint.
+@@ -1329,16 +1331,16 @@ Proof.
+   rewrite bvec_to_nat_shiftout_mod1.
+   change (2 * ((to_uint (lsl v (Z.of_nat n))) mod (Pow2int.pow2 (Z.of_nat last_bit))) = (to_uint v * Pow2int.pow2 (Z.of_nat (S n))) mod two_power_size).
+   unfold two_power_size.
+-  rewrite size_int_S, Nat2Z.inj_succ, <-Z.add_1_r, Pow2int.Power_s by omega.
+-  rewrite Zmult_assoc, Int.Comm1 with (y := 2), <-Z.add_1_r, Pow2int.Power_s by omega.
++  rewrite size_int_S, Nat2Z.inj_succ, <-Z.add_1_r, Pow2int.Power_s by lia.
++  rewrite Zmult_assoc, Int.Comm1 with (y := 2), <-Z.add_1_r, Pow2int.Power_s by lia.
+   rewrite Zmult_assoc_reverse, Zmult_mod_distr_l.
+-  rewrite Z.mul_cancel_l by omega.
++  rewrite Z.mul_cancel_l by lia.
+   rewrite IHn.
+   unfold two_power_size.
+-  rewrite size_int_S, <-Z.add_1_r, Pow2int.Power_s by omega.
++  rewrite size_int_S, <-Z.add_1_r, Pow2int.Power_s by lia.
+   apply mod_mod_mult.
+-  apply lt_sym, Pow2int.pow2pos; omega.
+-  omega.
++  apply lt_sym, Pow2int.pow2pos; lia.
++  lia.
+ Qed.
+ (* end of to_uint helpers *)
+ 
+@@ -1350,7 +1352,7 @@ Lemma to_uint_of_int :
+   unfold to_uint, of_int.
+   rewrite bvec_to_nat_nat_to_bvec.
+   apply Z2Nat.id; easy.
+-  rewrite Z2Nat.id; [fold size; fold two_power_size; omega|easy].
++  rewrite Z2Nat.id; [fold size; fold two_power_size; lia|easy].
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -1451,6 +1453,7 @@ Qed.
+ (* Why3 goal *)
+ Lemma positive_is_ge_zeros :
+   forall (x:t), is_signed_positive x <-> sge x zeros.
++Proof.
+   intros.
+   unfold is_signed_positive, sge, to_int, twos_complement, size_nat.
+   rewrite zeros_sign_false. destruct Bsign.
+@@ -1459,14 +1462,14 @@ Lemma positive_is_ge_zeros :
+   generalize (bvec_to_nat_range x). intros.
+   simpl (Z.of_nat 0) in H.
+   assert (Pow2int.pow2 (Z.of_nat (S last_bit)) <= Z.of_nat (bvec_to_nat (S last_bit) x)).
+-  omega. unfold size_nat in *.
+-  apply Z2Nat.inj_le in H1; try omega.
+-  rewrite Nat2Z.id in H1; try omega.
+-  eapply Z.le_trans. apply (max_int_nat (S last_bit)). omega.
++  lia. unfold size_nat in *.
++  apply Z2Nat.inj_le in H1.
++  rewrite Nat2Z.id in H1; lia.
++  eapply Z.le_trans. apply (max_int_nat (S last_bit)). lia.
+ 
+   intuition.
+   unfold zeros, zeros_aux.
+-  rewrite bvec_to_nat_zeros. simpl. omega.
++  rewrite bvec_to_nat_zeros. simpl. lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -1574,13 +1577,19 @@ Lemma to_uint_udiv :
+   forall (v1:t) (v2:t),
+   ((to_uint (udiv v1 v2)) =
+    (int.EuclideanDivision.div (to_uint v1) (to_uint v2))).
++Proof.
+   intros v1 v2.
+   apply to_uint_of_int.
+   case (Z.eq_dec (to_uint v2) 0); intro.
+-  rewrite e; unfold uint_in_range, div.
+-  rewrite Zmod_0_r; simpl.
+-  rewrite Zdiv_0_r.
++  unfold div.
++  case Z_le_dec.
++  intros _.
++  rewrite e, Zdiv_0_r.
+   split; [easy|apply Pow2int.pow2pos;easy].
++  rewrite e, Zmod_0_r.
++  intros H.
++  elim H.
++  apply to_uint_nat.
+   split.
+   apply Div_bound; split;[|apply Z.le_neq;split;[|auto]];apply to_uint_nat.
+   apply (Z.le_lt_trans _ (to_uint v1)).
+@@ -1852,7 +1861,7 @@ Lemma mask_succ :
+   rewrite mod1_is_mod by easy.
+   rewrite Z.mul_mod_idemp_l by easy.
+   rewrite Zmult_assoc_reverse, (Int.Comm1 (Pow2int.pow2 (Z.of_nat n)) 2).
+-  rewrite <-Pow2int.Power_s by omega.
++  rewrite <-Pow2int.Power_s by lia.
+   rewrite <-mod1_is_mod with (x := to_uint (of_int 1) * Pow2int.pow2 (Z.of_nat n + 1)) by easy.
+   rewrite Z.add_1_r with (n := Z.of_nat n).
+   rewrite <- Nat2Z.inj_succ.
+@@ -1948,7 +1957,7 @@ Lemma mask_succ_tmp :
+       rewrite <-Z.add_1_r, Zplus_assoc_reverse, Nat2Z.inj_mul in l.
+       simpl (1 + 1) in l.
+       rewrite Zred_factor3 in l.
+-      rewrite <-(Z.mul_lt_mono_pos_l 2) in l by omega.
++      rewrite <-(Z.mul_lt_mono_pos_l 2) in l by lia.
+       rewrite Z.add_1_l in l.
+       apply Zlt_succ_le in l; trivial.
+       rewrite Z2Nat.inj_lt, Nat2Z.id.
+@@ -1982,7 +1991,7 @@ Lemma nth_bit_pred_high :
+ Proof.
+   induction n;intros.
+   assert (Z.of_nat 0 <= to_uint i) by apply to_uint_bounds.
+-  omega.
++  lia.
+   rewrite <-Nth_bv_is_nth.
+   rewrite mask_succ_2; simpl.
+   unfold bw_or, nth.
+@@ -1994,7 +2003,7 @@ Proof.
+   right.
+   assert (to_uint i = 0).
+     assert (H' := to_uint_bounds i).
+-    omega.
++    lia.
+   rewrite H1; apply nth_zeros_is_hd.
+ 
+   left.
+@@ -2006,11 +2015,11 @@ Proof.
+   rewrite mod1_out; trivial.
+   split; auto with zarith.
+   apply (Z.lt_trans _ (to_uint i)).
+-  omega.
++  lia.
+   apply to_uint_bounds.
+ 
+   rewrite H1, Nth_bv_is_nth.
+-  apply IHn; rewrite <-H1; rewrite Nat2Z.inj_succ in H0; omega.
++  apply IHn; rewrite <-H1; rewrite Nat2Z.inj_succ in H0; lia.
+ Qed.
+ 
+   Lemma one_nth: forall {l},
+@@ -2040,8 +2049,8 @@ Lemma nth_bit_pred_low :
+   apply to_uint_extensionality.
+   rewrite to_uint_sub, to_uint_of_int, to_uint_of_int.
+   apply mod1_out.
+-  split; [omega|apply Pow2int.pow2pos, Z.lt_le_incl, size_pos].
+-  split; [omega|apply Pow2int.pow2pos, Z.lt_le_incl, size_pos].
++  split; [lia|apply Pow2int.pow2pos, Z.lt_le_incl, size_pos].
++  split; [lia|apply Pow2int.pow2pos, Z.lt_le_incl, size_pos].
+   apply in_range_1'.
+   rewrite H0, <-Of_int_zeros.
+   apply Nth_zeros.
+@@ -2062,18 +2071,18 @@ Lemma nth_bit_pred_low :
+   rewrite mod1_out; trivial.
+   split; auto with zarith.
+   apply (Z.lt_trans _ (to_uint i)).
+-  omega.
++  lia.
+   apply to_uint_bounds.
+   rewrite H0,Nth_bv_is_nth.
+   apply IHn.
+-  rewrite <-H0; omega.
+-  assert (to_uint i > 0) by omega.
++  rewrite <-H0; lia.
++  assert (to_uint i > 0) by lia.
+   unfold of_int, size, size_nat.
+   rewrite one_nth.
+   rewrite nth_cons_pred by auto with zarith.
+   apply Nth_zeros_aux.
+   apply nth_aux_out_of_bound.
+-  fold size; omega.
++  fold size; lia.
+ Qed.
+ 
+ Lemma mask_correctness :
+@@ -2090,11 +2099,11 @@ Proof.
+   rewrite uint_in_range_power in u.
+   rewrite Lsl_nth_high; auto with zarith.
+   assert (j - to_uint i = to_uint (sub (of_int j) i)).
+-  rewrite to_uint_sub by omega.
++  rewrite to_uint_sub by lia.
+   rewrite to_uint_of_int by (split; auto with zarith).
+   rewrite mod1_out by auto with zarith; trivial.
+   rewrite H2.
+-  rewrite Nth_bv_is_nth by omega.
++  rewrite Nth_bv_is_nth by lia.
+   apply nth_bit_pred_high; auto with zarith.
+   rewrite <-H2.
+   fold (to_uint n); auto with zarith.
+--- a/lib/coq/floating_point/GenFloat.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/floating_point/GenFloat.v	2021-10-20 08:45:02.905109791 -0600
+@@ -21,6 +21,7 @@ Require real.Abs.
+ Require real.FromInt.
+ Require floating_point.Rounding.
+ 
++Require Import Lia.
+ Require Import Flocq.Core.Core.
+ Require Import Flocq.IEEE754.Binary.
+ Require Import int.Abs.
+@@ -226,7 +227,7 @@ unfold FLT_exp.
+ rewrite Z.max_l.
+ apply Z.le_refl.
+ unfold emin.
+-generalize Hprec' Hemax' ; clear ; omega.
++generalize Hprec' Hemax' ; clear ; lia.
+ rewrite <- abs_IZR, Z.abs_eq, <- 2!IZR_Zpower.
+ split.
+ apply IZR_le.
+@@ -240,12 +241,12 @@ apply bpow_lt.
+ apply Zlt_pred.
+ apply Zlt_le_weak.
+ exact Hprec'.
+-generalize Hprec' ; clear ; omega.
++generalize Hprec' ; clear ; lia.
+ apply IZR_lt.
+ apply Zlt_pred.
+ apply Zlt_le_weak.
+ exact Hprec'.
+-generalize Hprec' ; clear ; omega.
++generalize Hprec' ; clear ; lia.
+ apply Zlt_succ_le.
+ change (2 ^ prec - 1)%Z with (Z.pred (2^prec))%Z.
+ rewrite <- Zsucc_pred.
+@@ -299,7 +300,7 @@ apply generic_format_abs.
+ apply generic_format_B2R.
+ apply generic_format_bpow.
+ unfold FLT_exp, emin.
+-zify ; generalize Hprec' Hemax' ; omega.
++zify ; generalize Hprec' Hemax' ; lia.
+ apply abs_B2R_lt_emax.
+ rewrite pred_eq_pos.
+ unfold pred_pos.
+@@ -316,7 +317,7 @@ rewrite minus_IZR, IZR_Zpower.
+ simpl; ring.
+ apply Zlt_le_weak.
+ exact Hprec'.
+-generalize Hprec' Hemax' ; omega.
++generalize Hprec' Hemax' ; lia.
+ apply bpow_ge_0.
+ Qed.
+ 
+@@ -340,7 +341,7 @@ exists (Float radix2 z 0).
+ unfold F2R ; simpl.
+ now rewrite Rmult_1_r.
+ easy.
+-simpl; unfold emin; generalize Hprec' Hemax'; omega.
++simpl; unfold emin; generalize Hprec' Hemax'; lia.
+ unfold max_representable_integer in Bz.
+ change 2%Z with (radix_val radix2) in Bz.
+ apply generic_format_abs_inv.
+@@ -348,7 +349,7 @@ rewrite <- abs_IZR, Bz, IZR_Zpower.
+ apply generic_format_bpow.
+ unfold FLT_exp, emin.
+ clear Bz; generalize Hprec' Hemax'; zify.
+-omega.
++lia.
+ apply Zlt_le_weak.
+ apply Hprec'.
+ Qed.
+--- a/lib/coq/for_drivers/ComputerOfEuclideanDivision.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/for_drivers/ComputerOfEuclideanDivision.v	2021-10-20 08:47:21.041133426 -0600
+@@ -18,8 +18,11 @@ Require int.Abs.
+ Require int.EuclideanDivision.
+ Require int.ComputerDivision.
+ 
++Require Import Lia.
++
+ Lemma on_pos_euclidean_is_div:
+   forall n d, (int.EuclideanDivision.div n (Zpos d)) = Z.div n (Zpos d).
++Proof.
+ intros n d.
+ unfold EuclideanDivision.div.
+ assert (0 < Z.pos d)%Z by reflexivity.
+@@ -40,6 +43,7 @@ Lemma cdiv_cases :
+    ((ZArith.BinInt.Z.quot n d) = (-(int.EuclideanDivision.div n (-d)%Z))%Z)) /\
+   ((n <= 0%Z)%Z -> (d < 0%Z)%Z ->
+    ((ZArith.BinInt.Z.quot n d) = (int.EuclideanDivision.div (-n)%Z (-d)%Z))).
++Proof.
+   intros n d.
+   destruct d as [|d|d]; destruct n as [|n|n]; intuition (try discriminate; try contradiction).
+     + assert (NZ_d:((Zpos d) <> 0)%Z) by discriminate.
+@@ -75,11 +79,12 @@ Lemma cmod_cases :
+   ((n <= 0%Z)%Z -> (d < 0%Z)%Z ->
+    ((ZArith.BinInt.Z.rem n d) =
+     (-(int.EuclideanDivision.mod1 (-n)%Z (-d)%Z))%Z)).
++Proof.
+   intros n d.
+   unfold int.EuclideanDivision.mod1.
+   assert (Z.rem n d = n - (d * (Z.quot n d)))%Z.
+   assert (H:= Z.quot_rem' n d).
+-  omega.
++  lia.
+   rewrite H.
+   assert (H2:=cdiv_cases n d).
+   intuition idtac.
+@@ -87,13 +92,13 @@ Lemma cmod_cases :
+     reflexivity.
+   + rewrite H4.
+     rewrite Z.mul_opp_r.
+-    omega.
++    lia.
+   + rewrite H1.
+     rewrite Z.mul_opp_r.
+     rewrite Z.mul_opp_l.
+     reflexivity.
+   + rewrite H4.
+     rewrite Z.mul_opp_l.
+-    omega.
++    lia.
+ Qed.
+ 
+--- a/lib/coq/ieee_float/Float32.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/ieee_float/Float32.v	2021-10-20 08:48:02.353140032 -0600
+@@ -26,6 +26,7 @@ Require bv.Pow2int.
+ Require ieee_float.RoundingMode.
+ Require ieee_float.GenericFloat.
+ 
++Require Import Lia.
+ Import Flocq.Core.Core.
+ Import Flocq.IEEE754.Binary.
+ Import ieee_float.RoundingMode.
+@@ -79,7 +80,7 @@ apply Digits.Zpower_gt_Zdigits.
+ revert H1.
+ generalize (Digits.Zdigits radix2 (Z.pos m)).
+ unfold FLT_exp, sb.
+-intros ; zify ; omega.
++intros ; lia.
+ now apply bpow_le.
+ Qed.
+ 
+--- a/lib/coq/ieee_float/Float64.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/ieee_float/Float64.v	2021-10-20 08:48:31.377144412 -0600
+@@ -26,6 +26,7 @@ Require bv.Pow2int.
+ Require ieee_float.RoundingMode.
+ Require ieee_float.GenericFloat.
+ 
++Require Import Lia.
+ Import Flocq.Core.Core.
+ Import Flocq.IEEE754.Binary.
+ Import ieee_float.RoundingMode.
+@@ -82,7 +83,7 @@ apply Digits.Zpower_gt_Zdigits.
+ revert H1.
+ generalize (Digits.Zdigits radix2 (Z.pos m)).
+ unfold FLT_exp, sb.
+-intros ; zify ; omega.
++intros ; lia.
+ now apply bpow_le.
+ Qed.
+ 
+--- a/lib/coq/ieee_float/GenericFloat.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/ieee_float/GenericFloat.v	2021-10-20 09:00:59.075275716 -0600
+@@ -184,7 +184,7 @@ Proof.
+   apply Zeq_bool_true.
+   rewrite Digits.Zpos_digits2_pos.
+   rewrite (Digits.Zdigits_unique radix2 _ sb).
+-  assert (sb + (emax - sb) - sb = emax - sb)%Z by omega; rewrite H0.
++  assert (sb + (emax - sb) - sb = emax - sb)%Z by ring; rewrite H0.
+   apply Zmax_left.
+   assert (1 < emax)%Z.
+   apply Z.le_lt_trans with (m := sb).
+@@ -204,7 +204,7 @@ Proof.
+   rewrite Z.pow_succ_r by trivial.
+   assert (1 <= 2 ^ (sb - 1))%Z.
+   apply Z.lt_pred_le, (Zpower_gt_0 radix2 (sb - 1)); trivial.
+-  omega.
++  lia.
+   apply Zle_bool_true; auto with zarith.
+ Qed.
+ 
+@@ -633,7 +633,7 @@ Proof.
+   rewrite H0 in a.
+   replace (Z.abs (Z.pos m)) with (Z.pos m) in a by auto with zarith.
+   destruct a. clear H1.
+-  assert (Z.pos m = radix2 ^ sb - 1 \/ Z.pos m < radix2 ^ sb - 1)%Z by omega.
++  assert (Z.pos m = radix2 ^ sb - 1 \/ Z.pos m < radix2 ^ sb - 1)%Z by lia.
+   destruct H1.
+   right.
+   replace (radix2 ^ sb)%Z with (Z.pos 2 ^ Z.pos sb_pos)%Z in H1 by auto.
+@@ -1212,9 +1212,9 @@ Proof.
+   unfold FLT_exp.
+   replace (sb - 1 + 1 + 1 - sb)%Z with 1%Z by ring.
+   apply Z.max_l.
+-  pose sb_gt_1; pose Hemax'; omega.
++  pose sb_gt_1; pose Hemax'; lia.
+   apply Zle_bool_true.
+-  pose Hemax'; pose Hsbb; omega.
++  pose Hemax'; pose Hsbb; lia.
+ Qed.
+ 
+ Definition Bmax_rep_int: t.
+@@ -1288,15 +1288,15 @@ exists (Float radix2 z 0).
+ unfold F2R ; simpl.
+ now rewrite Rmult_1_r.
+ easy.
+-simpl; unfold emin; generalize Hsb' Hemax'; omega.
++simpl; unfold emin; generalize Hsb' Hemax'; lia.
+ unfold pow2sb in Bz.
+ change 2%Z with (radix_val radix2) in Bz.
+ apply generic_format_abs_inv.
+ rewrite <- abs_IZR, Bz, IZR_Zpower.
+ apply generic_format_bpow.
+ unfold FLT_exp, emin.
+-clear Bz; generalize Hsb' Hemax'; zify.
+-omega.
++clear Bz; generalize Hsb' Hemax'.
++lia.
+ apply Zlt_le_weak.
+ apply Hsb'.
+ Qed.
+@@ -2371,8 +2371,7 @@ intros m x y r.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H.
+           + unfold to_real. rewrite <-min_real_is_F2R, <-FF2R_B2FF, H; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-          apply Pos.pow_gt_1.
+-          zify; auto with zarith.
++          now apply Pos.pow_gt_1.
+         - split.
+           destruct r; easy.
+           intro.
+@@ -2394,8 +2393,7 @@ intros m x y r.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H.
+           + unfold to_real. rewrite <-max_real_is_F2R, <-FF2R_B2FF, H; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-            apply Pos.pow_gt_1.
+-            zify; auto with zarith.
++            now apply Pos.pow_gt_1.
+           + assert (~is_nan r) by
+                 (destruct r; try easy; destruct n; easy).
+             rewrite is_positive_Bsign; easy. }
+@@ -2412,16 +2410,14 @@ intros m x y r.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H.
+           + unfold to_real. rewrite <-min_real_is_F2R, <-FF2R_B2FF, H; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-            apply Pos.pow_gt_1.
+-            zify; auto with zarith.
++            now apply Pos.pow_gt_1.
+         - split.
+           + intro; split.
+             destruct r; try easy; destruct n; easy.
+             replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H.
+             * unfold to_real. rewrite <-max_real_is_F2R, <-FF2R_B2FF, H; auto.
+             *  rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-               apply Pos.pow_gt_1.
+-               zify; auto with zarith.
++               now apply Pos.pow_gt_1.
+            + easy. }
+   - destruct H.
+     pose proof (Bplus_correct sb emax Hsb' Hemax' nan_bf m x y H H0).
+@@ -2635,8 +2631,7 @@ Proof.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H.
+           + unfold to_real. rewrite <-min_real_is_F2R, <-FF2R_B2FF, H; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-            apply Pos.pow_gt_1.
+-            zify; auto with zarith.
++            now apply Pos.pow_gt_1.
+         - split.
+           destruct r; easy.
+           intro.
+@@ -2658,8 +2653,7 @@ Proof.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H.
+           + unfold to_real. rewrite <-max_real_is_F2R, <-FF2R_B2FF, H; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-              apply Pos.pow_gt_1.
+-              zify; auto with zarith.
++              now apply Pos.pow_gt_1.
+           + assert (~is_nan r) by
+                 (destruct r; try easy; destruct n; easy).
+             rewrite is_positive_Bsign; easy. }
+@@ -2676,16 +2670,14 @@ Proof.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H.
+           + unfold to_real. rewrite <-min_real_is_F2R, <-FF2R_B2FF, H; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-            apply Pos.pow_gt_1.
+-            zify; auto with zarith.
++            now apply Pos.pow_gt_1.
+         - split.
+           + intro; split.
+             destruct r; try easy; destruct n; easy.
+             replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H.
+             * unfold to_real. rewrite <-max_real_is_F2R, <-FF2R_B2FF, H; auto.
+             *  rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-               apply Pos.pow_gt_1.
+-               zify; auto with zarith.
++               now apply Pos.pow_gt_1.
+           + easy. }
+   - destruct H.
+     pose proof (Bminus_correct sb emax Hsb' Hemax' nan_bf m x y H H0).
+@@ -2854,8 +2846,7 @@ Proof.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H1.
+           + unfold to_real. rewrite <-min_real_is_F2R, <-FF2R_B2FF, H1; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-            apply Pos.pow_gt_1.
+-            zify; auto with zarith.
++            now apply Pos.pow_gt_1.
+         - split.
+           assert (~is_nan r) by
+               (destruct r; try easy; destruct n; easy).
+@@ -2865,8 +2856,7 @@ Proof.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H1.
+           + unfold to_real. rewrite <-min_real_is_F2R, <-FF2R_B2FF, H1; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-            apply Pos.pow_gt_1.
+-            zify; auto with zarith.
++            now apply Pos.pow_gt_1.
+         - split.
+           destruct r; easy.
+           assert (~is_nan r) by
+@@ -2883,8 +2873,7 @@ Proof.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H1.
+           + unfold to_real. rewrite <-max_real_is_F2R, <-FF2R_B2FF, H1; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-            apply Pos.pow_gt_1.
+-            zify; auto with zarith. }
++            now apply Pos.pow_gt_1. }
+         assert (~is_nan r) by
+             (destruct r; try easy; destruct n; easy).
+         rewrite is_positive_Bsign, H1'; intro h; contradict h; easy.
+@@ -2904,8 +2893,7 @@ Proof.
+           replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H1.
+           + unfold to_real. rewrite <-max_real_is_F2R, <-FF2R_B2FF, H1; auto.
+           + rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-            apply Pos.pow_gt_1.
+-            zify; auto with zarith. }
++            now apply Pos.pow_gt_1. }
+         assert (~is_nan r) by
+             (destruct r; try easy; destruct n; easy).
+         rewrite is_positive_Bsign, H1'; intro h; contradict h; easy. }
+@@ -2937,8 +2925,7 @@ Proof.
+               (destruct r; try easy; destruct n; easy).
+           rewrite is_positive_Bsign, H1'; intro h; contradict h; easy. }
+       rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto.
+-      apply Pos.pow_gt_1.
+-      zify; auto with zarith.
++      now apply Pos.pow_gt_1.
+   - pose proof (Bmult_correct sb emax Hsb' Hemax' nan_bf m x y).
+     destruct (Rlt_le_dec (Rabs (round m (to_real x * to_real y))) (bpow radix2 emax));
+     [rewrite Rlt_bool_true in H1; auto| rewrite Rlt_bool_false in H1; auto].
+@@ -3051,8 +3038,7 @@ Proof.
+             simpl in H4.
+             replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H4 by
+                 (rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto;
+-                 apply Pos.pow_gt_1;
+-                 zify; auto with zarith).
++                 now apply Pos.pow_gt_1).
+             rewrite <-min_real_is_F2R; assumption. }
+         split; intro; [destruct r; easy|].
+         destruct r; try easy.
+@@ -3069,8 +3055,7 @@ Proof.
+             simpl in H4.
+             replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H4 by
+                 (rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto;
+-                 apply Pos.pow_gt_1;
+-                 zify; auto with zarith).
++                 now apply Pos.pow_gt_1).
+             rewrite <-max_real_is_F2R; assumption.
+           + destruct r; try easy; try (destruct n; easy).
+             destruct s; try easy.
+@@ -3084,8 +3069,7 @@ Proof.
+             simpl in H4.
+             replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H4 by
+                 (rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto;
+-                 apply Pos.pow_gt_1;
+-                 zify; auto with zarith).
++                 now apply Pos.pow_gt_1).
+             rewrite <-min_real_is_F2R; assumption.
+           - split; [destruct r; try easy| ].
+             apply (f_equal (FF2R radix2)) in H4.
+@@ -3093,8 +3077,7 @@ Proof.
+             simpl in H4.
+             replace (Z.pow_pos 2 sb_pos - 1)%Z with (Z.pos (2 ^ sb_pos - 1)) in H4 by
+                 (rewrite Pos2Z.inj_sub, Pos2Z.inj_pow_pos; auto;
+-                 apply Pos.pow_gt_1;
+-                 zify; auto with zarith).
++                 now apply Pos.pow_gt_1).
+             rewrite <-max_real_is_F2R; assumption.
+           - contradict H5.
+             destruct r; destruct s; easy. }
+@@ -4541,7 +4524,7 @@ Proof.
+   { assert (IZR (floor(to_real x)) < 0) by lra.
+     assert (-2 < IZR (floor (to_real x))) by lra.
+     apply lt_IZR in H1; apply lt_IZR in H2.
+-    now replace (floor (to_real x)) with (-1)%Z by omega. }
++    now replace (floor (to_real x)) with (-1)%Z by lia. }
+   lra.
+ Qed.
+ 
+@@ -4559,7 +4542,7 @@ Proof.
+   { assert (0 < IZR (ceil( to_real x))) by lra.
+     assert (IZR (ceil(to_real x)) < 2) by lra.
+     apply lt_IZR in H1; apply lt_IZR in H2.
+-    now replace (ceil (to_real x)) with 1%Z by omega. }
++    now replace (ceil (to_real x)) with 1%Z by lia. }
+   lra.
+ Qed.
+ 
+@@ -4615,9 +4598,9 @@ Proof.
+   unfold FLT_exp.
+   replace (sb - 1 + 1 + - sb)%Z with 0%Z by ring.
+   apply Z.max_l.
+-  pose sb_gt_1; pose Hemax'; omega.
++  pose sb_gt_1; pose Hemax'; lia.
+   apply Zle_bool_true.
+-  pose Hemax'; pose sb_gt_1; omega.
++  pose Hemax'; pose sb_gt_1; lia.
+ Qed.
+ 
+ Definition half: t.
+--- a/lib/coq/int/Abs.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/int/Abs.v	2021-10-20 09:01:55.793292871 -0600
+@@ -15,6 +15,8 @@ Require Import BuiltIn.
+ Require BuiltIn.
+ Require int.Int.
+ 
++Require Import Lia.
++
+ (* Why3 comment *)
+ (* abs is replaced with (ZArith.BinInt.Z.abs x) by the coq driver *)
+ 
+@@ -38,14 +40,15 @@ Qed.
+ Lemma Abs_le :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   ((ZArith.BinInt.Z.abs x) <= y)%Z <-> ((-y)%Z <= x)%Z /\ (x <= y)%Z.
++Proof.
+ intros x y.
+-zify.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Abs_pos :
+   forall (x:Numbers.BinNums.Z), (0%Z <= (ZArith.BinInt.Z.abs x))%Z.
++Proof.
+ exact Zabs_pos.
+ Qed.
+ 
+--- a/lib/coq/int/ComputerDivision.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/int/ComputerDivision.v	2021-10-20 09:12:14.876540134 -0600
+@@ -16,7 +16,7 @@ Require BuiltIn.
+ Require int.Int.
+ Require int.Abs.
+ 
+-Require Import Zquot.
++Require Import Zquot Lia.
+ 
+ (* Why3 comment *)
+ (* div is replaced with (ZArith.BinInt.Z.quot x x1) by the coq driver *)
+@@ -28,6 +28,7 @@ Require Import Zquot.
+ Lemma Div_mod :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z), ~ (y = 0%Z) ->
+   (x = ((y * (ZArith.BinInt.Z.quot x y))%Z + (ZArith.BinInt.Z.rem x y))%Z).
++Proof.
+ intros x y _.
+ apply Z.quot_rem'.
+ Qed.
+@@ -38,6 +39,7 @@ Lemma Div_bound :
+   (0%Z <= x)%Z /\ (0%Z < y)%Z ->
+   (0%Z <= (ZArith.BinInt.Z.quot x y))%Z /\
+   ((ZArith.BinInt.Z.quot x y) <= x)%Z.
++Proof.
+ intros x y (Hx,Hy).
+ split.
+ now apply Z.quot_pos.
+@@ -47,7 +49,7 @@ apply Z.le_refl.
+ destruct (Zle_lt_or_eq 0 x Hx) as [H'|H'].
+ apply Zlt_le_weak.
+ apply Z.quot_lt with (1 := H').
+-omega.
++lia.
+ now rewrite <- H', Zquot_0_l.
+ Qed.
+ 
+@@ -56,13 +58,14 @@ Lemma Mod_bound :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z), ~ (y = 0%Z) ->
+   ((-(ZArith.BinInt.Z.abs y))%Z < (ZArith.BinInt.Z.rem x y))%Z /\
+   ((ZArith.BinInt.Z.rem x y) < (ZArith.BinInt.Z.abs y))%Z.
++Proof.
+ intros x y Zy.
+ destruct (Zle_or_lt 0 x) as [Hx|Hx].
+ refine ((fun H => conj (Z.lt_le_trans _ 0 _ _ (proj1 H)) (proj2 H)) _).
+-clear -Zy ; zify ; omega.
++clear -Zy ; lia.
+ now apply Zrem_lt_pos.
+ refine ((fun H => conj (proj1 H) (Z.le_lt_trans _ 0 _ (proj2 H) _)) _).
+-clear -Zy ; zify ; omega.
++clear -Zy ; lia.
+ apply Zrem_lt_neg with (2 := Zy).
+ now apply Zlt_le_weak.
+ Qed.
+@@ -71,6 +74,7 @@ Qed.
+ Lemma Div_sign_pos :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (0%Z <= x)%Z /\ (0%Z < y)%Z -> (0%Z <= (ZArith.BinInt.Z.quot x y))%Z.
++Proof.
+ intros x y (Hx, Hy).
+ now apply Z.quot_pos.
+ Qed.
+@@ -79,16 +83,18 @@ Qed.
+ Lemma Div_sign_neg :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (x <= 0%Z)%Z /\ (0%Z < y)%Z -> ((ZArith.BinInt.Z.quot x y) <= 0%Z)%Z.
++Proof.
+ intros x y (Hx, Hy).
+ generalize (Z.quot_pos (-x) y).
+ rewrite Zquot_opp_l.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Mod_sign_pos :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (0%Z <= x)%Z /\ ~ (y = 0%Z) -> (0%Z <= (ZArith.BinInt.Z.rem x y))%Z.
++Proof.
+ intros x y (Hx, Zy).
+ now apply Zrem_lt_pos.
+ Qed.
+@@ -97,6 +103,7 @@ Qed.
+ Lemma Mod_sign_neg :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (x <= 0%Z)%Z /\ ~ (y = 0%Z) -> ((ZArith.BinInt.Z.rem x y) <= 0%Z)%Z.
++Proof.
+ intros x y (Hx, Zy).
+ now apply Zrem_lt_neg.
+ Qed.
+@@ -106,23 +113,25 @@ Lemma Rounds_toward_zero :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z), ~ (y = 0%Z) ->
+   ((ZArith.BinInt.Z.abs ((ZArith.BinInt.Z.quot x y) * y)%Z) <=
+    (ZArith.BinInt.Z.abs x))%Z.
++Proof.
+ intros x y Zy.
+ rewrite Zmult_comm.
+-zify.
+ generalize (Z.mul_quot_le x y).
+ generalize (Z.mul_quot_ge x y).
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Div_1 :
+   forall (x:Numbers.BinNums.Z), ((ZArith.BinInt.Z.quot x 1%Z) = x).
++Proof.
+ exact Z.quot_1_r.
+ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Mod_1 :
+   forall (x:Numbers.BinNums.Z), ((ZArith.BinInt.Z.rem x 1%Z) = 0%Z).
++Proof.
+ exact Z.rem_1_r.
+ Qed.
+ 
+@@ -130,6 +139,7 @@ Qed.
+ Lemma Div_inf :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (0%Z <= x)%Z /\ (x < y)%Z -> ((ZArith.BinInt.Z.quot x y) = 0%Z).
++Proof.
+ exact Z.quot_small.
+ Qed.
+ 
+@@ -137,6 +147,7 @@ Qed.
+ Lemma Mod_inf :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (0%Z <= x)%Z /\ (x < y)%Z -> ((ZArith.BinInt.Z.rem x y) = x).
++Proof.
+ exact Z.rem_small.
+ Qed.
+ 
+@@ -146,6 +157,7 @@ Lemma Div_mult :
+   (0%Z < x)%Z /\ (0%Z <= y)%Z /\ (0%Z <= z)%Z ->
+   ((ZArith.BinInt.Z.quot ((x * y)%Z + z)%Z x) =
+    (y + (ZArith.BinInt.Z.quot z x))%Z).
++Proof.
+ intros x y z (Hx&Hy&Hz).
+ rewrite (Zplus_comm y).
+ rewrite <- Z_quot_plus.
+@@ -163,6 +175,7 @@ Lemma Mod_mult :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (z:Numbers.BinNums.Z),
+   (0%Z < x)%Z /\ (0%Z <= y)%Z /\ (0%Z <= z)%Z ->
+   ((ZArith.BinInt.Z.rem ((x * y)%Z + z)%Z x) = (ZArith.BinInt.Z.rem z x)).
++Proof.
+ intros x y z (Hx&Hy&Hz).
+ rewrite Zplus_comm, Zmult_comm.
+ apply Z_rem_plus.
+--- a/lib/coq/int/Div2.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/int/Div2.v	2021-10-20 09:12:36.451550754 -0600
+@@ -15,6 +15,7 @@ Require Import BuiltIn.
+ Require BuiltIn.
+ Require int.Int.
+ 
++Require Import Lia.
+ Require Import int.EuclideanDivision.
+ 
+ (* Why3 goal *)
+@@ -28,6 +29,6 @@ exists (div x 2).
+ refine (_ (Mod_bound x 2 _) (Div_mod x 2 _)) ; try easy.
+ intros H1 H2.
+ simpl in H1.
+-omega.
++lia.
+ Qed.
+ 
+--- a/lib/coq/int/EuclideanDivision.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/int/EuclideanDivision.v	2021-10-20 09:15:30.675626764 -0600
+@@ -16,8 +16,11 @@ Require BuiltIn.
+ Require int.Int.
+ Require int.Abs.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Definition div : Numbers.BinNums.Z -> Numbers.BinNums.Z -> Numbers.BinNums.Z.
++Proof.
+ intros x y.
+ case (Z_le_dec 0 (Zmod x y)) ; intros H.
+ exact (Z.div x y).
+@@ -27,6 +30,7 @@ Defined.
+ (* Why3 goal *)
+ Definition mod1 :
+   Numbers.BinNums.Z -> Numbers.BinNums.Z -> Numbers.BinNums.Z.
++Proof.
+ intros x y.
+ exact (x - y * div x y)%Z.
+ Defined.
+@@ -35,6 +39,7 @@ Defined.
+ Lemma Div_mod :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z), ~ (y = 0%Z) ->
+   (x = ((y * (div x y))%Z + (mod1 x y))%Z).
++Proof.
+ intros x y Zy.
+ unfold mod1, div.
+ case Z_le_dec ; intros H ; ring.
+@@ -44,6 +49,7 @@ Qed.
+ Lemma Mod_bound :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z), ~ (y = 0%Z) ->
+   (0%Z <= (mod1 x y))%Z /\ ((mod1 x y) < (ZArith.BinInt.Z.abs y))%Z.
++Proof.
+ intros x y Zy.
+ assert (H := Zabs_spec y).
+ assert (H1 := Z_mod_neg x y).
+@@ -51,10 +57,10 @@ assert (H2 := Z_mod_lt x y).
+ unfold mod1, div.
+ case Z_le_dec ; intros H0.
+ rewrite Zmult_comm, <- Zmod_eq_full with (1 := Zy).
+-omega.
++lia.
+ replace (x - y * (x / y + 1))%Z with (x - x / y * y - y)%Z by ring.
+ rewrite <- Zmod_eq_full with (1 := Zy).
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -62,29 +68,31 @@ Lemma Div_unique :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (q:Numbers.BinNums.Z),
+   (0%Z < y)%Z -> ((q * y)%Z <= x)%Z /\ (x < ((q * y)%Z + y)%Z)%Z ->
+   ((div x y) = q).
++Proof.
+ intros x y q h1 (h2,h3).
+-assert (h:(~(y=0))%Z) by omega.
++assert (h:(~(y=0))%Z) by lia.
+ generalize (Mod_bound x y h); intro h0.
+ rewrite Z.abs_eq in h0; auto with zarith.
+ generalize (Div_mod x y h); clear h; intro h.
+-assert (cases:(div x y = q \/ (div x y <= q - 1 \/ div x y >= q+1))%Z) by omega.
++assert (cases:(div x y = q \/ (div x y <= q - 1 \/ div x y >= q+1))%Z) by lia.
+ destruct cases as [h4 | [h5 | h6]]; auto.
+ assert (y * div x y <= y * (q - 1))%Z.
+  apply  Zmult_le_compat_l; auto with zarith.
+ replace (y*(q-1))%Z with (q*y - y)%Z in H by ring.
+ elimtype False.
+-omega.
++lia.
+ assert (y * div x y >= y * (q + 1))%Z.
+  apply  Zmult_ge_compat_l; auto with zarith.
+ replace (y*(q+1))%Z with (q*y + y)%Z in H by ring.
+ elimtype False.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Div_bound :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (0%Z <= x)%Z /\ (0%Z < y)%Z -> (0%Z <= (div x y))%Z /\ ((div x y) <= x)%Z.
++Proof.
+ intros x y (Hx,Hy).
+ unfold div.
+ case Z_le_dec ; intros H.
+@@ -96,7 +104,7 @@ rewrite H', Zdiv_1_r.
+ apply Z.le_refl.
+ rewrite <- (Zdiv_1_r x) at 2.
+ apply Zdiv_le_compat_l with (1 := Hx).
+-omega.
++lia.
+ elim H.
+ apply Z_mod_lt.
+ now apply Z.lt_gt.
+@@ -104,6 +112,7 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Mod_1 : forall (x:Numbers.BinNums.Z), ((mod1 x 1%Z) = 0%Z).
++Proof.
+ intros x.
+ unfold mod1, div.
+ rewrite Zmod_1_r, Zdiv_1_r, Zmult_1_l.
+@@ -112,6 +121,7 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Div_1 : forall (x:Numbers.BinNums.Z), ((div x 1%Z) = x).
++Proof.
+ intros x.
+ unfold div.
+ now rewrite Zmod_1_r, Zdiv_1_r.
+@@ -121,6 +131,7 @@ Qed.
+ Lemma Div_inf :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (0%Z <= x)%Z /\ (x < y)%Z -> ((div x y) = 0%Z).
++Proof.
+ intros x y Hxy.
+ unfold div.
+ case Z_le_dec ; intros H.
+@@ -133,8 +144,9 @@ Qed.
+ Lemma Div_inf_neg :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (0%Z < x)%Z /\ (x <= y)%Z -> ((div (-x)%Z y) = (-1%Z)%Z).
++Proof.
+ intros x y Hxy.
+-assert (h: (x < y \/ x = y)%Z) by omega.
++assert (h: (x < y \/ x = y)%Z) by lia.
+ destruct h.
+ (* case 0 < x < y *)
+ assert (h1: (x mod y = x)%Z).
+@@ -165,6 +177,7 @@ Qed.
+ (* Why3 goal *)
+ Lemma Mod_0 :
+   forall (y:Numbers.BinNums.Z), ~ (y = 0%Z) -> ((mod1 0%Z y) = 0%Z).
++Proof.
+ intros y Hy.
+ unfold mod1, div.
+ rewrite Zmod_0_l.
+@@ -175,6 +188,7 @@ Qed.
+ (* Why3 goal *)
+ Lemma Div_1_left :
+   forall (y:Numbers.BinNums.Z), (1%Z < y)%Z -> ((div 1%Z y) = 0%Z).
++Proof.
+ intros y Hy.
+ rewrite Div_inf; auto with zarith.
+ Qed.
+@@ -182,6 +196,7 @@ Qed.
+ (* Why3 goal *)
+ Lemma Div_minus1_left :
+   forall (y:Numbers.BinNums.Z), (1%Z < y)%Z -> ((div (-1%Z)%Z y) = (-1%Z)%Z).
++Proof.
+ intros y Hy.
+ unfold div.
+ assert (h1: (1 mod y = 1)%Z).
+@@ -197,6 +212,7 @@ Qed.
+ (* Why3 goal *)
+ Lemma Mod_1_left :
+   forall (y:Numbers.BinNums.Z), (1%Z < y)%Z -> ((mod1 1%Z y) = 1%Z).
++Proof.
+ intros y Hy.
+ unfold mod1.
+ rewrite Div_1_left; auto with zarith.
+@@ -206,6 +222,7 @@ Qed.
+ Lemma Mod_minus1_left :
+   forall (y:Numbers.BinNums.Z), (1%Z < y)%Z ->
+   ((mod1 (-1%Z)%Z y) = (y - 1%Z)%Z).
++Proof.
+ intros y Hy.
+ unfold mod1.
+ rewrite Div_minus1_left; auto with zarith.
+@@ -217,6 +234,7 @@ Open Scope Z_scope.
+ Lemma Div_mult :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (z:Numbers.BinNums.Z),
+   (0%Z < x)%Z -> ((div ((x * y)%Z + z)%Z x) = (y + (div z x))%Z).
++Proof.
+ intros x y z h.
+ unfold div.
+ destruct (Z_le_dec 0 (z mod x)).
+@@ -231,6 +249,7 @@ Qed.
+ Lemma Mod_mult :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z) (z:Numbers.BinNums.Z),
+   (0%Z < x)%Z -> ((mod1 ((x * y)%Z + z)%Z x) = (mod1 z x)).
++Proof.
+ intros x y z h.
+ unfold mod1.
+ rewrite Div_mult.
+--- a/lib/coq/int/Exponentiation.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/int/Exponentiation.v	2021-10-20 09:16:14.466643317 -0600
+@@ -69,7 +69,8 @@ Lemma Power_s_alt :
+ Proof.
+ intros x n h1.
+ rewrite <- Power_s; auto with zarith.
+-f_equal; omega.
++apply f_equal.
++ring.
+ Qed.
+ 
+ (* Why3 goal *)
+--- a/lib/coq/int/MinMax.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/int/MinMax.v	2021-10-20 09:20:06.034764663 -0600
+@@ -15,6 +15,8 @@ Require Import BuiltIn.
+ Require BuiltIn.
+ Require int.Int.
+ 
++Require Import Lia.
++
+ (* Why3 comment *)
+ (* min is replaced with (ZArith.BinInt.Z.min x x1) by the coq driver *)
+ 
+@@ -28,7 +30,7 @@ intros x y.
+ split ; intros H.
+ now apply Z.min_l.
+ apply Z.min_r.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 comment *)
+@@ -44,13 +46,14 @@ intros x y.
+ split ; intros H.
+ now apply Z.max_r.
+ apply Z.max_l.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+ Lemma Min_r :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z), (y <= x)%Z ->
+   ((ZArith.BinInt.Z.min x y) = y).
++Proof.
+ exact Z.min_r.
+ Qed.
+ 
+@@ -58,6 +61,7 @@ Qed.
+ Lemma Max_l :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z), (y <= x)%Z ->
+   ((ZArith.BinInt.Z.max x y) = x).
++Proof.
+ exact Z.max_l.
+ Qed.
+ 
+@@ -65,6 +69,7 @@ Qed.
+ Lemma Min_comm :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   ((ZArith.BinInt.Z.min x y) = (ZArith.BinInt.Z.min y x)).
++Proof.
+ exact Z.min_comm.
+ Qed.
+ 
+@@ -72,6 +77,7 @@ Qed.
+ Lemma Max_comm :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   ((ZArith.BinInt.Z.max x y) = (ZArith.BinInt.Z.max y x)).
++Proof.
+ exact Z.max_comm.
+ Qed.
+ 
+--- a/lib/coq/int/NumOf.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/int/NumOf.v	2021-10-20 09:22:55.402885709 -0600
+@@ -16,6 +16,8 @@ Require BuiltIn.
+ Require HighOrd.
+ Require int.Int.
+ 
++Require Import Lia.
++
+ Fixpoint numof_aux (f : Z -> bool) (a : Z) (n : nat) : Z :=
+   match n with
+     | S n => (numof_aux f a n + (if f (a + (Z.of_nat n)) then 1%Z else 0%Z))%Z
+@@ -47,13 +49,13 @@ split ; intros h1.
+ - assert (Z.to_nat (b - a) = 0).
+   revert h1.
+   rewrite <-Z.le_sub_0.
+-  destruct (b - a)%Z ; try easy ; intros H ; now elim H. (* TODO: replace by now after 8.4 *)
++  now destruct (b - a)%Z.
+   now rewrite H.
+ - rewrite S_pred with (m := 0) (n := Z.to_nat (b - a)).
+-  2: apply (Z2Nat.inj_lt 0); omega.
++  2: apply (Z2Nat.inj_lt 0); lia.
+   rewrite <- Z2Nat.inj_pred.
+   simpl numof_aux.
+-  rewrite Z2Nat.id by omega.
++  rewrite Z2Nat.id by lia.
+   replace (a + Z.pred (b - a))%Z with (b - 1)%Z by (unfold Z.pred ; ring).
+   replace (Z.pred (b - a)) with (b - 1 - a)%Z by (unfold Z.pred ; ring).
+   split ; intros h2.
+@@ -80,12 +82,12 @@ Proof.
+   intros p a b h1.
+   unfold numof.
+   set (x := Z.to_nat (b - a)).
+-  rewrite <-Z2Nat.id with (n := (b - a)%Z) by omega.
++  rewrite <-Z2Nat.id with (n := (b - a)%Z) by lia.
+   change (0 <= numof_aux p a x <= Z.of_nat x)%Z.
+   induction x.
+-  simpl; omega.
++  split ; apply Z.le_refl.
+   rewrite Nat2Z.inj_succ; simpl numof_aux.
+-  case (p (a + Z.of_nat x)%Z); omega.
++  case (p (a + Z.of_nat x)%Z); lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -101,7 +103,7 @@ Proof.
+   intros.
+   case (Z.eq_dec b x).
+   intro e; rewrite e.
+-  rewrite Numof_empty with (a := x) (b := x); omega.
++  rewrite Numof_empty with (a := x) (b := x); lia.
+   intro H6.
+   refine (_ (proj2 (numof'def p a x) _)).
+   intros [H1 H2].
+@@ -110,15 +112,15 @@ Proof.
+   destruct (Bool.bool_dec (p (x - 1)%Z) true) as [H5|H5].
+   rewrite H1, H3, H ; auto with zarith.
+   rewrite H2, H4, H ; auto with zarith.
+-  clear -H0 H6 ; omega.
+-  clear -h1 H0 H6 ; omega.
++  clear -H0 H6 ; lia.
++  clear -h1 H0 H6 ; lia.
+ Qed.
+ 
+ Lemma numof_succ: forall p a, numof p a (a + 1) = (if p a then 1%Z else 0%Z).
+ Proof.
+   intros.
+   unfold numof.
+-  replace (a + 1 - a)%Z with 1%Z by omega.
++  replace (a + 1 - a)%Z with 1%Z by ring.
+   simpl.
+   rewrite <-Zplus_0_r_reverse.
+   trivial.
+@@ -129,8 +131,8 @@ Proof.
+   intros.
+   replace (numof p (a - 1) a)%Z with (numof p (a - 1) ((a - 1) + 1))%Z.
+   apply numof_succ.
+-  repeat apply f_equal.
+-  omega.
++  apply f_equal.
++  ring.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -141,7 +143,7 @@ Lemma Numof_left_no_add :
+   ((numof p a b) = (numof p (a + 1%Z)%Z b)).
+ Proof.
+   intros p a b h1 h2.
+-  rewrite Numof_append with (b := (a+1)%Z) by omega.
++  rewrite Numof_append with (b := (a+1)%Z) by lia.
+   rewrite (numof_succ p a).
+   apply Bool.not_true_is_false in h2.
+   rewrite h2; trivial.
+@@ -155,7 +157,7 @@ Lemma Numof_left_add :
+   ((numof p a b) = (1%Z + (numof p (a + 1%Z)%Z b))%Z).
+ Proof.
+   intros p a b h1 h2.
+-  rewrite Numof_append with (b := (a+1)%Z) by omega.
++  rewrite Numof_append with (b := (a+1)%Z) by lia.
+   rewrite (numof_succ p a).
+   rewrite h2; trivial.
+ Qed.
+@@ -173,11 +175,11 @@ Proof.
+   pattern b.
+   apply Zlt_lower_bound_ind with (z := a); auto with zarith; intros.
+   case (Z.eq_dec a x); intro e.
+-  rewrite e; apply Numof_empty; omega.
+-  rewrite Numof_append with (b := (x - 1)%Z) by omega.
++  rewrite e; apply Numof_empty; lia.
++  rewrite Numof_append with (b := (x - 1)%Z) by lia.
+   assert (numof p (x - 1) x = 0)%Z.
+   rewrite numof_pred.
+-  assert (a <= (x - 1)%Z < x)%Z as H2 by omega.
++  assert (a <= (x - 1)%Z < x)%Z as H2 by lia.
+   generalize (H1 (x - 1)%Z H2).
+   intro H3; apply Bool.not_true_is_false in H3; rewrite H3; trivial.
+   rewrite H2.
+@@ -197,11 +199,11 @@ Proof.
+   pattern b.
+   apply Zlt_lower_bound_ind with (z := a); auto with zarith; intros.
+   case (Z.eq_dec a x); intro e.
+-  rewrite e; rewrite Zminus_diag; apply Numof_empty; omega.
+-  rewrite Numof_append with (b := (x - 1)%Z) by omega.
++  rewrite e; rewrite Zminus_diag; apply Numof_empty; lia.
++  rewrite Numof_append with (b := (x - 1)%Z) by lia.
+   assert (numof p (x - 1) x = 1)%Z.
+   rewrite numof_pred.
+-  assert (a <= (x - 1)%Z < x)%Z as H2 by omega.
++  assert (a <= (x - 1)%Z < x)%Z as H2 by lia.
+   generalize (H1 (x - 1)%Z H2).
+   intro; rewrite H3; trivial.
+   rewrite H2.
+@@ -215,10 +217,10 @@ Proof.
+   pattern b.
+   apply Zlt_lower_bound_ind with (z := a) (x := b); auto with zarith; intros.
+   case (Z.eq_dec a x); intro e.
+-  rewrite e; rewrite Numof_empty; omega.
+-  rewrite Numof_append with (b := (x - 1)%Z) by omega.
++  rewrite e; rewrite Numof_empty; lia.
++  rewrite Numof_append with (b := (x - 1)%Z) by lia.
+   apply Z.add_nonneg_nonneg.
+-  apply H; omega.
++  apply H; lia.
+   rewrite numof_pred.
+   case (p (x - 1)%Z); easy.
+ Qed.
+@@ -229,7 +231,7 @@ Proof.
+   generalize h; pattern b.
+   apply Zlt_lower_bound_ind with (z := (a + 1)%Z) (x := b); auto with zarith; intros.
+   rewrite Z.add_1_r in H0; apply Zle_succ_gt in H0.
+-  rewrite Numof_append with (b := (x - 1)%Z) by omega.
++  rewrite Numof_append with (b := (x - 1)%Z) by lia.
+   case (Z.eq_dec k (x-1)); intro e.
+   rewrite e in H1.
+   apply Z.add_nonneg_pos.
+@@ -247,7 +249,7 @@ Lemma numof_increasing :
+   (i <= j)%Z /\ (j <= k)%Z -> ((numof p i j) <= (numof p i k))%Z.
+ Proof.
+ intros p i j k (h1,h2).
+-rewrite (Numof_append p i j k) by omega.
++rewrite (Numof_append p i j k) by lia.
+ rewrite <-Z.le_sub_le_add_l, Zminus_diag.
+ apply numof_nat.
+ Qed.
+@@ -260,7 +262,7 @@ Lemma numof_strictly_increasing :
+   ((numof p i j) < (numof p i l))%Z.
+ Proof.
+ intros p i j k l (h1,(h2,h3)) h4.
+-rewrite (Numof_append p i j l) by omega.
++rewrite (Numof_append p i j l) by lia.
+ rewrite <-Z.lt_sub_lt_add_l, Zminus_diag.
+ apply numof_pos with (k := k); auto with zarith.
+ Qed.
+@@ -275,13 +277,13 @@ Lemma numof_change_any :
+   ((numof p1 a b) <= (numof p2 a b))%Z.
+ Proof.
+   intros p1 p2 a b.
+-  case (Z_lt_le_dec a b); intro; [|rewrite Numof_empty, Numof_empty; omega].
++  case (Z_lt_le_dec a b); intro; [|rewrite Numof_empty, Numof_empty; lia].
+   pattern b.
+   apply Zlt_lower_bound_ind with (z := a); auto with zarith; intros.
+   case (Z.eq_dec a x); intro eq.
+-  rewrite eq; rewrite Numof_empty, Numof_empty; omega.
+-  rewrite Numof_append with (b := (x-1)%Z) by omega.
+-  rewrite Numof_append with (p := p2) (b := (x-1)%Z) by omega.
++  rewrite eq; rewrite Numof_empty, Numof_empty; lia.
++  rewrite Numof_append with (b := (x-1)%Z) by lia.
++  rewrite Numof_append with (p := p2) (b := (x-1)%Z) by lia.
+   apply Z.add_le_mono.
+   apply H; auto with zarith.
+   rewrite numof_pred, numof_pred.
+@@ -306,14 +308,14 @@ Proof.
+   generalize (Z_le_lt_eq_dec _ _ (numof_change_any p1 p2 a b h3)).
+   intro H; destruct H; trivial.
+   cut False; auto with zarith.
+-  rewrite Numof_append with (b := i) in e by omega.
+-  rewrite Numof_append with (p := p2) (b := i) in e by omega.
++  rewrite Numof_append with (b := i) in e by lia.
++  rewrite Numof_append with (p := p2) (b := i) in e by lia.
+   rewrite (Numof_left_add _ _ _ h2 h5), (Numof_left_no_add _ _ _ h2 h4) in e.
+   assert (forall j : int, (a <= j < i)%Z -> p1 j = true -> p2 j = true) by auto with zarith.
+   generalize (numof_change_any p1 p2 _ _ H).
+   assert (forall j : int, ((i + 1) <= j < b)%Z -> p1 j = true -> p2 j = true) by auto with zarith.
+   generalize (numof_change_any p1 p2 _ _ H0).
+-  omega.
++  lia.
+ Qed.
+ 
+ Lemma le_ge_eq: forall a b, (a <= b)%Z /\ (b <= a)%Z -> (a = b)%Z.
+--- a/lib/coq/int/Power.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/int/Power.v	2021-10-20 09:24:31.241953629 -0600
+@@ -15,6 +15,7 @@ Require Import BuiltIn.
+ Require BuiltIn.
+ Require int.Int.
+ 
++Require Import Lia.
+ Require Import Exponentiation.
+ 
+ (* Why3 goal *)
+@@ -54,10 +55,11 @@ Qed.
+ Lemma Power_s_alt :
+   forall (x:Numbers.BinNums.Z) (n:Numbers.BinNums.Z), (0%Z < n)%Z ->
+   ((power x n) = (x * (power x (n - 1%Z)%Z))%Z).
++Proof.
+ intros x n h1.
+-rewrite <- Power_s.
+-f_equal; auto with zarith.
+-omega.
++rewrite <- Power_s by lia.
++apply f_equal.
++ring.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -94,7 +96,7 @@ Lemma Power_comm1 :
+   (((power x n) * y)%Z = (y * (power x n))%Z).
+ Proof.
+ intros x y h1 n h2.
+-auto with zarith.
++apply Zmult_comm.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -112,6 +114,7 @@ Qed.
+ Lemma Power_non_neg :
+   forall (x:Numbers.BinNums.Z) (y:Numbers.BinNums.Z),
+   (0%Z <= x)%Z /\ (0%Z <= y)%Z -> (0%Z <= (power x y))%Z.
++Proof.
+ intros x y (h1,h2).
+ now apply Z.pow_nonneg.
+ Qed.
+@@ -131,6 +134,7 @@ Open Scope Z_scope.
+ Lemma Power_monotonic :
+   forall (x:Numbers.BinNums.Z) (n:Numbers.BinNums.Z) (m:Numbers.BinNums.Z),
+   (0%Z < x)%Z /\ (0%Z <= n)%Z /\ (n <= m)%Z -> ((power x n) <= (power x m))%Z.
++Proof.
+ intros.
+ apply Z.pow_le_mono_r; auto with zarith.
+ Qed.
+--- a/lib/coq/list/Length.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/list/Length.v	2021-10-20 09:29:10.475152106 -0600
+@@ -16,6 +16,8 @@ Require BuiltIn.
+ Require int.Int.
+ Require list.List.
+ 
++Require Import Lia.
++
+ (* Why3 assumption *)
+ Fixpoint length {a:Type} {a_WT:WhyType a}
+   (l:Init.Datatypes.list a) {struct l}: Numbers.BinNums.Z :=
+@@ -54,6 +56,6 @@ unfold length. fold length.
+ intros H.
+ exfalso.
+ generalize (Length_nonnegative t).
+-omega.
++lia.
+ Qed.
+ 
+--- a/lib/coq/list/NthHdTl.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/list/NthHdTl.v	2021-10-20 09:29:43.331175519 -0600
+@@ -19,6 +19,8 @@ Require list.Nth.
+ Require option.Option.
+ Require list.HdTl.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Lemma Nth_tl {a:Type} {a_WT:WhyType a} :
+   forall (l1:Init.Datatypes.list a) (l2:Init.Datatypes.list a),
+@@ -33,7 +35,7 @@ generalize (Zeq_bool_if (i + 1) 0).
+ case Zeq_bool.
+ intro H.
+ exfalso.
+-omega.
++lia.
+ intros _.
+ simpl in h1.
+ inversion h1.
+--- a/lib/coq/list/NthLengthAppend.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/list/NthLengthAppend.v	2021-10-20 09:30:59.842230039 -0600
+@@ -22,6 +22,8 @@ Require option.Option.
+ Require list.NthLength.
+ Require list.Append.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Lemma nth_append_1 {a:Type} {a_WT:WhyType a} :
+   forall (l1:Init.Datatypes.list a) (l2:Init.Datatypes.list a)
+@@ -41,7 +43,7 @@ easy.
+ intros _.
+ apply IHl1.
+ assert (i < 1 + Length.length l1)%Z by exact Hi.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -67,9 +69,9 @@ case Zeq_bool.
+ intros Hi'.
+ exfalso.
+ generalize (Length.Length_nonnegative l1).
+-omega.
++lia.
+ intros _.
+ apply IHl1.
+-omega.
++lia.
+ Qed.
+ 
+--- a/lib/coq/list/NthLength.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/list/NthLength.v	2021-10-20 09:30:29.027208081 -0600
+@@ -19,6 +19,8 @@ Require list.Length.
+ Require list.Nth.
+ Require option.Option.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Lemma nth_none_1 {a:Type} {a_WT:WhyType a} :
+   forall (l:Init.Datatypes.list a) (i:Numbers.BinNums.Z), (i < 0%Z)%Z ->
+@@ -35,7 +37,7 @@ intros H'.
+ now rewrite H' in H.
+ intros _.
+ apply IHq.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -57,10 +59,10 @@ intros H'.
+ rewrite H' in H.
+ exfalso.
+ generalize (Length.Length_nonnegative q).
+-omega.
++lia.
+ intros _.
+ apply IHq.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -73,7 +75,7 @@ intros l.
+ induction l as [|h q].
+ intros i _.
+ simpl.
+-omega.
++lia.
+ intros i.
+ simpl (Nth.nth i (h :: q)).
+ change (Length.length (h :: q)) with (1 + Length.length q)%Z.
+@@ -82,6 +84,6 @@ case Zeq_bool.
+ easy.
+ intros Hi H.
+ specialize (IHq _ H).
+-omega.
++lia.
+ Qed.
+ 
+--- a/lib/coq/list/NumOcc.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/list/NumOcc.v	2021-10-20 09:31:50.459266109 -0600
+@@ -20,6 +20,8 @@ Require list.Mem.
+ Require list.Append.
+ Require list.Reverse.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Definition num_occ {a:Type} {a_WT:WhyType a} :
+   a -> Init.Datatypes.list a -> Numbers.BinNums.Z.
+@@ -53,12 +55,13 @@ Qed.
+ (* Why3 goal *)
+ Lemma Num_Occ_NonNeg {a:Type} {a_WT:WhyType a} :
+   forall (x:a) (l:Init.Datatypes.list a), (0%Z <= (num_occ x l))%Z.
++Proof.
+ intros x l.
+ induction l as [|lh lt IHl].
+ easy.
+ simpl.
+ case why_decidable_eq ; intros H.
+-omega.
++lia.
+ easy.
+ Qed.
+ 
+@@ -75,7 +78,7 @@ case why_decidable_eq ; intros H ; split
+ intros _.
+ clear.
+ generalize (Num_Occ_NonNeg x lt).
+-omega.
++lia.
+ now left.
+ intros [H'|H'] ; try easy.
+ now apply IHl.
+--- a/lib/coq/list/Permut.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/list/Permut.v	2021-10-20 09:32:21.163287990 -0600
+@@ -21,6 +21,8 @@ Require list.Append.
+ Require list.Reverse.
+ Require list.NumOcc.
+ 
++Require Import Lia.
++
+ (* Why3 assumption *)
+ Definition permut {a:Type} {a_WT:WhyType a} (l1:Init.Datatypes.list a)
+     (l2:Init.Datatypes.list a) : Prop :=
+@@ -147,7 +149,7 @@ induction l1 as [|l1h l1t IHl1].
+   simpl.
+   case why_decidable_eq ; intros H.
+   generalize (NumOcc.Num_Occ_NonNeg l2h l2t).
+-  omega.
++  lia.
+   now elim H.
+ - intros l2 H.
+   assert (H': Mem.mem l1h l2).
+@@ -157,7 +159,7 @@ induction l1 as [|l1h l1t IHl1].
+     destruct (why_decidable_eq l1h l1h) as [_|H'].
+     2: now elim H'.
+     generalize (NumOcc.Num_Occ_NonNeg l1h l1t).
+-    omega.
++    lia.
+   destruct (Append.mem_decomp _ _ H') as [l2a [l2b Hl2]].
+   rewrite Hl2.
+   rewrite Append.Append_length.
+@@ -175,6 +177,6 @@ induction l1 as [|l1h l1t IHl1].
+   intros l H y.
+   specialize (H y).
+   simpl in H.
+-  omega.
++  lia.
+ Qed.
+ 
+--- a/lib/coq/map/MapInjection.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/map/MapInjection.v	2021-10-20 09:33:53.595353868 -0600
+@@ -31,8 +31,7 @@ Definition surjection (n:nat) (f:nat ->
+   forall i:nat, i < n ->
+     exists j:nat, j < n /\ f j = i.
+ 
+-Require Omega.
+-Require Import Peano_dec.
++Require Import Lia Peano_dec.
+ 
+ Theorem injective_implies_surjective:
+   forall n:nat,
+@@ -44,11 +43,11 @@ Proof.
+ induction n.
+ (* case n = 0 *)
+ unfold surjection; intros.
+-elimtype False; omega.
++elimtype False; lia.
+ (* case n > 0 *)
+ intros f Hinto Hinj.
+ pose (k := f n).
+-assert (Hbound_k: k < S n) by (apply Hinto; omega).
++assert (Hbound_k: k < S n) by (apply Hinto; lia).
+ (* transposition n <-> k *)
+ pose (trans i :=
+   if eq_nat_dec i n then k else
+@@ -61,21 +60,21 @@ assert (Ginto: into n g).
+   unfold into, g, trans; intros.
+   destruct (eq_nat_dec (f i) n).
+   (* f i = n *)
+-  assert (h : k < n \/ k = n) by omega.
++  assert (h : k < n \/ k = n) by lia.
+   destruct h; auto.
+   elimtype False.
+   clear g trans; subst.
+   assert (f i = i) by (apply Hinj; auto with * ).
+-  omega.
++  lia.
+   (* f i <> n *)
+   destruct (eq_nat_dec (f i) k).
+   (* f i = k *)
+   elimtype False.
+   assert (i = n) by (apply Hinj; auto with * ).
+-  omega.
++  lia.
+   (* f i <> k *)
+-  assert (f i < S n) by (apply Hinto; omega).
+-  omega.
++  assert (f i < S n) by (apply Hinto; lia).
++  lia.
+ 
+ (* second step: trans is injective *)
+ 
+@@ -85,14 +84,14 @@ assert (trans_inj: injection (S n) trans
+   (* i = n *)
+   destruct (eq_nat_dec j n); auto with *.
+   (* i = n and j <> n *)
+-  destruct (eq_nat_dec j k); omega.
++  destruct (eq_nat_dec j k); lia.
+   (* i <> n *)
+   destruct (eq_nat_dec i k); auto with *.
+   destruct (eq_nat_dec j n); auto with *.
+-  destruct (eq_nat_dec j k); omega.
++  destruct (eq_nat_dec j k); lia.
+   (* i <> n and i <> k *)
+   destruct (eq_nat_dec j n); auto with *.
+-  destruct (eq_nat_dec j k); omega.
++  destruct (eq_nat_dec j k); lia.
+ 
+ (* third step: g is injective on [0;n[  *)
+ assert (Ginj: injection n g).
+@@ -118,12 +117,12 @@ assert (f_is_trans_o_g: forall i, f i =
+ 
+ (* conclusion *)
+ red; intros.
+-assert (h: i = k \/ i <> k) by omega.
++assert (h: i = k \/ i <> k) by lia.
+ destruct h.
+ (* case i = k: the preimage is n *)
+ exists n; auto.
+ (* case i <> k *)
+-assert (h: i = n \/ i <> n) by omega.
++assert (h: i = n \/ i <> n) by lia.
+ destruct h.
+ (* case i = n: the preimage is the preimage of k by g *)
+ elim Gsurj with (i:=k).
+@@ -135,7 +134,7 @@ rewrite h2.
+ unfold trans.
+ destruct (eq_nat_dec k n); auto with *.
+ destruct (eq_nat_dec k k); auto with *.
+-omega.
++lia.
+ (* case i <> n and i <> k:
+    the preimage is the preimage of i by g
+  *)
+@@ -148,7 +147,7 @@ rewrite h2.
+ unfold trans.
+ destruct (eq_nat_dec i n); auto with *.
+ destruct (eq_nat_dec i k); auto with *.
+-omega.
++lia.
+ Qed.
+ 
+ 
+@@ -183,7 +182,7 @@ Proof.
+ intros n f Hinto.
+ elim (lifting n f Hinto).
+ intros g Heq_g_f Hinj i Hi_inf_n.
+-assert (n_pos: 0 <= n) by omega.
++assert (n_pos: 0 <= n) by lia.
+ elim (Z_of_nat_complete_inf n n_pos).
+ intros m Heq_n_m.
+ 
+@@ -191,7 +190,7 @@ intros m Heq_n_m.
+ 
+ assert (Hinto_g: into m g).
+   red; intros i0 Hinter.
+-  assert (0 <= f (Z_of_nat i0) < n) by (apply Hinto; omega).
++  assert (0 <= f (Z_of_nat i0) < n) by (apply Hinto; lia).
+   apply inj_lt_rev; auto with *.
+   rewrite Heq_g_f; auto with *.
+ 
+@@ -206,14 +205,14 @@ assert (Hinj_g: injection m g).
+ (* conclusion *)
+ generalize (injective_implies_surjective m g Hinto_g Hinj_g).
+ intro Hsurj_g.
+-assert (i_pos: 0 <= i) by omega.
++assert (i_pos: 0 <= i) by lia.
+ elim (Z_of_nat_complete_inf i i_pos).
+ intros j Heq_j_i.
+ elim (Hsurj_g j); auto with *.
+ intros x (inter_x, eq_x).
+ exists (Z_of_nat x).
+ split; auto with *.
+-rewrite <- Heq_g_f; omega.
++rewrite <- Heq_g_f; lia.
+ Qed.
+ 
+ 
+@@ -248,7 +247,7 @@ intros a n h1 h2.
+ intros.
+ apply Zinjective_implies_surjective; auto.
+ intros.
+-assert (h: (i0 = j \/ i0 <> j)%Z) by omega.
++assert (h: (i0 = j \/ i0 <> j)%Z) by lia.
+ destruct h; auto.
+ red in h1.
+ elimtype False; apply h1 with i0 j; clear h1; auto.
+@@ -265,78 +264,78 @@ Proof.
+ intros m n; split.
+ (* -> *)
+ intros inj v.
+-assert (case: (occ v m 0 n <= 1 \/ occ v m 0 n >= 2)%Z) by omega. destruct case.
++assert (case: (occ v m 0 n <= 1 \/ occ v m 0 n >= 2)%Z) by lia. destruct case.
+ trivial.
+-destruct (occ_exists v m 0 n) as (i,(hi1,hi2)). omega.
++destruct (occ_exists v m 0 n) as (i,(hi1,hi2)). lia.
+ assert (0 <= occ v m 0 i)%Z.
+-  generalize (occ_bounds v m 0 i). omega.
+-assert (case: (occ v m 0 i = 0 \/ occ v m 0 i > 0)%Z) by omega. destruct case.
++  generalize (occ_bounds v m 0 i). lia.
++assert (case: (occ v m 0 i = 0 \/ occ v m 0 i > 0)%Z) by lia. destruct case.
+ assert (0 < occ v m (i+1) n)%Z.
+ assert (occ v m 0 n = occ v m 0 i + occ v m i n)%Z.
+-  apply occ_append; omega.
++  apply occ_append; lia.
+   assert (occ v m i n = occ v m i (i+1) + occ v m (i+1) n)%Z.
+-  apply occ_append; omega.
++  apply occ_append; lia.
+   assert (occ v m i (i+1) = 1)%Z.
+   rewrite occ_right_add.
+-  replace (i+1-1)%Z with i by omega.
+-  rewrite occ_empty; omega.
+-  omega.
+-  replace (i+1-1)%Z with i by omega. auto.
+-  omega.
+-destruct (occ_exists v m (i+1) n) as (j,(hj1,hj2)). omega.
+-elim (inj i j); omega.
+-destruct (occ_exists v m 0 i) as (j,(hj1,hj2)). omega.
+-elim (inj i j); omega.
++  replace (i+1-1)%Z with i by lia.
++  rewrite occ_empty; lia.
++  lia.
++  replace (i+1-1)%Z with i by lia. auto.
++  lia.
++destruct (occ_exists v m (i+1) n) as (j,(hj1,hj2)). lia.
++elim (inj i j); lia.
++destruct (occ_exists v m 0 i) as (j,(hj1,hj2)). lia.
++elim (inj i j); lia.
+ 
+ (* <- *)
+ intros Hocc i j hi hj neq eq.
+ pose (v := m i).
+ assert (occ v m 0 n >= 2)%Z.
+ assert (occ v m 0 n = occ v m 0 i + occ v m i n)%Z.
+-  apply occ_append; omega.
++  apply occ_append; lia.
+   assert (occ v m i n = occ v m i (i+1) + occ v m (i+1) n)%Z.
+-  apply occ_append; omega.
++  apply occ_append; lia.
+   assert (occ v m i (i+1) = 1)%Z.
+   rewrite occ_right_add.
+-  replace (i+1-1)%Z with i by omega.
+-  rewrite occ_empty; omega.
+-  omega.
+-  replace (i+1-1)%Z with i by omega. auto.
+-assert (case: (j < i \/ i+1 <= j)%Z) by omega. destruct case.
++  replace (i+1-1)%Z with i by lia.
++  rewrite occ_empty; lia.
++  lia.
++  replace (i+1-1)%Z with i by lia. auto.
++assert (case: (j < i \/ i+1 <= j)%Z) by lia. destruct case.
+ assert (occ v m 0 i >= 1)%Z.
+   assert (occ v m 0 i = occ v m 0 j + occ v m j i)%Z.
+-  apply occ_append; omega.
++  apply occ_append; lia.
+   assert (occ v m j i = occ v m j (j+1) + occ v m (j+1) i)%Z.
+-  apply occ_append; omega.
++  apply occ_append; lia.
+   assert (occ v m j (j+1) = 1)%Z.
+   rewrite occ_right_add.
+-  replace (j+1-1)%Z with j by omega.
+-  rewrite occ_empty; omega.
+-  omega.
+-  replace (j+1-1)%Z with j by omega. auto.
++  replace (j+1-1)%Z with j by lia.
++  rewrite occ_empty; lia.
++  lia.
++  replace (j+1-1)%Z with j by lia. auto.
+   generalize (occ_bounds v m (i+1) n).
+   generalize (occ_bounds v m 0 j).
+   generalize (occ_bounds v m (j+1) i).
+-  omega.
++  lia.
+   generalize (occ_bounds v m (i+1) n).
+-omega.
++lia.
+ assert (occ v m (i+1) n >= 1)%Z.
+   assert (occ v m (i+1) n = occ v m (i+1) j + occ v m j n)%Z.
+-  apply occ_append; omega.
++  apply occ_append; lia.
+   assert (occ v m j n = occ v m j (j+1) + occ v m (j+1) n)%Z.
+-  apply occ_append; omega.
++  apply occ_append; lia.
+   assert (occ v m j (j+1) = 1)%Z.
+   rewrite occ_right_add.
+-  replace (j+1-1)%Z with j by omega.
+-  rewrite occ_empty; omega.
+-  omega.
+-  replace (j+1-1)%Z with j by omega. auto.
++  replace (j+1-1)%Z with j by lia.
++  rewrite occ_empty; lia.
++  lia.
++  replace (j+1-1)%Z with j by lia. auto.
+   generalize (occ_bounds v m (j+1) n).
+   generalize (occ_bounds v m 0 i).
+   generalize (occ_bounds v m (i+1) j).
+-  omega.
++  lia.
+   generalize (occ_bounds v m 0 i).
+-  omega.
+-generalize (Hocc v); omega.
++  lia.
++generalize (Hocc v); lia.
+ Qed.
+ 
+--- a/lib/coq/map/Occ.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/map/Occ.v	2021-10-20 09:35:21.683416654 -0600
+@@ -17,6 +17,8 @@ Require HighOrd.
+ Require int.Int.
+ Require map.Map.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Definition occ {a:Type} {a_WT:WhyType a} :
+   a -> (Numbers.BinNums.Z -> a) -> Numbers.BinNums.Z -> Numbers.BinNums.Z ->
+@@ -35,11 +37,11 @@ Lemma occ_equation :
+   ((if why_decidable_eq (m (u - 1)%Z) v then 1 else 0) + occ v m l (u - 1))%Z.
+ Proof.
+ intros a a_WT v m l u Hlu.
+-assert (0 < u - l)%Z as h1' by omega.
++assert (0 < u - l)%Z as h1' by lia.
+ unfold occ.
+ replace (u - 1 - l)%Z with (u - l - 1)%Z by ring.
+ replace (u - 1)%Z with (l + (u - l - 1))%Z by ring.
+-rewrite <- (Z2Nat.id (u - l - 1)) by omega.
++rewrite <- (Z2Nat.id (u - l - 1)) by lia.
+ rewrite (Z2Nat.inj_sub _ 1) by easy.
+ destruct (u - l)%Z ; try easy.
+ simpl.
+@@ -70,15 +72,15 @@ rewrite <- Zplus_assoc.
+ apply f_equal.
+ rewrite Zplus_comm.
+ apply H.
+-clear -Hlu' ; unfold Zwf ; omega.
+-clear -Hlu' ; omega.
++clear -Hlu' ; unfold Zwf ; lia.
++clear -Hlu' ; lia.
+ replace u with (l + 1)%Z.
+ unfold occ.
+ rewrite Z.add_simpl_l.
+ rewrite <- Zminus_diag_reverse.
+ simpl.
+ now rewrite (Zplus_0_r l).
+-clear -Hlu Hlu' ; omega.
++clear -Hlu Hlu' ; lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -88,7 +90,7 @@ Lemma occ_empty {a:Type} {a_WT:WhyType a
+   (u <= l)%Z -> ((occ v m l u) = 0%Z).
+ Proof.
+ intros v m l u h1.
+-assert (u - l <= 0)%Z as h1' by omega.
++assert (u - l <= 0)%Z as h1' by lia.
+ unfold occ.
+ destruct (u - l)%Z ; try reflexivity.
+ now elim h1'.
+@@ -148,28 +150,28 @@ Lemma occ_bounds {a:Type} {a_WT:WhyType
+   (l <= u)%Z -> (0%Z <= (occ v m l u))%Z /\ ((occ v m l u) <= (u - l)%Z)%Z.
+ Proof.
+ intros v m l u h1.
+-cut (0 <= u - l)%Z. 2: omega.
++cut (0 <= u - l)%Z. 2: lia.
+ replace (occ v m l u) with (occ v m l (l + (u - l)))%Z.
+-pattern (u - l)%Z; apply Z_lt_induction. 2: omega.
++pattern (u - l)%Z; apply Z_lt_induction. 2: lia.
+ intros.
+-assert (h: (x = 0 \/ x <> 0)%Z) by omega. destruct h.
+-now rewrite occ_empty; omega.
++assert (h: (x = 0 \/ x <> 0)%Z) by lia. destruct h.
++now rewrite occ_empty; lia.
+ destruct (why_decidable_eq (m (l + (x-1))%Z) v).
+ rewrite occ_right_add.
+ generalize (H (x-1)%Z); clear H; intros.
+ assert (0 <= occ v m l (l + (x - 1)) <= x-1)%Z.
+-apply H; omega.
++apply H; lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+-omega.
+-omega.
++lia.
++lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+ trivial.
+ rewrite occ_right_no_add.
+ assert (0 <= occ v m l (l + (x - 1)) <= x-1)%Z.
+-apply H; omega.
++apply H; lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+-omega.
+-omega.
++lia.
++lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+ trivial.
+ replace (l + (u-l))%Z with u by ring. trivial.
+@@ -183,38 +185,38 @@ Lemma occ_append {a:Type} {a_WT:WhyType
+   ((occ v m l u) = ((occ v m l mid) + (occ v m mid u))%Z).
+ Proof.
+ intros v m l mid u (h1,h2).
+-cut (0 <= u - mid)%Z. 2: omega.
++cut (0 <= u - mid)%Z. 2: lia.
+ replace (occ v m l u) with (occ v m l (mid + (u - mid)))%Z.
+ replace (occ v m mid u) with (occ v m mid (mid + (u - mid)))%Z.
+-pattern (u - mid)%Z; apply Z_lt_induction. 2: omega.
++pattern (u - mid)%Z; apply Z_lt_induction. 2: lia.
+ intros.
+-assert (h: (x = 0 \/ x <> 0)%Z) by omega. destruct h.
++assert (h: (x = 0 \/ x <> 0)%Z) by lia. destruct h.
+ rewrite (occ_empty _ _ mid (mid+x)%Z).
+ subst x. ring_simplify ((mid+0)%Z). ring.
+-omega.
++lia.
+ destruct (why_decidable_eq (m (mid + (x-1))%Z) v).
+ rewrite (occ_right_add _ _ l (mid+x))%Z.
+ rewrite (occ_right_add _ _ mid (mid+x))%Z.
+ generalize (H (x-1)%Z); clear H; intros.
+ assert ((occ v m l (mid+(x-1)) = (occ v m l mid) + occ v m mid (mid + (x - 1)))%Z).
+-apply H; omega.
++apply H; lia.
+ replace (mid + x - 1)%Z with (mid+(x-1))%Z by ring.
+-omega. omega.
++lia. lia.
+ trivial.
+ replace (mid + x - 1)%Z with (mid+(x-1))%Z by ring. trivial.
+-omega.
++lia.
+ replace (mid + x - 1)%Z with (mid+(x-1))%Z by ring. trivial.
+ 
+ rewrite (occ_right_no_add _ _ l (mid+x))%Z.
+ rewrite (occ_right_no_add _ _ mid (mid+x))%Z.
+ generalize (H (x-1)%Z); clear H; intros.
+ assert ((occ v m l (mid+(x-1)) = (occ v m l mid) + occ v m mid (mid + (x - 1)))%Z).
+-apply H; omega.
++apply H; lia.
+ replace (mid + x - 1)%Z with (mid+(x-1))%Z by ring.
+-omega. omega.
++lia. lia.
+ trivial.
+ replace (mid + x - 1)%Z with (mid+(x-1))%Z by ring. trivial.
+-omega.
++lia.
+ replace (mid + x - 1)%Z with (mid+(x-1))%Z by ring. trivial.
+ 
+ replace (mid + (u-mid))%Z with u by ring. trivial.
+@@ -229,23 +231,23 @@ Lemma occ_neq {a:Type} {a_WT:WhyType a}
+   ((occ v m l u) = 0%Z).
+ Proof.
+ intros v m l u.
+-assert (h: (u < l \/ 0 <= u - l)%Z) by omega. destruct h.
+-rewrite occ_empty. trivial. omega.
++assert (h: (u < l \/ 0 <= u - l)%Z) by lia. destruct h.
++rewrite occ_empty. trivial. lia.
+ replace u with (l + (u - l))%Z. 2:ring.
+ generalize H.
+-pattern (u - l)%Z; apply Z_lt_induction. 2: omega.
++pattern (u - l)%Z; apply Z_lt_induction. 2: lia.
+ clear H; intros.
+-assert (h: (x = 0 \/ x <> 0)%Z) by omega. destruct h.
+-now rewrite occ_empty; omega.
++assert (h: (x = 0 \/ x <> 0)%Z) by lia. destruct h.
++now rewrite occ_empty; lia.
+ destruct (why_decidable_eq (m (l + (x-1))%Z) v).
+ assert (m (l + (x - 1)) <> v)%Z.
+-  apply H1; omega.
++  apply H1; lia.
+ intuition.
+ rewrite occ_right_no_add.
+ replace (l+x-1)%Z with (l+(x-1))%Z by ring.
+ apply H; intuition.
+-apply (H1 i). omega. assumption.
+-omega.
++apply (H1 i). lia. assumption.
++lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+ trivial.
+ Qed.
+@@ -258,23 +260,23 @@ Lemma occ_exists {a:Type} {a_WT:WhyType
+   exists i:Numbers.BinNums.Z, ((l <= i)%Z /\ (i < u)%Z) /\ ((m i) = v).
+ Proof.
+ intros v m l u h1.
+-assert (h: (u < l \/ 0 <= u - l)%Z) by omega. destruct h.
+-rewrite occ_empty in h1. elimtype False; omega. omega.
++assert (h: (u < l \/ 0 <= u - l)%Z) by lia. destruct h.
++rewrite occ_empty in h1. elimtype False; lia. lia.
+ generalize h1.
+ replace u with (l + (u - l))%Z. 2:ring.
+ generalize H.
+-pattern (u - l)%Z; apply Z_lt_induction. 2: omega.
++pattern (u - l)%Z; apply Z_lt_induction. 2: lia.
+ clear H; intros.
+-assert (h: (x = 0 \/ x <> 0)%Z) by omega. destruct h.
+-rewrite occ_empty in h0. elimtype False; omega. omega.
++assert (h: (x = 0 \/ x <> 0)%Z) by lia. destruct h.
++rewrite occ_empty in h0. elimtype False; lia. lia.
+ destruct (why_decidable_eq (m (l + (x-1))%Z) v).
+-exists (l+(x-1))%Z. split. omega. now trivial.
+-destruct (H (x-1))%Z as (i,(hi1,hi2)). omega. omega.
++exists (l+(x-1))%Z. split. lia. now trivial.
++destruct (H (x-1))%Z as (i,(hi1,hi2)). lia. lia.
+ rewrite occ_right_no_add in h0.
+ replace (l + (x - 1))%Z with (l+x-1)%Z by ring. trivial.
+-omega.
++lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring. trivial.
+-exists i. split. omega. assumption.
++exists i. split. lia. assumption.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -286,17 +288,17 @@ Proof.
+ intros m l u i (h1,h2).
+ pose (v := m i). fold v.
+ assert (occ v m l u = occ v m l i + occ v m i u)%Z.
+-  apply occ_append. omega.
++  apply occ_append. lia.
+ assert (occ v m i u = occ v m i (i+1) + occ v m (i+1) u)%Z.
+-  apply occ_append. omega.
++  apply occ_append. lia.
+ assert (occ v m i (i + 1) = 1)%Z.
+ rewrite occ_right_add.
+-  ring_simplify (i+1-1)%Z. rewrite occ_empty. ring. omega. omega.
++  ring_simplify (i+1-1)%Z. rewrite occ_empty. ring. lia. lia.
+ ring_simplify (i+1-1)%Z. auto.
+-assert (0 <= occ v m l i <= i -l)%Z. apply occ_bounds. omega.
+-assert (0 <= occ v m i (i+1) <= (i+1)-i)%Z. apply occ_bounds. omega.
+-assert (0 <= occ v m (i+1) u <= u - (i+1))%Z. apply occ_bounds. omega.
+-omega.
++assert (0 <= occ v m l i <= i -l)%Z. apply occ_bounds. lia.
++assert (0 <= occ v m i (i+1) <= (i+1)-i)%Z. apply occ_bounds. lia.
++assert (0 <= occ v m (i+1) u <= u - (i+1))%Z. apply occ_bounds. lia.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -308,33 +310,33 @@ Lemma occ_eq {a:Type} {a_WT:WhyType a} :
+   ((occ v m1 l u) = (occ v m2 l u)).
+ Proof.
+ intros v m1 m2 l u h1.
+-assert (h: (u < l \/ 0 <= u - l)%Z) by omega. destruct h.
++assert (h: (u < l \/ 0 <= u - l)%Z) by lia. destruct h.
+ rewrite occ_empty.
+ rewrite occ_empty. trivial.
+-omega. omega.
++lia. lia.
+ generalize h1.
+ replace u with (l + (u - l))%Z. 2:ring.
+ generalize H.
+-pattern (u - l)%Z; apply Z_lt_induction. 2: omega.
++pattern (u - l)%Z; apply Z_lt_induction. 2: lia.
+ clear H; intros.
+-assert (h: (x = 0 \/ x <> 0)%Z) by omega. destruct h.
+-rewrite occ_empty. rewrite occ_empty. trivial. omega. omega.
++assert (h: (x = 0 \/ x <> 0)%Z) by lia. destruct h.
++rewrite occ_empty. rewrite occ_empty. trivial. lia. lia.
+ destruct (why_decidable_eq (m1 (l + (x-1))%Z) v).
+ rewrite occ_right_add.
+ rewrite (occ_right_add v m2).
+ apply f_equal.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+-apply H. omega. omega. intros. apply h0. omega. omega.
++apply H. lia. lia. intros. apply h0. lia. lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+-rewrite <- h0. trivial. omega. omega.
++rewrite <- h0. trivial. lia. lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring. assumption.
+ 
+ rewrite occ_right_no_add.
+ rewrite (occ_right_no_add v m2).
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+-apply H. omega. omega. intros. apply h0. omega. omega.
++apply H. lia. lia. intros. apply h0. lia. lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring.
+-rewrite <- h0. trivial. omega. omega.
++rewrite <- h0. trivial. lia. lia.
+ replace (l + x - 1)%Z with (l+(x-1))%Z by ring. assumption.
+ Qed.
+ 
+@@ -358,18 +360,18 @@ Lemma occ_set {a:Type} {a_WT:WhyType a}
+   if why_decidable_eq (m i) y then 1 else 0)%Z.
+ Proof.
+ intros m l u i x y H.
+-rewrite 2!(occ_append _ _ l i u) by omega.
+-rewrite 2!(occ_append _ _ i (i + 1) u) by omega.
++rewrite 2!(occ_append _ _ l i u) by lia.
++rewrite 2!(occ_append _ _ i (i + 1) u) by lia.
+ rewrite 2!occ_single.
+ rewrite (proj1 (Map.set'def _ _ _ _) eq_refl).
+ rewrite 2!(occ_eq _ (Map.set m i x) m).
+ ring.
+ intros j H1.
+ apply Map.set'def.
+-omega.
++lia.
+ intros j H1.
+ apply Map.set'def.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+--- a/lib/coq/number/Prime.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/number/Prime.v	2021-10-20 09:36:46.651469216 -0600
+@@ -20,7 +20,7 @@ Require int.ComputerDivision.
+ Require number.Parity.
+ Require number.Divisibility.
+ 
+-Import Znumtheory.
++Require Import Lia Znumtheory.
+ 
+ (* Why3 assumption *)
+ Definition prime (p:Numbers.BinNums.Z) : Prop :=
+@@ -39,6 +39,7 @@ Qed.
+ 
+ (* Why3 goal *)
+ Lemma not_prime_1 : ~ prime 1%Z.
++Proof.
+ intros (H1,_).
+ now elim H1.
+ Qed.
+@@ -84,26 +85,26 @@ elimtype False.
+ (* *)
+ assert (exists d, (2 <= d)%Z /\ (d * d <= p)%Z /\ prime d /\ Z.divide d p).
+ clear H.
+-assert (Hp' : (0 <= p)%Z) by omega.
++assert (Hp' : (0 <= p)%Z) by lia.
+ revert p Hp' Hp Pp.
+ apply (Zlt_0_ind (fun p => 2 <= p -> ~ Znumtheory.prime p -> (exists d : Z, 2 <= d /\ d * d <= p /\ prime d /\ (d | p)))%Z).
+ intros p IH _ Hp Pp.
+ destruct (not_prime_divide p) as (x,(Hx1,Hx2)).
+-clear -Hp ; omega.
++clear -Hp ; lia.
+ exact Pp.
+ destruct (Zle_or_lt (x * x) p) as [Hx|Hx].
+ destruct (prime_dec x) as [Px|Px].
+ exists x.
+ split.
+-clear -Hx1 ; omega.
++clear -Hx1 ; lia.
+ split.
+ exact Hx.
+ split.
+ now apply <- prime_is_Zprime.
+ exact Hx2.
+ destruct (IH x) as (y&Hy1&Hy2&Hy3&Hy4).
+-clear -Hx1 ; omega.
+-clear -Hx1 ; omega.
++clear -Hx1 ; lia.
++clear -Hx1 ; lia.
+ exact Px.
+ exists y.
+ refine (conj Hy1 (conj _ (conj Hy3 _))).
+@@ -112,14 +113,14 @@ apply Z.le_trans with (2 := Hx).
+ rewrite <- (Zmult_1_r x) at 1.
+ apply Zmult_le_compat_l.
+ now apply Zlt_le_weak.
+-clear -Hx1 ; omega.
++clear -Hx1 ; lia.
+ now apply Z.divide_trans with x.
+ case Hx2.
+ intros q Hq1.
+ assert (Hq2 : (2 <= q)%Z).
+ apply (Zlt_le_succ 1).
+ apply Zmult_lt_reg_r with x.
+-clear -Hx1 ; omega.
++clear -Hx1 ; lia.
+ now rewrite Zmult_1_l, <- Hq1.
+ destruct (prime_dec q) as [Pq|Pq].
+ exists q.
+@@ -130,20 +131,20 @@ rewrite Hq1.
+ apply Zmult_le_compat_l.
+ apply Zlt_le_weak.
+ apply Zmult_lt_reg_r with x.
+-clear -Hx1 ; omega.
++clear -Hx1 ; lia.
+ now rewrite <- Hq1.
+-clear -Hq2 ; omega.
++clear -Hq2 ; lia.
+ split.
+ now apply <- prime_is_Zprime.
+ exists x.
+ now rewrite Zmult_comm.
+ destruct (IH q) as (y&Hy1&Hy2&Hy3&Hy4).
+ split.
+-clear -Hq2 ; omega.
++clear -Hq2 ; lia.
+ rewrite <- (Zmult_1_r q), Hq1.
+ apply Zmult_lt_compat_l.
+-clear -Hq2 ; omega.
+-clear -Hx1 ; omega.
++clear -Hq2 ; lia.
++clear -Hx1 ; lia.
+ exact Hq2.
+ exact Pq.
+ exists y.
+@@ -151,8 +152,8 @@ refine (conj Hy1 (conj _ (conj Hy3 _))).
+ apply Z.le_trans with (1 := Hy2).
+ rewrite <- (Zmult_1_r q), Hq1.
+ apply Zmult_le_compat_l.
+-clear -Hx1 ; omega.
+-clear -Hq2 ; omega.
++clear -Hx1 ; lia.
++clear -Hq2 ; lia.
+ apply Z.divide_trans with (1 := Hy4).
+ exists x.
+ now rewrite Zmult_comm.
+@@ -175,13 +176,7 @@ assert (Z.divide q p).
+ now exists 2%Z.
+ intros.
+ refine (_ (fun H1 => H0 H1 H) (proj1 Pp)).
+-(* ??? omega fails to solve this goal ??? *)
+-clear -Hq.
+-intros H Hp.
+-destruct (Zle_lt_or_eq 2 p Hp) as [Hp'|Hp'].
+-elim H.
+-omega.
+-easy.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -193,6 +188,6 @@ intros p Pp Hp.
+ apply <- Divisibility.odd_divides.
+ apply proj2 in Pp.
+ apply Pp.
+-omega.
++lia.
+ Qed.
+ 
+--- a/lib/coq/real/PowerInt.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/real/PowerInt.v	2021-10-20 09:38:32.731532867 -0600
+@@ -18,6 +18,7 @@ Require int.Int.
+ Require real.Real.
+ Require real.RealInfix.
+ 
++Require Import Lia.
+ Require Import Exponentiation.
+ Import Rfunctions.
+ 
+@@ -62,10 +63,12 @@ Lemma Power_s_alt :
+   forall (x:Reals.Rdefinitions.R) (n:Numbers.BinNums.Z), (0%Z < n)%Z ->
+   ((Reals.Rfunctions.powerRZ x n) =
+    (x * (Reals.Rfunctions.powerRZ x (n - 1%Z)%Z))%R).
++Proof.
+ intros x n h1.
+ rewrite <- Power_s.
+-f_equal; omega.
+-omega.
++apply f_equal.
++ring.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -105,6 +108,7 @@ Lemma Power_comm1 :
+   ((x * y)%R = (y * x)%R) -> forall (n:Numbers.BinNums.Z), (0%Z <= n)%Z ->
+   (((Reals.Rfunctions.powerRZ x n) * y)%R =
+    (y * (Reals.Rfunctions.powerRZ x n))%R).
++Proof.
+ intros x y h1 n h2.
+ apply Rmult_comm.
+ Qed.
+@@ -125,17 +129,18 @@ Qed.
+ Lemma Pow_ge_one :
+   forall (x:Reals.Rdefinitions.R) (n:Numbers.BinNums.Z),
+   (0%Z <= n)%Z /\ (1%R <= x)%R -> (1%R <= (Reals.Rfunctions.powerRZ x n))%R.
++Proof.
+ intros x n (h1,h2).
+ generalize h1.
+ pattern n; apply Z_lt_induction; auto.
+ clear n h1; intros n Hind h1.
+-assert (h: (n = 0 \/ 0 < n)%Z) by omega.
++assert (h: (n = 0 \/ 0 < n)%Z) by lia.
+ destruct h.
+ subst n; rewrite Power_0; auto with *.
+-replace n with ((n-1)+1)%Z by omega.
++replace n with ((n-1)+1)%Z by ring.
+ rewrite Power_s; auto with zarith.
+ assert (h : (1 <= powerRZ x (n-1))%R).
+-apply Hind; omega.
++apply Hind; lia.
+ replace 1%R with (1*1)%R by auto with real.
+ apply Rmult_le_compat; auto with real.
+ Qed.
+--- a/lib/coq/set/Cardinal.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/set/Cardinal.v	2021-10-20 09:39:23.827563515 -0600
+@@ -19,6 +19,8 @@ Require set.Set.
+ Require map.Map.
+ Require map.Const.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Definition is_finite {a:Type} {a_WT:WhyType a} :
+   (a -> Init.Datatypes.bool) -> Prop.
+@@ -304,7 +306,7 @@ Proof.
+ intros s.
+ unfold cardinal. destruct ClassicalEpsilon.excluded_middle_informative.
+ destruct ClassicalEpsilon.classical_indefinite_description.
+-omega.
++lia.
+ reflexivity.
+ Qed.
+ 
+@@ -430,7 +432,7 @@ assert (List.length x <= List.length x0)
+   intros e H1.
+   eapply Heqx0. eapply Heqx in H1. unfold set.Set.subset, set.Set.mem in h2. eapply h2 in H1. assumption.
+ }
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -465,10 +467,10 @@ unfold set.Set.subset in h2.
+ rewrite <- Heq2, <- Heq1.
+ assert (List.length l1 = List.length l2).
+ {
+-  omega.
++  lia.
+ }
+ split. eauto.
+-eapply List.NoDup_length_incl; eauto. omega.
++eapply List.NoDup_length_incl; eauto. lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -487,7 +489,7 @@ destruct ClassicalEpsilon.excluded_middl
+   + inversion h1.
+   + destruct x0.
+     - simpl in a0. eapply a0 in h2. eapply a0 in H0. intuition. subst. reflexivity.
+-    - simpl in h1; contradict h1; zify; omega.
++    - simpl in h1; contradict h1; lia.
+ * inversion h1.
+ Qed.
+ 
+@@ -520,7 +522,7 @@ induction lu; intros.
+        subst. inversion H. intuition.
+    }
+    rewrite Hlieq. rewrite List.app_length. simpl length.
+-   rewrite H4. rewrite List.app_length. omega.
++   rewrite H4. rewrite List.app_length. lia.
+   * assert (List.In a lui). { eapply H3. split. left. reflexivity. assumption. }
+     destruct (List.in_split a lui H4) as [lui' [lui'' Hlui]].
+     assert (length (List.app lui' lui'') = length lu - length li).
+@@ -545,7 +547,7 @@ induction lu; intros.
+       intros e Hincl. specialize (H2 e Hincl). simpl in H2. intuition. subst.
+       intuition.
+     }
+-  omega.
++  lia.
+ Qed.
+ 
+ Lemma NoDup_app: forall {A} l l' 
+@@ -657,7 +659,7 @@ assert (List.length (List.app l1_lint l2
+   eapply List.NoDup_incl_length; intuition. intro. apply H6.
+   assert (List.length (List.app l1_lint l2_lint) >= List.length lun_lint).
+   eapply List.NoDup_incl_length; intuition. intro. apply H7.
+-  omega.
++  lia.
+ }
+ 
+ assert (length l1 >= length lint).
+@@ -675,7 +677,7 @@ assert (length lun >= length lint).
+   eapply List.NoDup_incl_length; intuition. intros e Hincl. eapply Heq_int in Hincl.
+   eapply Heq_un. eapply set.Set.inter'def in Hincl. eapply set.Set.union'def. intuition.
+ }
+-rewrite List.app_length in H5. omega.
++rewrite List.app_length in H5. lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -729,7 +731,7 @@ eapply List.NoDup_incl_length; intuition
+   intros e Hincl. eapply H4. eapply H6 in Hincl. rewrite set.Set.inter'def in Hincl.
+   intuition.
+ }
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -758,6 +760,6 @@ assert (List.length x <= List.length x0)
+     eapply List.NoDup_incl_length; eauto.
+   - rewrite List.map_length; eauto.
+ }
+-omega.
++lia.
+ Qed.
+ 
+--- a/lib/coq/set/FsetInt.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/set/FsetInt.v	2021-10-20 09:43:12.813700711 -0600
+@@ -17,6 +17,8 @@ Require HighOrd.
+ Require int.Int.
+ Require set.Fset.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Definition min_elt : set.Fset.fset Numbers.BinNums.Z -> Numbers.BinNums.Z.
+ Proof.
+@@ -49,18 +51,18 @@ induction l0; intros.
+ { destruct H. }
+ assert (forall l z, List.fold_left (fun x1 acc : int => if Z_le_dec x1 acc then x1 else acc) l z <= z)%Z.
+ {
+-  induction l1; intros; simpl; eauto. omega.
+-  simpl. destruct Z_le_dec. eauto. eapply Z.le_trans with a0; eauto. omega. 
++  induction l1; intros; simpl; eauto. lia.
++  simpl. destruct Z_le_dec. eauto. eapply Z.le_trans with a0; eauto. lia.
+ }
+ simpl. destruct Z_le_dec.
+ destruct (Z_le_dec z0 x0).
+ eapply Z.le_trans with z0. eapply H0. assumption.
+-simpl in H. destruct H.  subst. omega.
++simpl in H. destruct H.  subst. lia.
+ eapply IHl0; eauto.
+ 
+ destruct (Z_le_dec a x0).
+ eapply Z.le_trans with a. eapply H0. assumption.
+-simpl in H. destruct H. subst. omega.
++simpl in H. destruct H. subst. lia.
+ eapply IHl0; eauto.
+ }
+ 
+@@ -79,7 +81,7 @@ rewrite <- Heql. simpl. specialize (H0 l
+ 
+ intros. eapply Heql in H1. eapply (H (List.cons z l) z) in H1; eauto. simpl in H1.
+ destruct Z_le_dec. assumption.
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+@@ -115,7 +117,7 @@ assert (min_elt (Fset.map (fun x => - x)
+ {
+   eapply H1; eauto. apply Fset.mem_map. assumption.
+ }
+-omega.
++lia.
+ Qed.
+ 
+ Fixpoint seqZ l len : list Numbers.BinNums.Z :=
+@@ -133,16 +135,16 @@ Qed.
+ Lemma seqZ_le2: forall len x l, List.In x (seqZ l len) -> (x < l + Z.of_nat len)%Z.
+ Proof.
+ induction len; simpl; intuition idtac.
+-- subst. zify. omega.
+-- eapply IHlen in H0. zify. omega.
++- subst. lia.
++- eapply IHlen in H0. lia.
+ Qed.
+ 
+ Lemma seqZ_rev: forall len x l, (l <= x < l + Z.of_nat len)%Z -> List.In x (seqZ l len).
+ Proof.
+ induction len; intros; simpl in *.
+-+ omega.
+++ lia.
+ + destruct (Z.eq_dec l x); eauto.
+-  right. eapply IHlen; eauto. zify; omega.
++  right. eapply IHlen; eauto. lia.
+ Qed.
+ 
+ Lemma seqZ_In_iff: forall l len x, List.In x (seqZ l len) <-> (l <= x <  l + Z.of_nat len)%Z.
+@@ -157,7 +159,7 @@ Proof.
+ induction len; intros.
+ + constructor.
+ + simpl. constructor; eauto.
+-  intro Habs. eapply seqZ_le in Habs. omega. 
++  intro Habs. eapply seqZ_le in Habs. lia.
+ Qed.
+ 
+ Lemma seqZ_length: forall len l, List.length (seqZ l len) = len.
+@@ -179,7 +181,7 @@ destruct (Z_le_dec l r).
+   - eapply seqZ_NoDup.
+   - intros.
+     rewrite seqZ_In_iff.
+-    rewrite Z2Nat.id; [|omega].
++    rewrite Z2Nat.id; [|lia].
+     destruct Z_le_dec.
+     * destruct Z_lt_dec. split; intros; [reflexivity|].
+       intuition.
+@@ -190,7 +192,7 @@ destruct (Z_le_dec l r).
+   - constructor.
+   - intros.
+     destruct Z_le_dec; try destruct Z_lt_dec; intuition.
+-    omega.
++    lia.
+     inversion H.
+     inversion H.
+ Qed.
+@@ -228,7 +230,7 @@ destruct (Z_le_dec l r).
+ + exists (seqZ l (Z.to_nat (r - l)%Z)).
+   split. apply seqZ_NoDup.
+   intros. rewrite seqZ_In_iff.
+-  rewrite Z2Nat.id; [|omega].
++  rewrite Z2Nat.id; [|lia].
+   destruct Z_le_dec; try destruct Z_lt_dec; intuition; try inversion H.
+ + exists nil. split. constructor.
+   simpl. intros. destruct Z_le_dec; try destruct Z_lt_dec; intuition.
+@@ -255,15 +257,15 @@ split.
+     eapply Nat.le_antisymm.
+     + eapply List.NoDup_incl_length. eapply seqZ_NoDup. intro. rewrite H2.
+       rewrite seqZ_In_iff. destruct Z_le_dec; try destruct Z_lt_dec; intuition idtac.
+-      rewrite Z2Nat.id in H5; omega.
++      rewrite Z2Nat.id in H5; lia.
+     + eapply List.NoDup_incl_length. assumption. intro. rewrite H2.
+       rewrite seqZ_In_iff. destruct Z_le_dec; try destruct Z_lt_dec; intuition (try discriminate).
+-      rewrite Z2Nat.id; omega.
++      rewrite Z2Nat.id; lia.
+   }
+-  rewrite <- H3. rewrite seqZ_length. rewrite Z2Nat.id; omega.
++  rewrite <- H3. rewrite seqZ_length. rewrite Z2Nat.id; lia.
+ + intros. destruct a. 
+   destruct x. reflexivity.
+   specialize (H2 z). contradict H2. destruct Z_le_dec. 
+-  destruct Z_lt_dec. omega. intuition. intuition.
++  destruct Z_lt_dec. lia. intuition. intuition.
+ Qed.
+ 
+--- a/lib/coq/set/FsetSum.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/set/FsetSum.v	2021-10-20 09:43:38.628716168 -0600
+@@ -17,6 +17,8 @@ Require HighOrd.
+ Require int.Int.
+ Require set.Fset.
+ 
++Require Import Lia.
++
+ (* Why3 goal *)
+ Definition sum {a:Type} {a_WT:WhyType a} :
+   set.Fset.fset a -> (a -> Numbers.BinNums.Z) -> Numbers.BinNums.Z.
+@@ -192,7 +194,7 @@ destruct a2 as (Hx1dup, Hx1eq).
+     - intros. rewrite Hx1eq. rewrite Hdieq in H0. rewrite set.Set.diff'def in H0.
+       intuition.
+ }
+-omega.
++lia.
+ Qed.
+ 
+ Lemma sum_union_disj {a:Type} {a_WT:WhyType a} :
+@@ -255,7 +257,7 @@ assert (sum (Fset.union s1 s2) f - sum (
+   + eapply Fset.subset_trans with s1. eapply Fset.subset_inter_1.
+     eapply Fset.subset_union_1.
+ }
+-omega.
++lia.
+ Qed.
+ 
+ (* Why3 goal *)
+--- a/lib/coq/set/Fset.v	2021-03-13 02:24:39.000000000 -0700
++++ b/lib/coq/set/Fset.v	2021-10-20 09:40:37.348607589 -0600
+@@ -16,7 +16,9 @@ Require BuiltIn.
+ Require HighOrd.
+ Require int.Int.
+ 
+-Require Import ClassicalEpsilon.
++Require Import ClassicalEpsilon Lia.
++Require Logic.ProofIrrelevance.
++Require set.Set set.Cardinal.
+ 
+ (* Why3 goal *)
+ Definition fset : forall (a:Type), Type.
+@@ -40,8 +42,6 @@ Qed.
+ Definition mem {a:Type} {a_WT:WhyType a} : a -> fset a -> Prop.
+ Proof.
+ intros. destruct X0 as (f, P).
+-(* TODO remove this *)
+-Require set.Set.
+ apply (set.Set.mem X f).
+ Defined.
+ 
+@@ -62,7 +62,6 @@ eapply set.Set.extensionality. intro. ea
+ subst.
+ assert (e = e0).
+ (* TODO maybe provable on such property ? *)
+-Require Logic.ProofIrrelevance.
+ apply Logic.ProofIrrelevance.proof_irrelevance.
+ subst. reflexivity.
+ Qed.
+@@ -96,8 +95,6 @@ Definition is_empty {a:Type} {a_WT:WhyTy
+ Definition empty {a:Type} {a_WT:WhyType a} : fset a.
+ Proof.
+ exists (fun x => false). 
+-(* TODO remove this *)
+-Require Cardinal.
+ apply Cardinal.is_finite_empty. unfold set.Set.is_empty.
+ unfold set.Set.mem. intuition.
+ Defined.
+@@ -591,10 +588,10 @@ destruct ClassicalEpsilon.excluded_middl
+    intro. intros. rewrite H2. rewrite H0 in H3. rewrite Bool.andb_true_iff in H3.
+    apply H3.
+   }
+-  omega.
++  lia.
+ - destruct ClassicalEpsilon.classical_indefinite_description.
+   destruct ClassicalEpsilon.excluded_middle_informative; [| intuition].
+-  unfold Z.zero. omega.
++  unfold Z.zero. lia.
+ Qed.
+ 
+ (* Why3 goal *)
+--- a/share/provers-detection-data.conf	2021-03-13 02:24:39.000000000 -0700
++++ b/share/provers-detection-data.conf	2021-10-20 09:45:16.028775089 -0600
+@@ -812,6 +812,7 @@ support_library = "%l/coq/version"
+ exec = "coqtop"
+ version_switch = "-v"
+ version_regexp = "The Coq Proof Assistant, version \\([^ \n]+\\)"
++version_ok = "^8\.14\.[0-9]+$"
+ version_ok = "^8\.13\.[0-9]+$"
+ version_ok = "^8\.12\.[0-9]+$"
+ version_ok = "^8\.11\.[0-9]+$"
