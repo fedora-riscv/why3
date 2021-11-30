@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.4.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -314,6 +314,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Tue Nov 30 2021 Jerry James <loganjerry@gmail.com> - 1.4.0-7
+- Rebuild for coq 8.14.1, sexplib0 0.15.0 and menhir 20211128
+
 * Thu Oct 21 2021 Jerry James <loganjerry@gmail.com> - 1.4.0-6
 - Rebuild for coq 8.14.0 and menhir 20211012
 - Add -coq8.14 patch
