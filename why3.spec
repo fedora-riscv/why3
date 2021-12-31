@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.4.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -142,6 +142,8 @@ Requires:       ocaml-menhir%{?_isa}
 Requires:       ocaml-num-devel%{?_isa}
 Requires:       ocaml-re-devel%{?_isa}
 Requires:       ocaml-seq-devel%{?_isa}
+Requires:       ocaml-sexplib-devel%{?_isa}
+Requires:       ocaml-zip-devel%{?_isa}
 
 %description -n ocaml-%{name}-devel
 This package contains development files needed to build applications
@@ -314,6 +316,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Mon Dec 27 2021 Jerry James <loganjerry@gmail.com> - 1.4.0-8
+- Rebuild for alt-ergo 2.3.0 and ocaml-zip 1.11
+
 * Tue Nov 30 2021 Jerry James <loganjerry@gmail.com> - 1.4.0-7
 - Rebuild for coq 8.14.1, sexplib0 0.15.0 and menhir 20211128
 
