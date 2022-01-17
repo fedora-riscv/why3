@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.4.0
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -316,6 +316,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Mon Jan 17 2022 Jerry James <loganjerry@gmail.com> - 1.4.0-9
+- Rebuild for menhir 20211230
+
 * Mon Dec 27 2021 Jerry James <loganjerry@gmail.com> - 1.4.0-8
 - Rebuild for alt-ergo 2.3.0 and ocaml-zip 1.11
 
