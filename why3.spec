@@ -9,7 +9,7 @@
 
 Name:           why3
 Version:        1.4.0
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -316,6 +316,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Jan 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
 * Mon Jan 17 2022 Jerry James <loganjerry@gmail.com> - 1.4.0-9
 - Rebuild for menhir 20211230
 
