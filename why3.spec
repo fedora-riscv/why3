@@ -1,3 +1,4 @@
+%undefine _package_note_flags
 # NOTE: Upstream has said that the Frama-C support is still experimental, and
 # less functional than the corresponding support in why2.  They recommend not
 # enabling it for now.  We abide by their wishes.  Revisit this decision each
@@ -9,7 +10,7 @@
 
 Name:           why3
 Version:        1.4.0
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -316,6 +317,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Feb 04 2022 Richard W.M. Jones <rjones@redhat.com> - 1.4.0-11
+- OCaml 4.13.1 rebuild to remove package notes
+
 * Sat Jan 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.4.0-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
