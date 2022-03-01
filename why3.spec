@@ -1,16 +1,17 @@
-%undefine _package_note_flags
 # NOTE: Upstream has said that the Frama-C support is still experimental, and
 # less functional than the corresponding support in why2.  They recommend not
 # enabling it for now.  We abide by their wishes.  Revisit this decision each
 # release.
+
+%undefine _package_note_flags
 
 %ifnarch %{ocaml_native_compiler}
 %global debug_package %{nil}
 %endif
 
 Name:           why3
-Version:        1.4.0
-Release:        11%{?dist}
+Version:        1.4.1
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -39,7 +40,8 @@ BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk3-sourceview3-devel
 BuildRequires:  ocaml-menhir
-BuildRequires:  ocaml-mlmpfr-devel
+# mlmpfr <= 4.0 is required, but we have 4.1
+# BuildRequires:  ocaml-mlmpfr-devel
 BuildRequires:  ocaml-num-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
@@ -171,13 +173,13 @@ fixtimestamp() {
 # Use the correct compiler flags, keep timestamps, and harden the build due to
 # network use.  Link the binaries with runtime compiled with -fPIC.
 # This avoids many link-time errors.
-sed -e "s|-Wall|$RPM_OPT_FLAGS|;s/ -O -g//" \
+sed -e "s|-Wall|%{build_cflags}|;s/ -O -g//" \
     -e "s/cp /cp -p /" \
-    -e "s|^OLINKFLAGS =.*|& -runtime-variant _pic -ccopt \"$RPM_LD_FLAGS\"|" \
+    -e "s|^OLINKFLAGS =.*|& -runtime-variant _pic -ccopt \"%{build_ldflags}\"|" \
     -i Makefile.in
 
 # Remove spurious executable bits
-find -O3 examples -type f -perm /0111 -exec chmod a-x {} \+
+find -O3 examples -type f -perm /0111 -exec chmod a-x {} +
 chmod a+x examples/*.sh
 
 # Update the ProofGeneral integration instructions
@@ -317,6 +319,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Mon Feb 28 2022 Jerry James <loganjerry@gmail.com> - 1.4.1-1
+- Version 1.4.1
+
 * Fri Feb 04 2022 Richard W.M. Jones <rjones@redhat.com> - 1.4.0-11
 - OCaml 4.13.1 rebuild to remove package notes
 
