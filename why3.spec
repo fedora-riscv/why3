@@ -11,7 +11,7 @@
 
 Name:           why3
 Version:        1.4.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -319,6 +319,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Mar 25 2022 Jerry James <loganjerry@gmail.com> - 1.4.1-2
+- Rebuild for coq 8.15.1
+
 * Mon Feb 28 2022 Jerry James <loganjerry@gmail.com> - 1.4.1-1
 - Version 1.4.1
 
