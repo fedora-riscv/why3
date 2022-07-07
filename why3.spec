@@ -10,24 +10,18 @@
 %endif
 
 Name:           why3
-Version:        1.4.1
-Release:        3%{?dist}
+Version:        1.5.0
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
 License:        LGPLv2 with exceptions
 URL:            http://why3.lri.fr/
 Source0:        https://why3.gitlabpages.inria.fr/releases/%{name}-%{version}.tar.gz
-# Man pages written by Jerry James using text found in the sources.  Hence,
-# the copyright and license are the same as for the upstream sources.
-Source1:        %{name}-man.tar.xz
 # Desktop file written by Jerry James
-Source2:        fr.lri.%{name}.desktop
+Source1:        fr.lri.%{name}.desktop
 # AppData file written by Jerry James
-Source3:        fr.lri.%{name}.metainfo.xml
-# Add support for coq 8.14.0
-# https://gitlab.inria.fr/why3/why3/-/commit/a41e40f88987a26a7ac35f62e7637a2f6fcf1c07
-Patch0:         %{name}-coq8.14.patch
+Source2:        fr.lri.%{name}.metainfo.xml
 
 BuildRequires:  appstream
 BuildRequires:  coq
@@ -40,15 +34,13 @@ BuildRequires:  ocaml-camlp5-devel
 BuildRequires:  ocaml-findlib
 BuildRequires:  ocaml-lablgtk3-sourceview3-devel
 BuildRequires:  ocaml-menhir
-# mlmpfr <= 4.0 is required, but we have 4.1
-# BuildRequires:  ocaml-mlmpfr-devel
+BuildRequires:  ocaml-mlmpfr-devel
 BuildRequires:  ocaml-num-devel
 BuildRequires:  ocaml-ocamldoc
 BuildRequires:  ocaml-ocamlgraph-devel
 BuildRequires:  ocaml-ppx-deriving-devel
 BuildRequires:  ocaml-ppx-sexp-conv-devel
 BuildRequires:  ocaml-re-devel
-BuildRequires:  ocaml-seq-devel
 BuildRequires:  ocaml-sexplib-devel
 BuildRequires:  ocaml-zarith-devel
 BuildRequires:  ocaml-zip-devel
@@ -78,7 +70,7 @@ Recommends:     flocq
 Provides:       bundled(jquery)
 
 # The corresponding Provides is not generated, so filter this out
-%global __requires_exclude ocaml\\\(Why3\\\)
+%global __requires_exclude ocaml\\\((Driver_ast|Why3)\\\)
 
 # This can be removed when F36 reaches EOL
 Obsoletes:      why < 2.41-12
@@ -144,7 +136,6 @@ Requires:       ocaml-%{name}%{?_isa} = %{version}-%{release}
 Requires:       ocaml-menhir%{?_isa}
 Requires:       ocaml-num-devel%{?_isa}
 Requires:       ocaml-re-devel%{?_isa}
-Requires:       ocaml-seq-devel%{?_isa}
 Requires:       ocaml-sexplib-devel%{?_isa}
 Requires:       ocaml-zip-devel%{?_isa}
 
@@ -163,7 +154,6 @@ This package provides a why3 plugin for ProofGeneral.
 
 %prep
 %autosetup -p1
-%setup -q -T -D -a 1
 
 fixtimestamp() {
   touch -r $1.orig $1
@@ -186,9 +176,16 @@ chmod a+x examples/*.sh
 sed -i.orig 's,(MY_PATH_TO_WHY3)/share/whyitp,%{_emacs_sitelispdir},' share/whyitp/README
 fixtimestamp share/whyitp/README
 
+# Look for the seq module in the right place
+sed -i 's/stdlib__seq\.cmi/seq.mli/g' configure
+
+# Adapt to breaking change in mlmpfr bugfix2
+sed -i 's/Mpfr/Mlmpfr/' src/util/mlmpfr_real.ml
+
 %build
 %configure --enable-verbose-make
-make #%%{?_smp_mflags}
+# FIXME: Parallel make sometimes fails
+make
 make doc
 rm -f doc/html/.buildinfo examples/use_api/.merlin.in
 
@@ -204,15 +201,6 @@ for dir in $(find . -name .coq-native); do
 done
 cd -
 %endif
-
-# Install the man pages
-mkdir -p %{buildroot}%{_mandir}/man1
-cd man
-for f in *.1; do
-  sed "s/@version@/%{version}/" $f > %{buildroot}%{_mandir}/man1/$f
-  touch -r $f %{buildroot}%{_mandir}/man1/$f
-done
-cd ..
 
 # Install the bash completion file
 mkdir -p %{buildroot}%{_datadir}/bash-completion/completions
@@ -233,7 +221,7 @@ mv %{buildroot}%{_datadir}/%{name}/lang \
 
 # Install the desktop file
 mkdir -p %{buildroot}%{_datadir}/applications
-desktop-file-install --dir=%{buildroot}%{_datadir}/applications %{SOURCE2}
+desktop-file-install --dir=%{buildroot}%{_datadir}/applications %{SOURCE1}
 
 # Install the icon
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable
@@ -242,7 +230,7 @@ cp -p share/images/src/logo-kim.svg \
 
 # Install the AppStream metadata
 mkdir -p %{buildroot}%{_metainfodir}
-cp -p %{SOURCE3} %{buildroot}%{_metainfodir}
+cp -p %{SOURCE2} %{buildroot}%{_metainfodir}
 appstreamcli validate --no-net \
   %{buildroot}%{_metainfodir}/fr.lri.%{name}.metainfo.xml
 
@@ -265,12 +253,13 @@ rm -fr %{buildroot}%{_datadir}/doc
 chmod 0755 %{buildroot}%{_bindir}/* \
            %{buildroot}%{_libdir}/%{name}/commands/* \
            %{buildroot}%{_libdir}/%{name}/plugins/*.cmxs \
-           %{buildroot}%{_libdir}/ocaml/%{name}/*.cmxs
+           %{buildroot}%{ocamldir}/%{name}/*.cmxs
 
 %files
 %doc AUTHORS CHANGES.md README.md doc/html doc/latex/manual.pdf
 %license LICENSE
 %{_bindir}/%{name}
+%{_bindir}/isabelle_client
 %{_datadir}/%{name}/
 %{_datadir}/applications/fr.lri.%{name}.desktop
 %{_datadir}/bash-completion/completions/why3
@@ -283,26 +272,25 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %{_datadir}/zsh/
 %{_texmf}/tex/latex/why3/
 %{_libdir}/%{name}/
-%{_mandir}/man1/%{name}*
 %{_metainfodir}/fr.lri.%{name}.metainfo.xml
 
 %files -n ocaml-%{name}
-%dir %{_libdir}/ocaml/%{name}/
-%{_libdir}/ocaml/%{name}/META
-%{_libdir}/ocaml/%{name}/*.cmi
+%dir %{ocamldir}/%{name}/
+%{ocamldir}/%{name}/META
+%{ocamldir}/%{name}/*.cmi
 %ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{name}/*.cmxs
+%{ocamldir}/%{name}/*.cmxs
 %endif
 
 %files -n ocaml-%{name}-devel
 %ifarch %{ocaml_native_compiler}
-%{_libdir}/ocaml/%{name}/*.a
-%{_libdir}/ocaml/%{name}/*.cmx
-%{_libdir}/ocaml/%{name}/*.cmxa
+%{ocamldir}/%{name}/*.a
+%{ocamldir}/%{name}/*.cmx
+%{ocamldir}/%{name}/*.cmxa
 %else
-%{_libdir}/ocaml/%{name}/*.cma
+%{ocamldir}/%{name}/*.cma
 %endif
-%{_libdir}/ocaml/%{name}/*.cmt
+%{ocamldir}/%{name}/*.cmt
 
 %files examples
 %doc examples
@@ -319,6 +307,12 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Jul  7 2022 Jerry James <loganjerry@gmail.com> - 1.5.0-1
+- Version 1.5.0
+- Add ocaml-mlmpfr support
+- Drop unmaintained man pages
+- Use new OCaml macros
+
 * Sun Jun 19 2022 Richard W.M. Jones <rjones@redhat.com> - 1.4.1-3
 - OCaml 4.14.0 rebuild
 
