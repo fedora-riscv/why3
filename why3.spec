@@ -23,6 +23,12 @@ Source1:        fr.lri.%{name}.desktop
 # AppData file written by Jerry James
 Source2:        fr.lri.%{name}.metainfo.xml
 
+# ANTLR is unavailable on i686, so coq is also unavailable.  We could build
+# without coq support, but choose to forgo i686 support entirely.
+# See https://fedoraproject.org/wiki/Changes/Drop_i686_JDKs
+# See https://fedoraproject.org/wiki/Changes/EncourageI686LeafRemoval
+ExclusiveArch:  %{java_arches}
+
 BuildRequires:  appstream
 BuildRequires:  coq
 BuildRequires:  emacs-proofgeneral
@@ -307,6 +313,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Tue Jul 19 2022 Jerry James <loganjerry@gmail.com> - 1.5.0-1
+- Remove i686 support
+
 * Thu Jul  7 2022 Jerry James <loganjerry@gmail.com> - 1.5.0-1
 - Version 1.5.0
 - Add ocaml-mlmpfr support
