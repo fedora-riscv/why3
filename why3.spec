@@ -11,7 +11,7 @@
 
 Name:           why3
 Version:        1.5.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 # See LICENSE for the terms of the exception
@@ -313,6 +313,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Sat Jul 23 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
 * Tue Jul 19 2022 Jerry James <loganjerry@gmail.com> - 1.5.0-1
 - Remove i686 support
 
