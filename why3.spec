@@ -11,11 +11,10 @@
 
 Name:           why3
 Version:        1.5.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Software verification platform
 
-# See LICENSE for the terms of the exception
-License:        LGPLv2 with exceptions
+License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
 URL:            http://why3.lri.fr/
 Source0:        https://why3.gitlabpages.inria.fr/releases/%{name}-%{version}.tar.gz
 # Desktop file written by Jerry James
@@ -313,6 +312,10 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Aug 18 2022 Jerry James <loganjerry@gmail.com> - 1.5.0-3
+- Rebuild to fix coq dependency
+- Convert License tag to SPDX
+
 * Sat Jul 23 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.5.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
