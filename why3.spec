@@ -10,8 +10,8 @@
 %endif
 
 Name:           why3
-Version:        1.5.0
-Release:        3%{?dist}
+Version:        1.5.1
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
@@ -72,7 +72,7 @@ Requires:       vim-filesystem
 Recommends:     bash-completion
 Recommends:     flocq
 
-Provides:       bundled(jquery)
+Provides:       bundled(js-jquery)
 
 # The corresponding Provides is not generated, so filter this out
 %global __requires_exclude ocaml\\\((Driver_ast|Why3)\\\)
@@ -183,9 +183,6 @@ fixtimestamp share/whyitp/README
 
 # Look for the seq module in the right place
 sed -i 's/stdlib__seq\.cmi/seq.mli/g' configure
-
-# Adapt to breaking change in mlmpfr bugfix2
-sed -i 's/Mpfr/Mlmpfr/' src/util/mlmpfr_real.ml
 
 %build
 %configure --enable-verbose-make
@@ -312,6 +309,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Sep 16 2022 Jerry James <loganjerry@gmail.com> - 1.5.1-1
+- Version 1.5.1
+
 * Thu Aug 18 2022 Jerry James <loganjerry@gmail.com> - 1.5.0-3
 - Rebuild to fix coq dependency
 - Convert License tag to SPDX
