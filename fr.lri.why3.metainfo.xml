@@ -41,7 +41,7 @@
   <update_contact>loganjerry@gmail.com</update_contact>
   <url type="homepage">http://why3.lri.fr/</url>
   <url type="bugtracker">https://gitlab.inria.fr/why3/why3/issues</url>
-  <content_rating type="oars-1.0"></content_rating>
+  <content_rating type="oars-1.1"></content_rating>
   <provides>
     <binary>why3</binary>
   </provides>
