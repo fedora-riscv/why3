@@ -1,6 +1,12 @@
 # Coq's plugin architecture requires cmxs files, so:
 ExclusiveArch: %{ocaml_native_compiler}
 
+# ANTLR is unavailable on i686, so coq is also unavailable.  We could build
+# without coq support, but choose to forgo i686 support entirely.
+# See https://fedoraproject.org/wiki/Changes/Drop_i686_JDKs
+# See https://fedoraproject.org/wiki/Changes/EncourageI686LeafRemoval
+#ExclusiveArch:  %%{java_arches}
+
 # NOTE: Upstream has said that the Frama-C support is still experimental, and
 # less functional than the corresponding support in why2.  They recommend not
 # enabling it for now.  We abide by their wishes.  Revisit this decision each
@@ -26,12 +32,6 @@ Source2:        fr.lri.%{name}.metainfo.xml
 # Support coq 8.17.  See
 # https://gitlab.inria.fr/why3/why3/-/commit/64facc03bdc2bc4ce0586ff2f458bcd87f646ba8
 Patch0:         %{name}-coq-8.17.patch
-
-# ANTLR is unavailable on i686, so coq is also unavailable.  We could build
-# without coq support, but choose to forgo i686 support entirely.
-# See https://fedoraproject.org/wiki/Changes/Drop_i686_JDKs
-# See https://fedoraproject.org/wiki/Changes/EncourageI686LeafRemoval
-ExclusiveArch:  %{java_arches}
 
 BuildRequires:  appstream
 BuildRequires:  coq
