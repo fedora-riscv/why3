@@ -18,7 +18,7 @@ ExclusiveArch: %{ocaml_native_compiler}
 
 Name:           why3
 Version:        1.6.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Software verification platform
 
 License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
@@ -296,6 +296,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Thu Oct 05 2023 Richard W.M. Jones <rjones@redhat.com> - 1.6.0-7
+- OCaml 5.1 rebuild for Fedora 40
+
 * Sat Sep  9 2023 Jerry James <loganjerry@gmail.com> - 1.6.0-6
 - Rebuild for ocaml-ocamlgraph 2.1.0
 
