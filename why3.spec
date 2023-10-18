@@ -11,7 +11,7 @@
 
 Name:           why3
 Version:        1.5.1
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Software verification platform
 
 License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
@@ -310,6 +310,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Wed Oct 18 2023 Jerry James <loganjerry@gmail.com> - 1.5.1-8
+- Rebuild for coq 8.17.1
+
 * Sat Apr  1 2023 Jerry James <loganjerry@gmail.com> - 1.5.1-7
 - Rebuild for coq 8.17.0
 
