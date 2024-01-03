@@ -17,8 +17,8 @@ ExclusiveArch: %{ocaml_native_compiler}
 %endif
 
 Name:           why3
-Version:        1.6.0
-Release:        6%{?dist}
+Version:        1.7.0
+Release:        1%{?dist}
 Summary:        Software verification platform
 
 License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
@@ -28,10 +28,6 @@ Source0:        https://why3.gitlabpages.inria.fr/releases/%{name}-%{version}.ta
 Source1:        fr.lri.%{name}.desktop
 # AppData file written by Jerry James
 Source2:        fr.lri.%{name}.metainfo.xml
-
-# Support coq 8.17.  See
-# https://gitlab.inria.fr/why3/why3/-/commit/64facc03bdc2bc4ce0586ff2f458bcd87f646ba8
-Patch0:         %{name}-coq-8.17.patch
 
 BuildRequires:  coq
 BuildRequires:  emacs-nox
@@ -84,14 +80,6 @@ Provides:       bundled(js-jquery)
 # The corresponding Provides is not generated, so filter this out
 %global __requires_exclude ocaml\\\((Driver_ast|Why3)\\\)
 
-# This can be removed when F36 reaches EOL
-Obsoletes:      why < 2.41-12
-Provides:       why = 2.41-12%{?dist}
-Obsoletes:      why-jessie < 2.41-12
-Provides:       why-jessie = 2.41-12%{?dist}
-Obsoletes:      why-pvs-support < 2.41-12
-Provides:       why-pvs-support = 2.41-12%{?dist}
-
 # This can be removed when F39 reaches EOL
 Obsoletes:      %{name}-xemacs < 1.4.0-4
 
@@ -124,10 +112,6 @@ This package contains an Emacs support file for working with %{name} files.
 Summary:        Complete Why3 software verification platform suite
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       alt-ergo coq cvc5 E gappa yices-tools z3 zenon
-
-# This can be removed when F36 reaches EOL
-Obsoletes:      why-all < 2.41-12
-Provides:       why-all = 2.41-12%{?dist}
 
 %description all
 This package provides a complete software verification platform suite
@@ -270,7 +254,7 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %{_datadir}/icons/hicolor/scalable/%{name}.svg
 %{_datadir}/vim/vimfiles/ftdetect/%{name}.vim
 %{_datadir}/vim/vimfiles/syntax/%{name}.vim
-%{_datadir}/zsh/
+%{_datadir}/zsh/site-functions/_why3
 %{_texmf}/tex/latex/why3/
 %{_libdir}/%{name}/
 %{_metainfodir}/fr.lri.%{name}.metainfo.xml
@@ -308,6 +292,10 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Tue Jan  2 2024 Jerry James <loganjerry@gmail.com> - 1.7.0-1
+- Version 1.7.0
+- Drop upstreamed coq patch
+
 * Sat Sep  9 2023 Jerry James <loganjerry@gmail.com> - 1.6.0-6
 - Rebuild for ocaml-ocamlgraph 2.1.0
 
