@@ -12,7 +12,7 @@ ExclusiveArch: %{ocaml_native_compiler}
 
 Name:           why3
 Version:        1.7.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Software verification platform
 
 License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
@@ -286,6 +286,9 @@ chmod 0755 %{buildroot}%{_bindir}/* \
 %files all
 
 %changelog
+* Fri Feb  2 2024 Jerry James <loganjerry@gmail.com> - 1.7.1-2
+- Build again because koji ran out of disk space
+
 * Fri Feb  2 2024 Jerry James <loganjerry@gmail.com> - 1.7.1-1
 - Version 1.7.1
 
