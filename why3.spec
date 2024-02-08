@@ -1,5 +1,5 @@
 # Coq's plugin architecture requires cmxs files, so:
-ExclusiveArch: %{ocaml_native_compiler}
+ExclusiveArch: %{ocaml_native_compiler} riscv64
 
 # NOTE: Upstream has said that the Frama-C support is still experimental, and
 # less functional than the corresponding support in why2.  They recommend not
@@ -12,7 +12,7 @@ ExclusiveArch: %{ocaml_native_compiler}
 
 Name:           why3
 Version:        1.7.1
-Release:        1%{?dist}
+Release:        1.rv64%{?dist}
 Summary:        Software verification platform
 
 License:        LGPL-2.1-only WITH OCaml-LGPL-linking-exception
